@@ -11,51 +11,54 @@
 ;; Utilities
 ;; 
 
-(defun traverse-tree (fun tree)
-  "Traverses a tree-like structure, calling fun for every sexp it finds"
+;; "Constructive" traversal
+(defun map-tree (fun tree)
+  "Traverses a tree-like structure, calling fun for every sexp it finds. Returns the new tree"
+  
+  ;; If the tree is a list..
+  (if (consp tree)
+      ;; Call fun on that list
+      (cons (funcall fun tree) 
+	
+	    ;; And traverse the child trees
+	    (mapcar (lambda (child)
+		      (map-tree fun child))
+		    
+		    (cdr tree)))
+      
+      ;; Else just return tree as-is
+      tree))
 
-  ;; When the tree is a list..
-  (when (consp tree)
-    
-    ;; Call fun on that list
-    (funcall fun tree)
+;; Destructive traversal
+(defun mapc-tree (fun tree)
+  "Traverses a tree-like structure, calling fun for every sexp it finds. Returns tree"
+  
+  ;; If the tree is a list..
+  (if (consp tree)
 
-    ;; And traverse the child trees
-    (mapc (lambda (child)
-	    (traverse-tree fun child))
-	  (cdr tree))
-    t))
+      ;; Call fun on that list
+      (progn (funcall fun tree) 
+	       
+	     ;; And traverse the child trees
+	     (mapc (lambda (child)
+		     (map-tree fun child))
+		     
+		   (cdr tree)))
+      
+      ;; Else just return tree as-is
+      tree))
 
 
 
 (defun find-in-code (code car)
   "Find all sexps matching with a given car in the tree given by code"
   (let (matches)
-    (traverse-tree (lambda (node)
-		     (when (and (consp node) (eql car (first node)))
-		       (pushnew node matches)))
+    (mapc-tree (lambda (node)
+		 (when (and (consp node) (eql car (first node)))
+		   (pushnew node matches)))
 		   
 		   code)
     matches))
-
-
-;; 
-;; Functions for finding various info about a given code segment
-;; 
-
-(defun find-parameters (code)
-  "Find and return a list of all referenced parameters of this code"
-  (find-in-code code 'param))
-
-
-(defun find-components (code)
-  "Find and return a list of all referenced subcomponents in this code"
-  (find-in-code code 'component))
-
-
-(defun find-state (code)
-  "Find and return a list of all referenced state variables in this code"
-  (find-in-code code 'state))
 
 
 ;; 
@@ -65,45 +68,84 @@
 ;; Example:
 (defvar example-code
   '(:div :class "my-example-div"
-    "Hello, " (state name)))
+    "Hello, " (param name)))
 ;; 
 ;; this is now code for a component with one state-variable that can be changed live (eventually..)
 
 
 (defclass component ()
-  ((name :initarg name :initform (error "Please give your component a name!"))
-   (code :initarg code :initform (error "The component must contain some code") :reader code)))
+  ((name :initarg :name :initform (error "Please give your component a name!") :reader component-name)
+   (code :initarg :code :initform (error "The component must contain some code") :reader code)))
 
 
-(defun parameters (component)
-  (find-parameters (code component)))
+;; 
+;; Compilation utils
+;; 
+
+(defvar *signals* nil
+  "List of all defined state-signals")
+
+(defvar *components* nil
+  "List of all defined components")
 
 
-(defun state-vars (component)
-  (find-state (code component)))
+(defun find-component (name list)
+  "Find a component from a list, given its name"
+  (or (find name list :test #'component-name)
+      (error "Unknown component ~a" name)))
 
 
-(defun sub-components (component)
-  (find-components (code component)))
+(defun resolve-param (param-form env)
+  "Resolves the parameter indicated by param-form within the given environment"
+  
+  (destructuring-bind (param name &rest _) param-form
+    (declare (ignore _))
+    (assert (eql param 'param))
+
+    (or (cdr (assoc name env :test #'eql))
+	(error "The param ~a is undefined" name))))
+
+
+(defun resolve-state (state-form &optional (signals *signals*))
+  "Takes a snapshot of the state variable indicated by state-form and returns it"
+  (destructuring-bind (state name &rest _) state-form
+    (declare (ignore _))
+    (assert (eql state 'state))
+    
+    (let ((sgnl (frp-signal:find-signal name signals)))
+      (frp-signal:signal-value sgnl))))
+
+
+(defun compile-component (component-form &optional (components *components*))
+  (destructuring-bind (component name &rest params) component-form
+    (assert (eql component 'component))
+    
+    (let ((c (find-component name components))
+	  (env (loop for (key value) on params by #'cddr collect (cons key value))))
+      (generate-html c env))))
+
 
 ;; 
 ;; Code generators
 ;; 
+
 (defun generate-html (component &optional env)
-  ;; TODO use cl-who to 
-  ;; replace (state bla) by e.g (lisp (get-store-value bla)))
-  ;; replace (param bla) by e.g (lisp (get-env bla)))
-  ;; replace (component bla) by (generate-html (get-component bla)))
-  ;; etc
-  ;; Note: the aforementioned operations can all be performed BEFORE invoking cl-who.
-  ;; just create gensyms for them and assign to them in an enclosing let, THEN call cl-who
-  ;; Could then be done by e.g traversing the tree and (signal ..)ing everytime a form is found
-  ;; 
-  ;; The only difference between (state ) and (param) is how the values are looked up.
-  ;; That is, they produce the same code in the end once the lookup has been performed.
-  )
+  (flet ((process-sexp (sexp)
+	   (case (first sexp)
+	       (param 
+		(resolve-param sexp env))
+		
+	       (state 
+		(resolve-state sexp))
+		
+	       (component 
+		(compile-component sexp))
+		
+	       (otherwise sexp))))
+    
+    (map-tree #'process-sexp (code component))))
 
-;; TODO for this we require a code walker that can produce a modified code-tree
+(defparameter test-instance (make-instance 'component :code example-code :name "example"))
 
-;; Note: 'environment' above refers to the set of param-bindings, store-bindings and
-;; available subcomponents that can be referenced during compilation
+;; TODO work on tree traversal...
+;(generate-html test-instance (acons 'name "erik" nil))
