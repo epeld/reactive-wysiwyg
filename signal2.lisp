@@ -2,7 +2,7 @@
 (defpackage :frp-signal
   (:use :common-lisp)
   (:export 
-   frp-signal signal-value signal-name
+   frp-signal signal-value signal-name find-signal
    fmap foldp make-frp-signal frp-signal-value set-value frp-signal-name))
 
 
@@ -93,3 +93,9 @@
     (push-listener sgnl-a sgnl-state)
     
     sgnl-state))
+
+
+(defun find-signal (name list)
+  "Find a signal from a list, given its name"
+  (or (find name list :test #'signal-name)
+      (error "Unknown signal ~a" name)))
