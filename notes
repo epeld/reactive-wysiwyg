@@ -1,0 +1,36 @@
+
+Notes on how to proceed with this project:
+
+----------------------
+
+Write a :web-components module and a :signals module where we can do e.g
+
+(defcomponent "mycomponent"
+	      (:myhtml bla bla))
+	      
+(defsignal "mysignal" 3)
+	   
+----------------------
+
+then write a hunchentoot dispatcher that can display e.g a signal and provide editing facilities
+
+similarly, provide a way to view the component as well as edit it from a browser. Consider using
+e.g query params or POST params for supplying (param xxx) values
+    
+----------------------
+
+Provide "list"-views, where users can see all their components and all their signals together
+
+-----------------------
+
+Extend HTML compiler with simple logic. Consider just supporting all of CL (or parenscript) initially!
+
+-----------------------
+
+Provide "compile to React" functionality
+
+Port signal-concept to parenscript. Link ps-signals to cl-signals using a websocket
+
+-----------------------
+
+Rewrite the whole fronted using the above functionality (plugging it into "meta signals" etc)
