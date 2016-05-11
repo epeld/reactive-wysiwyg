@@ -97,5 +97,5 @@
 
 (defun find-signal (name list)
   "Find a signal from a list, given its name"
-  (or (find name list :test #'signal-name)
+  (or (find name list :key #'signal-name :test #'string=)
       (error "Unknown signal ~a" name)))
