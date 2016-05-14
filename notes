@@ -9,6 +9,13 @@ Write a :web-components module and a :signals module where we can do e.g
 	      (:myhtml bla bla))
 	      
 (defsignal "mysignal" 3)
+
+ACTUALLY
+
+we would prefer being able to POST to create new components
+
+start differentiating between signals used internally to implement the web server
+and signals/components that are user-defined!
 	   
 ----------------------
 
