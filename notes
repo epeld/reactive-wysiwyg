@@ -1,4 +1,26 @@
 
+Define (defcomponent) that creates a macro for generating html from request params.
+
+Eventually also generate:
+
+- Styling
+
+- Javascript (e.g using React)
+
+----------------
+
+Define (make-editor) that takes any map-like data and generates an editor-like
+interface for changing that map's values
+
+
+
+
+
+
+
+----------------------------
+OLD NOTES:
+
 Notes on how to proceed with this project:
 
 ----------------------
