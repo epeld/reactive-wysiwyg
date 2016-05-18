@@ -1,8 +1,11 @@
 
 (defpackage :psx
-  (:use :common-lisp))
+  (:use :common-lisp)
+  (:export psx psx-to-who psx-to-html))
 
+;(ql:quickload "cl-who")
 (in-package :psx)
+
 
 (defun attrs (sexp)
   "Extract the attributes part from an HTML-sexp"
@@ -57,18 +60,19 @@
      (psx ,psx)))
 
 
-
 (defmacro psx-to-html (psx)
   "Shortcut for converting psx directly to an HTML string"
   `(cl-who:with-html-output-to-string (s) 
      ,(eval `(psx-to-who ,psx))))
 
 
-(psx-to-who (:div :class "abc" "Hello, World!" "."))
+(quote (psx-to-who (:div :class "abc" "Hello, World!" ".")))
 
-
+(quote
 (psx-to-html (:div :class "abc" (:p "Hello, World!")
 		   (:p "blub")
 		   (:div (:span "erik"))))
 
+
+)
 
