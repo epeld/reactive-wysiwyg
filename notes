@@ -1,7 +1,5 @@
 
-Define (defcomponent) that creates a macro for generating html from request params.
-
-Eventually also generate:
+Eventually generate for each component:
 
 - Styling
 
