@@ -52,7 +52,16 @@
 		`(list ,@kvs))
 	      
 	      (psx-children (&body children)
-		`(list ,@children))
+		;; Some children might actually be expressions evaluating
+		;; to LISTS of children. Therefore, flatten one level after
+		;; evaling
+		(let ((result (gensym)))
+		  `(let ((,result (list ,@children)))
+		     (apply #'append (loop for child in ,result
+					collect (if (and (consp child)
+							 (not (keywordp (first child))))
+						    child
+						    (list child)))))))
 	      
 	      (psx-element (name attrs children)
 		`(append (list ,name) ,attrs ,children)))
@@ -68,11 +77,8 @@
 
 (quote (psx-to-who (:div :class "abc" "Hello, World!" ".")))
 
-(quote
 (psx-to-html (:div :class "abc" (:p "Hello, World!")
 		   (:p "blub")
+		   (mapcar (lambda (x) (write-to-string (+ x 3))) (list 1 2 3))
 		   (:div (:span "erik"))))
-
-
-)
 
