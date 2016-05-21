@@ -33,7 +33,10 @@
 (defun handle-component-request ()
   (string-bind-case (script-name*)
 		    (("component" name output)
-		     (format nil "You have requested the componet ~s as ~s" name output))))
+		     (format nil "You have requested the componet ~s as ~s" name output))
+		    
+		    (otherwise
+		     (format nil "Page not found! ~s" (script-name*)))))
 
 
 
