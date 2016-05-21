@@ -12,4 +12,7 @@
 
 
 (defun find-resource (name resources)
-  (common-lisp:find name resources :test #'resource-name))
+  (common-lisp:find name resources :key #'resource-name :test #'string=))
+
+
+
