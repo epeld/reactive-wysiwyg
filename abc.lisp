@@ -1,6 +1,6 @@
 
 (defpackage :psx
-  (:use :common-lisp)
+  (:use :common-lisp :peldan.alist :cl-who)
   (:export psx psx-to-who psx-to-html))
 
 ;(ql:quickload "cl-who")
@@ -19,14 +19,6 @@
 		 (return)))
     
     (values attr-list body)))
-
-
-(defun flatten-alist (alist)
-  "Returns keys and values interspersed in a flat list"
-  (let (list)
-    (loop for item in alist
-	 do (setf list (cons (car item) (cons (cdr item) list))))
-    list))
 
 
 
