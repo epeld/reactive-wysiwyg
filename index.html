@@ -1,0 +1,15 @@
+<html>
+  <head>
+    <script src="https://fb.me/react-15.0.2.js"></script>
+    <script src="https://fb.me/react-dom-15.0.2.js"></script>
+  </head>
+  
+  <body>
+    Hi!
+    <div id="mydiv"/>
+  </body>
+</html>
+
+
+function Hello(props) { return React.createElement('div', null, props.a, props.b); }
+ReactDOM.render(React.createElement(Hello, { a: 1, b: "blub" }, "erik"), document.getElementById("mydiv"))
