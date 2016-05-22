@@ -20,16 +20,38 @@
   (format nil "Testing 1 2 3"))
 
 
+(defcomponent mycomponent (a b c)
+  (:h1 a)
+  (map #'subcomp b)
+  (subcomp2 b c)
+  (when c
+    (:div "postamble" (str c))))
 
-(define-easy-handler (list-components :uri "/components") ()
-  (setf (content-type*) "text/plain")
+
+(defun display-components-list ()
+  (cl-who:with-html-output-to-string (s)
+    (:h1 "All components")
+    (:div :class "components-list"
+	  (if (null components)
+	      (cl-who:htm (:div (cl-who:str "No components yet!")))
+	      (loop for c in components
+		 do (cl-who:htm (:div (cl-who:str "Component"))))))))
+
+
+(define-easy-handler (list-components :uri "/components") (name code)
   
-  (yason:with-output-to-string* ()
+  (case (request-method*)
+    (:get
+     (if (null name)
+	 (display-components-list)
+	 (display-component name)))
     
-    ;; TODO write encode-array JSON fn..
-    (yason:with-array ()
-      (loop for c in components
-	   do (yason:encode-array-element c)))))
+    (:post
+     (when (and name code)
+       (format nil "Received a new component named ~a with code ~a" name code)))))
+
+
+; (setf *show-lisp-errors-p* t)
 
 
 
