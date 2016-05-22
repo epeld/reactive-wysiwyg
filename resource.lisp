@@ -1,6 +1,10 @@
 
 (defpackage :peldan.resource
-  (:use :common-lisp))
+  (:use :common-lisp)
+  (:export :replace-resource
+	   :find-resource
+	   :resource
+	   :resource-name))
 
 (in-package :peldan.resource)
 
@@ -16,3 +20,5 @@
 
 
 
+(defun replace-resource (resource resources)
+  (cons resource (remove resource resources :test #'string= :key #'resource-name :coun 1)))
