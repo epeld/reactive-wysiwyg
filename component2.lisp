@@ -1,5 +1,5 @@
 
-(defpackage :component
+(defpackage :peldan.component
   (:use :common-lisp :hunchentoot)
   
   (:import-from :peldan.string 
@@ -10,10 +10,12 @@
 		:replace-resource
 		:resource
 		:find-resource
-		:resource-name))
+		:resource-name)
+  
+  (:export :component :source-code :args :*components*))
 
 
-(in-package :component)
+(in-package :peldan.component)
 
 ;(quicklisp:quickload "hunchentoot")
 ;(quicklisp:quickload "alexandria")
@@ -44,14 +46,17 @@
   (intern (string-upcase string) "KEYWORD"))
 
 
+(defun generate-html (component)
+  'todo)
+
 (defun component-page (component output)
   (case (keywordize output)
     
-    (:js (format nil "JS! ~s" (resource-name component)))
+    (:js (format nil "Component ~s has source code ~&~s" (resource-name component) (source-code component)))
     
     ; (:html (format nil "HTML! ~s" (resource-name component)))
     
-    (otherwise (format nil "You have requested the componet ~s as ~s" (resource-name component) output))))
+    (otherwise (format nil "You have requested the componet ~s as ~s ~&~s" (resource-name component) output (source-code component)))))
 
 
 (defun process-component-request (name output)
@@ -74,22 +79,4 @@
 		    (otherwise
 		     (format nil "Page not found! ~s" (script-name*)))))
 
-
-
-
-;; Set up the server
-(define-easy-handler (components-handler :uri (constantly t)) ()
-  (dispatch-on-script-name))
-
-(defvar server (make-instance 'easy-acceptor :port 4243))
-
-(quote (start server))
-
-
-
-
-(setf *show-lisp-errors-p* t)
-
-(quote (defcomponent testdiv (a b)
-  (:div "This is a test div" a (:p "This is a paragraph!") (mapcar (lambda (x) `(:p "Count" ,(write-to-string x))) (list 0 1 2 3)) b)))
 

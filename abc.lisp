@@ -1,10 +1,10 @@
 
-(defpackage :psx
+(defpackage :peldan.psx
   (:use :common-lisp :peldan.alist :cl-who)
-  (:export psx psx-to-who psx-to-html))
+  (:export :psx :psx-to-who :psx-to-html))
 
 ;(ql:quickload "cl-who")
-(in-package :psx)
+(in-package :peldan.psx)
 
 
 (defun attrs (sexp)
@@ -69,8 +69,8 @@
 
 (quote (psx-to-who (:div :class "abc" "Hello, World!" ".")))
 
-(psx-to-html (:div :class "abc" (:p "Hello, World!")
+(quote (psx-to-html (:div :class "abc" (:p "Hello, World!")
 		   (:p "blub")
 		   (mapcar (lambda (x) (write-to-string (+ x 3))) (list 1 2 3))
-		   (:div (:span "erik"))))
+		   (:div (:span "erik")))))
 

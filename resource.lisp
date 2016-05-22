@@ -21,4 +21,4 @@
 
 
 (defun replace-resource (resource resources)
-  (cons resource (remove resource resources :test #'string= :key #'resource-name :coun 1)))
+  (cons resource (remove (resource-name resource) resources :test #'string= :key #'resource-name :count 1)))

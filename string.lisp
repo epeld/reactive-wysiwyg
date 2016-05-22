@@ -2,7 +2,7 @@
 (defpackage :peldan.string
   (:use :common-lisp)
   (:import-from :alexandria :with-gensyms)
-  (:export :strings-bind :string-bind-case :string-var-match :split-by))
+  (:export :strings-bind :string-bind-case :string-var-match :split-by :transpose))
 
 
 (in-package :peldan.string)
