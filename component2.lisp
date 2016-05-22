@@ -40,8 +40,18 @@
 		   `(replace-resource ,name *components*)))))
 
 
+(defun keywordize (string)
+  (intern (string-upcase string) "KEYWORD"))
+
+
 (defun component-page (component output)
-  (format nil "You have requested the componet ~s as ~s" name output))
+  (case (keywordize output)
+    
+    (:js (format nil "JS! ~s" (resource-name component)))
+    
+    ; (:html (format nil "HTML! ~s" (resource-name component)))
+    
+    (otherwise (format nil "You have requested the componet ~s as ~s" (resource-name component) output))))
 
 
 (defun process-component-request (name output)
