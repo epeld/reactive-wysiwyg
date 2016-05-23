@@ -2,7 +2,12 @@
 (defpackage :peldan.string
   (:use :common-lisp)
   (:import-from :alexandria :with-gensyms)
-  (:export :strings-bind :string-bind-case :string-var-match :split-by :transpose))
+  (:export :strings-bind
+	   :string-bind-case
+	   :string-var-match
+	   :split-by
+	   :transpose
+	   :replace-all))
 
 
 (in-package :peldan.string)
@@ -21,26 +26,34 @@ if there were an empty string between them."
 
 (defvar *error-on-mismatch* nil)
 
+
 (defun string-var-match (strings-and-vars strings)
-  (loop 
-     for var in strings-and-vars
-     for string in strings
+  (labels ((no-match (&rest message)
+	   (if *error-on-mismatch* 
+	       (apply #'error message)
+	       (return-from string-var-match nil))))
+	 (loop 
+	    for var in strings-and-vars
+	    for rest on strings
 	  
-     with filled = (acons '&whole strings nil)
-     do (progn (check-type var (or string symbol))
-	       (cond ((and (stringp var) 
-			   (string= var string))
-		      t)
+	    with filled = (acons '&whole strings nil)
+	    with string = (car rest)
+       
+	    do (progn (check-type var (or string symbol))
+		      (cond ((and (stringp var) 
+				  (string= var string))
+			     t)
 		
-		     ((symbolp var)
-		      (setq filled (acons var string filled)))
+			    ((symbolp var)
+			     (setq filled (acons var string filled)))
 		
-		     (t
-		      (if *error-on-mismatch* 
-			  (error "Mismatch: ~s (~a) ~s (~a)" var (type-of var) string (type-of string))
-			  (return nil)))))
+			    (t
+			     (no-match "Mismatch: ~s (~a) ~s (~a)" var (type-of var) string (type-of string)))))
 	  
-	  finally (return filled)))
+	    finally (let ((rest (cdr rest)))
+		      (if rest
+			  (no-match "Incomplete match. Remaining ~s out of ~s" rest strings)
+			  (return-from string-var-match (acons '&rest rest filled)))))))
 
 
 (defun transpose (list-of-lists)
@@ -73,3 +86,17 @@ if there were an empty string between them."
 			       `(strings-bind ,vars-and-strings ,split (return-from ,block-name (progn ,@body))))))))))
 
 
+(defun replace-all (string part replacement &key (test #'char=))
+"Returns a new string in which all the occurences of the part 
+is replaced with replacement."
+    (with-output-to-string (out)
+      (loop with part-length = (length part)
+            for old-pos = 0 then (+ pos part-length)
+            for pos = (search part string
+                              :start2 old-pos
+                              :test test)
+            do (write-string string out
+                             :start old-pos
+                             :end (or pos (length string)))
+            when pos do (write-string replacement out)
+            while pos))) 
