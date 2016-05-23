@@ -1,7 +1,8 @@
 (defpackage :peldan.page
   (:use :cl)
+  (:import-from :cl-who :with-html-output-to-string :str :htm)
   (:import-from :alexandria :with-gensyms)
-  (:import-from :peldan.resource :resource-name)
+  (:import-from :peldan.resource :resource-name :find-resource)
   (:import-from :peldan.string :replace-all)
   (:import-from :peldan.component
 		:source-code :code :*components*)
@@ -99,14 +100,19 @@
       
       `(let (,@(peldan.string:transpose (list url-symbols url-vals)))
 	 (let (,@(peldan.string:transpose (list arg-symbols arg-vals)))
-	   (peldan.psx:psx-to-html ,code))))))
+	   (with-html-output-to-string (,(gensym))
+	     ,code))))))
 
 
 (defun handle-request (page request)
   (let ((match (peldan.string:string-var-match (page-url-parts page)
 					       (split-script-name request))))
     (when match
-	(eval (render-page page request match)))))
+      (when nil (let ((*print-pretty* t) (*print-readably* t))
+		  (common-lisp:with-output-to-string (s)
+		    (pprint (render-page page request match) s))))
+      (eval (render-page page request match)))))
+
 
 
 (defun page-dispatch (request)
@@ -141,16 +147,19 @@
 	
 	(mapcar (lambda (page)
 		  
-		  `(:div (:a :href ,(page-url page-overview (resource-name page)) ,(resource-name page))))
+		  (htm (:div (:a :href (str (page-url page-overview (resource-name page))) (str (resource-name page))))))
 		*pages*)))
 
 
 (defpage page-overview (("pages" page) ())
   (:div :class "components"
 	
-	(:h1 "Overview of page" (:span (readable-name (resource-name page))))
+	(:h1 "Overview of page - " (:span (str (readable-name page))))
 	
-	`(:div (:a :href ,(page-url page) ,(resource-name page)))))
+	(:div (:p "This page has code:")
+	      (:p (str (princ (source-code (find-resource page *pages*)) nil))))
+	
+	(:a :href (page-url pages-overview) "Back")))
 
-(page-url page-overview (resource-name page-overview))
+;(page-url page-overview (resource-name page-overview))
 
