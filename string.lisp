@@ -35,9 +35,9 @@ if there were an empty string between them."
 	 (loop 
 	    for var in strings-and-vars
 	    for rest on strings
+	    for string = (car rest) then (car rest)
 	  
 	    with filled = (acons '&whole strings nil)
-	    with string = (car rest)
        
 	    do (progn (check-type var (or string symbol))
 		      (cond ((and (stringp var) 
