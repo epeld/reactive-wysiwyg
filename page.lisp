@@ -1,4 +1,3 @@
-
 (defpackage :peldan.page
   (:use :cl)
   (:import-from :alexandria :with-gensyms)
@@ -91,8 +90,6 @@
 	    (return-from page-dispatch reply)))))
 
 
-
-
 ;; Examples:
 (defpage components-page (("components") ())
   (:div :class "components"
@@ -110,4 +107,34 @@
 	       name
 	       "This page will contain some info about the component")))
 
-(source-code components-page)
+(quote (source-code components-page))
+
+;; 
+;; Url resolution
+;; 
+(defun url-parts (url-parts &rest args)
+  "Fill in the 'holes' in the url-parts with the values passed"
+  (mapcar (lambda (part)
+	    (if (symbolp part)
+		(pop args)
+		part))
+	  url-parts))
+
+
+(defun page-url-parts (page &rest args)
+  "Fill in a page's url-parts with the values passed in"
+  (url-parts (apply #'page-url args)))
+
+
+(defun url (url-parts &rest args)
+  "Produce a string url by filling in the holes in the url-parts with values"
+  (format nil "/~{~a~^/~}" (apply #'url-parts url-parts args)))
+
+
+(defun page-url (page &rest args)
+  "Produce a page url by filling in the holes in the url-parts with values"
+  (url (apply #'page-url-parts page args)))
+
+
+
+
