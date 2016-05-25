@@ -125,7 +125,7 @@
 
 
 (defun readable-name (symbol)
-  (replace-all (string-downcase (string symbol)) "-" " "))
+  (string-capitalize (replace-all (string-downcase (string symbol)) "-" " ")))
 
 
 ;; Examples:
