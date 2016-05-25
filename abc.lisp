@@ -7,10 +7,11 @@
 (in-package :peldan.psx)
 
 
-(defun attrs (sexp)
-  "Extract the attributes part from an HTML-sexp"
+(defun extract-element-parts (sexp)
+  "Extract the parts from an HTML-like sexp"
+  (the list sexp)
   (let (attr-list body)
-    (loop for rest on sexp by #'cddr
+    (loop for rest on (rest sexp) by #'cddr
        if (keywordp (first rest))
        collect (cons (first rest) (second rest)) into attr
        else
@@ -18,53 +19,67 @@
 		 (setq body rest)
 		 (return)))
     
-    (values attr-list body)))
+    (values (first sexp) attr-list body)))
 
 
-
-(defmacro psx (body)
-  "Compile html-like DSL using captured psx-element, psx-attrs, psx-children"
-  (if (and (consp body) (typep (first body) 'keyword))
-      (multiple-value-bind (attrs children) (attrs (rest body))
-	 
-	 `(psx-element ,(first body)
- 
-		       (psx-attrs ,@(flatten-alist attrs)) 
-	     
-		       ;; Compile all the children
-		       (psx-children ,@(loop for child in children collect `(psx ,child)))))
-      
-      ;; Pass everything else through
-      body))
+(defun psx-element (sexp)
+  (multiple-value-bind (first attrs children) sexp
+    '(create-element )))
 
 
-(defmacro psx-to-who (psx)
-  "Compile psx to cl-who syntax"
-  `(macrolet ((psx-attrs (&body kvs)
-		`(list ,@kvs))
-	      
-	      (psx-children (&body children)
-		;; Some children might actually be expressions evaluating
-		;; to LISTS of children. Therefore, flatten one level after
-		;; evaling
-		(let ((result (gensym)))
-		  `(let ((,result (list ,@children)))
-		     (apply #'append (loop for child in ,result
-					collect (if (and (consp child)
-							 (not (keywordp (first child))))
-						    child
-						    (list child)))))))
-	      
-	      (psx-element (name attrs children)
-		`(append (list ,name) ,attrs ,children)))
+(defun psx-atom (atom)
+  "Compile an atom"
+  (cond
+    ((keywordp atom)
+     (psx-element `(,atom)))
     
-     (psx ,psx)))
+    (otherwise
+     (string atom))))
 
 
-(defmacro psx-to-html (psx)
-  "Shortcut for converting psx directly to an HTML string"
-  `(cl-who:with-html-output-to-string (s) 
-     ,(eval `(psx-to-who ,psx))))
+(defun psx-list (sexp)
+  (let ((first (first sexp)))
+    (etypecase first
+      (keyword
+       (psx-element sexp))
+      
+      (string
+       (psx-element sexp))
+      
+      (symbol
+       'funcall))))
+
+
+(defun psx (sexp)
+  "Compile html-like DSL using captured psx-element, psx-attrs, psx-children"
+  (if (atom sexp)
+    (psx-atom sexp)
+    (psx-list sexp)))
+
+
+
+#|
+;(ql:quickload "cl-who")
+
+(defun test2 (x &optional s)
+  (cl-who:with-html-output (s)
+    (:div "Hello Test2" (cl-who:str x))))
+
+(defun test1 (&optional s)
+  (labels ((component (name &rest args)
+	     (apply name (append args (list s)))))
+    (cl-who:with-html-output (s)
+      (:div "Hello Test1" (component #'test2 3)))))
+
+(cl-who:with-html-output (s)
+      (:div "Hello Test1" (component #'test2 3)))
+
+
+(cl-who:with-html-output-to-string (s)
+  (test1 s))
+|#
+
+
 
 
 (quote (psx-to-who (:div :class "abc" "Hello, World!" ".")))
