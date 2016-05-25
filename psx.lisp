@@ -1,7 +1,8 @@
 
 (defpackage :peldan.psx
-  (:use :common-lisp :peldan.alist :cl-who)
-  (:export :psx :psx-to-who :psx-to-html))
+  (:use :common-lisp)
+  (:import-from :peldan.string :transpose)
+  (:export :psx))
 
 ;(ql:quickload "cl-who")
 (in-package :peldan.psx)
@@ -19,12 +20,15 @@
 		 (setq body rest)
 		 (return)))
     
-    (values (first sexp) attr-list body)))
+    (values (the atom (first sexp))
+	    (the list attr-list) 
+	    (the list body))))
 
 
 (defun psx-element (sexp)
-  (multiple-value-bind (first attrs children) sexp
-    '(create-element )))
+  (multiple-value-bind (first attrs children) (extract-element-parts sexp)
+
+    `(create-reactive-element ,first (create ,@attrs) (list ,@children))))
 
 
 (defun psx-atom (atom)
@@ -46,46 +50,55 @@
       (string
        (psx-element sexp))
       
+      ;; Leave logic be
       (symbol
-       'funcall))))
+       sexp))))
 
 
-(defun psx (sexp)
-  "Compile html-like DSL using captured psx-element, psx-attrs, psx-children"
+(defun psx-compile (sexp)
+  "Compile html-like DSL but leaves logic as-is"
   (if (atom sexp)
     (psx-atom sexp)
     (psx-list sexp)))
 
 
-
-#|
-;(ql:quickload "cl-who")
-
-(defun test2 (x &optional s)
-  (cl-who:with-html-output (s)
-    (:div "Hello Test2" (cl-who:str x))))
-
-(defun test1 (&optional s)
-  (labels ((component (name &rest args)
-	     (apply name (append args (list s)))))
-    (cl-who:with-html-output (s)
-      (:div "Hello Test1" (component #'test2 3)))))
-
-(cl-who:with-html-output (s)
-      (:div "Hello Test1" (component #'test2 3)))
-
-
-(cl-who:with-html-output-to-string (s)
-  (test1 s))
-|#
+(defmacro psx (sexp)
+  ;; Smooth out the 'cl-who edges':
+  `(macrolet ((component (component-expr &rest args)
+		(if (and (list component-expr) 
+			 (eq (first component-expr) 'function))
+		    `(quote (create-reactive-element ,(second component-expr) ,@args))
+		    `(quote (apply create-reactive-element component-expr ,@args))))
+	     
+	      (htm (html)
+		`(psx ,html))
+	     
+	      (str (code)
+		`(new (-string ,code))))
+    
+     ;; Compile the code, but this will leave htm, str and component-forms since
+     ;; these look like logic. Hence the (recursive) macros above
+     ,(psx-compile sexp)))
 
 
+(defun make-renderer (lambda-list html)
+  (let ((this-list (mapcar (lambda (var) 
+			     `(ps:@ this ,var))
+			   lambda-list)))
+    `(lambda ()
+       (ps:symbol-macrolet (,@(transpose (list lambda-list this-list)))
+	 (psx ,html)))))
 
 
-(quote (psx-to-who (:div :class "abc" "Hello, World!" ".")))
+(defmacro defcomponent (name lambda-list html)
+  `(quote 
+    (defparameter ,name 
+      (create-reactive-component 
+       (create :render ,(make-renderer lambda-list html))))))
 
-(quote (psx-to-html (:div :class "abc" (:p "Hello, World!")
-		   (:p "blub")
-		   (mapcar (lambda (x) (write-to-string (+ x 3))) (list 1 2 3))
-		   (:div (:span "erik")))))
+
+(defcomponent testA (a) (:div "test" a (component #'test1)))
+
+
+
 
