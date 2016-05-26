@@ -4,9 +4,13 @@
   (:import-from :peldan.string :transpose)
   (:export :psx))
 
-;(ql:quickload "cl-who")
+
 (in-package :peldan.psx)
 
+
+;; 
+;; This file contains lisp-code for compiling cl-who code to ReactJS
+;; 
 
 (defun extract-element-parts (sexp)
   "Extract the parts from an HTML-like sexp"
@@ -27,8 +31,12 @@
 
 (defun psx-element (sexp)
   (multiple-value-bind (first attrs children) (extract-element-parts sexp)
-
-    `(create-reactive-element ,first (ps:create ,@attrs) (ps:list ,@children))))
+    
+    ;; Expand all the children before continuing!
+    (let ((children (mapcar #'psx-compile children)))
+      `(create-reactive-element ,first 
+				(ps:create ,@attrs)
+				(ps:list ,@children)))))
 
 
 (defun psx-atom (atom)
@@ -81,8 +89,16 @@
      ,(psx-compile sexp)))
 
 
-(defmacro psx (sexp)
-  `(psx* ,sexp))
+;; 
+;; Exports to ParenScript.
+;; 
+
+;; The end-result of compiling psx-code will be ReactJS-like code with
+;; calls to these JS-functions:
+;; - createReactiveElement
+;; - createReactiveComponent
+(ps:defpsmacro psx (sexp)
+  (psx* sexp))
 
 
 (defun make-renderer (lambda-list html)
@@ -94,7 +110,7 @@
 	 ,(psx* html)))))
 
 
-(defmacro defcomponent (name lambda-list html)
+(ps:defpsmacro defcomponent (name lambda-list html)
   `(ps:defvar ,name 
      (create-reactive-component 
       (ps:create :render ,(make-renderer lambda-list html)))))
