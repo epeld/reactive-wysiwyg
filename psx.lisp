@@ -28,7 +28,7 @@
 (defun psx-element (sexp)
   (multiple-value-bind (first attrs children) (extract-element-parts sexp)
 
-    `(create-reactive-element ,first (create ,@attrs) (list ,@children))))
+    `(create-reactive-element ,first (ps:create ,@attrs) (ps:list ,@children))))
 
 
 (defun psx-atom (atom)
@@ -37,7 +37,7 @@
     ((keywordp atom)
      (psx-element `(,atom)))
     
-    (otherwise
+    (t
      (string atom))))
 
 
@@ -62,13 +62,13 @@
     (psx-list sexp)))
 
 
-(defmacro psx (sexp)
+(defun psx* (sexp)
   ;; Smooth out the 'cl-who edges':
   `(macrolet ((component (component-expr &rest args)
 		(if (and (list component-expr) 
 			 (eq (first component-expr) 'function))
-		    `(quote (create-reactive-element ,(second component-expr) ,@args))
-		    `(quote (apply create-reactive-element component-expr ,@args))))
+		    `(create-reactive-element ,(second component-expr) ,@args)
+		    `(apply create-reactive-element component-expr ,@args)))
 	     
 	      (htm (html)
 		`(psx ,html))
@@ -81,24 +81,21 @@
      ,(psx-compile sexp)))
 
 
+(defmacro psx (sexp)
+  `(psx* ,sexp))
+
+
 (defun make-renderer (lambda-list html)
   (let ((this-list (mapcar (lambda (var) 
 			     `(ps:@ this ,var))
 			   lambda-list)))
     `(lambda ()
-       (ps:symbol-macrolet (,@(transpose (list lambda-list this-list)))
-	 (psx ,html)))))
+       (ps:with-slots (,@lambda-list) this
+	 ,(psx* html)))))
 
 
 (defmacro defcomponent (name lambda-list html)
-  `(quote 
-    (defparameter ,name 
-      (create-reactive-component 
-       (create :render ,(make-renderer lambda-list html))))))
-
-
-(defcomponent testA (a) (:div "test" a (component #'test1)))
-
-
-
+  `(ps:defvar ,name 
+     (create-reactive-component 
+      (ps:create :render ,(make-renderer lambda-list html)))))
 
