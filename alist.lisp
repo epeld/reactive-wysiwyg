@@ -1,7 +1,7 @@
 
 (defpackage :peldan.alist
   (:use :common-lisp)
-  (:export :flatten-alist))
+  (:export :flatten-alist :interleaved-alist))
 
 (in-package :peldan.alist)
 
@@ -12,3 +12,9 @@
     (loop for item in alist
 	 do (setf list (cons (car item) (cons (cdr item) list))))
     list))
+
+
+(defun interleaved-alist (list)
+  "Extracts an alist from an interleaved list of keys and values"
+  (loop for rest on list by #'cddr
+     collect (cons (first rest) (second rest))))

@@ -2,8 +2,8 @@
 (defpackage :peldan.psx
   (:use :common-lisp)
   (:import-from :peldan.string :transpose)
+  (:import-from :peldan.alist :interleaved-alist :flatten-alist)
   (:export :psx))
-
 
 (in-package :peldan.psx)
 
@@ -28,22 +28,25 @@
 	    (the list attr-list) 
 	    (the list body))))
 
+(defun psx-element (head attrs children)
+  `(create-reactive-element ,head
+			    (ps:create ,@(flatten-alist attrs))
+			    (ps:list ,@children)))
 
-(defun psx-element (sexp)
+
+(defun psx-element-sexp (sexp)
   (multiple-value-bind (first attrs children) (extract-element-parts sexp)
     
     ;; Expand all the children before continuing!
     (let ((children (mapcar #'psx-compile children)))
-      `(create-reactive-element ,first 
-				(ps:create ,@attrs)
-				(ps:list ,@children)))))
+      (psx-element first attrs children))))
 
 
 (defun psx-atom (atom)
   "Compile an atom"
   (cond
     ((keywordp atom)
-     (psx-element `(,atom)))
+     (psx-element-sexp `(,atom)))
     
     (t
      (string atom))))
@@ -52,13 +55,23 @@
 (defun psx-list (sexp)
   (let ((first (first sexp)))
     (etypecase first
+      
+      (list
+
+       ;; Sexp looks like: ((:p :attr 2) "child")
+       (psx-element (first first) 
+		    (interleaved-alist (rest first))
+		    (rest sexp)))
+      
       (keyword
-       (psx-element sexp))
+       ;; Sexp looks like (:p :attr 3 :attr2 "val" "child")
+       (psx-element-sexp sexp))
       
       (string
-       (psx-element sexp))
+       ;; Sexp looks like ("p" :attr 3 :attr2 "val" "child")
+       (psx-element-sexp sexp))
       
-      ;; Leave logic be
+      ;; Sexp is a function call (logic). Leave it be.
       (symbol
        sexp))))
 
@@ -102,12 +115,9 @@
 
 
 (defun make-renderer (lambda-list html)
-  (let ((this-list (mapcar (lambda (var) 
-			     `(ps:@ this ,var))
-			   lambda-list)))
-    `(lambda ()
+  `(lambda ()
        (ps:with-slots (,@lambda-list) this
-	 ,(psx* html)))))
+	 ,(psx* html))))
 
 
 (ps:defpsmacro defcomponent (name lambda-list html)
@@ -115,3 +125,5 @@
      (create-reactive-component 
       (ps:create :render ,(make-renderer lambda-list html)))))
 
+
+(ps:ps (defcomponent testar () ((:p :class "ff") "child")))
