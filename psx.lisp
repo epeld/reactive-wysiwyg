@@ -115,15 +115,16 @@
 
 
 (defun make-renderer (lambda-list html)
-  `(lambda ()
-       (ps:with-slots (,@lambda-list) this
-	 ,(psx* html))))
+  (ps:with-ps-gensyms (state)
+    `(lambda (,state)
+       (ps:with-slots (,@lambda-list) ,state
+	 ,(psx* html)))))
 
 
 (ps:defpsmacro defcomponent (name lambda-list html)
   `(ps:defvar ,name 
-     (create-reactive-component 
-      (ps:create :render ,(make-renderer lambda-list html)))))
+     (create-reactive-component ,(make-renderer lambda-list html))))
 
 
-(ps:ps (defcomponent testar () ((:p :class "ff") "child")))
+(ps:ps (defcomponent testar (a b) ((:p :class "ff") a "child" b)))
+
