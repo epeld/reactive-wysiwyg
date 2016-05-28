@@ -2,13 +2,12 @@
 (defpackage :peldan.string
   (:use :common-lisp)
   (:import-from :alexandria :with-gensyms)
-  (:export :strings-bind
-	   :string-bind-case
-	   :string-var-match
-	   :split-by
-	   :transpose
-	   :replace-all))
-
+  (:export "STRINGS-BIND"
+	   "STRING-BIND-CASE"
+	   "STRING-VAR-MATCH"
+	   "SPLIT-BY"
+	   "TRANSPOSE"
+	   "REPLACE-ALL"))
 
 (in-package :peldan.string)
 
