@@ -1,13 +1,15 @@
 
-(defpackage :peldan.component
+(defpackage peldan.component
   (:use :common-lisp)
   (:import-from :cl-who 
-		:with-html-output
-		:with-html-output-to-string)
-  (:import-from :alexandria 
-		:with-gensyms))
+		htm
+		with-html-output
+		with-html-output-to-string)
+  (:import-from alexandria
+		with-gensyms)
+  (:export defcomponent defcomponent-macro render component))
 
-(in-package :peldan.component)
+(in-package peldan.component)
 
 
 (defun add-parameter (lambda-list name)
@@ -22,6 +24,11 @@
 		  (apply fn (add-parameter ,args ,stream))))
 	 (with-html-output (,stream)
 	   ,html)))))
+
+
+(defmacro defcomponent-macro (name lambda html)
+  `(defmacro ,name ,lambda
+       (list 'htm ,html)))
 
 
 (defmacro render (component &rest args)
