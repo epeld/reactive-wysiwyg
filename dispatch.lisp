@@ -1,7 +1,7 @@
 
 (defpackage peldan.dispatch
   (:use common-lisp hunchentoot)
-  (:export *handlers*))
+  (:export "*HANDLERS*"))
 
 (in-package peldan.dispatch)
 
@@ -9,7 +9,7 @@
 
 ;; We define our own list of handlers
 ;; that will get to work on the requests in turn
-(defparameter *handlers* (list #'peldan.page:page-dispatch))
+(defparameter *handlers* nil)
 
 
 (defun central-dispatch (request)
