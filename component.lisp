@@ -2,12 +2,11 @@
 (defpackage peldan.component
   (:use :common-lisp)
   (:import-from :cl-who 
-		htm
-		with-html-output
-		with-html-output-to-string)
-  (:import-from alexandria
-		with-gensyms)
-  (:export defcomponent defcomponent-macro render component))
+		"HTM"
+		"WITH-HTML-OUTPUT"
+		"WITH-HTML-OUTPUT-TO-STRING")
+  (:import-from :alexandria "WITH-GENSYMS")
+  (:export "DEFCOMPONENT" "DEFCOMPONENT-MACRO" "RENDER" "COMPONENT"))
 
 (in-package peldan.component)
 
