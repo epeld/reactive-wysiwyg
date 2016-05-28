@@ -1,10 +1,11 @@
 
-(defpackage :peldan.dispatch
-  (:use :common-lisp :hunchentoot)
-  (:export :*handlers*))
+(defpackage peldan.dispatch
+  (:use common-lisp hunchentoot)
+  (:export *handlers*))
 
-(in-package :peldan.dispatch)
+(in-package peldan.dispatch)
 
+(ql:quickload "hunchentoot")
 
 ;; We define our own list of handlers
 ;; that will get to work on the requests in turn
