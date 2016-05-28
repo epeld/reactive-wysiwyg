@@ -1,15 +1,42 @@
 
 (defpackage peldan.simple
-  (:use common-lisp parenscript)
-  (:import-from parenscript ps ps*)
-  (:import-from cl-who str)
+  (:use common-lisp parenscript peldan.ps)
+  (:import-from cl-who "STR")
+  (:import-from peldan.ps "DEFSNIPPET" "LOG-MESSAGE")
   (:import-from peldan.component 
-		defcomponent
-		defcomponent-macro
-		render
-		component))
+		"DEFCOMPONENT"
+		"DEFCOMPONENT-MACRO"
+		"RENDER"
+		"COMPONENT"))
 
 (in-package peldan.simple)
+
+
+
+
+(defsnippet bootstrap ()
+  (let ((ws (new (-web-socket (lisp (concatenate
+				     'string 
+				     "ws://localhost:"
+				     (write-to-string peldan.websocket:*port*)))))))
+    (with-slots (onclose onmessage onopen) ws
+      
+      (setf onclose (lambda ()
+		      (log-message "Connection closed")))
+      
+      (setf onmessage (lambda (ev)
+		      (log-message "Got message" ev)))
+      
+      (setf onopen (lambda ()
+		      (log-message "Connection estabilished"))))
+    ws))
+
+
+
+
+(defcomponent-macro load-scripts (&rest names)
+  `(:script :type "text/javascript" 
+	    ,@(mapcar (lambda (name) `(str ,(funcall name))) names)))
 
 
 (defcomponent-macro javascript (&body ps)
@@ -24,7 +51,7 @@
   (:div (:h1 "Hello, World")
 	(component #'notice)
 	(:iframe)
-	(javascript ((ps:@ console log) "Hi"))))
+	(load-scripts bootstrap)))
 
 
 (defun simple-handler (request)
