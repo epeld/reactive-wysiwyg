@@ -1,6 +1,7 @@
 
 (defpackage :peldan.dispatch
-  (:use :common-lisp :hunchentoot))
+  (:use :common-lisp :hunchentoot)
+  (:export :*handlers*))
 
 (in-package :peldan.dispatch)
 
