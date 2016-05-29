@@ -56,7 +56,8 @@
 
 
 (defpackage :peldan.websocket
-  (:use :common-lisp :hunchensocket)
+  (:use :common-lisp :hunchensocket :hunchentoot)
+  (:import-from :peldan.resource :defgroup :named)
   (:export :*port*))
 
 
