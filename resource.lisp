@@ -1,24 +1,52 @@
 
-(defpackage :peldan.resource
-  (:use :common-lisp)
-  (:export :replace-resource
-	   :find-resource
-	   :resource
-	   :resource-name))
-
 (in-package :peldan.resource)
 
 
-(defclass resource ()
-  ((name :reader resource-name 
+(defclass named ()
+  ((name :reader name
 	 :initarg :name
-	 :initform (error "A name is required"))))
+	 :initform (error "A name is required")))
+  (:documentation "Something that has a name of some sort"))
 
 
-(defun find-resource (name resources)
-  (common-lisp:find name resources :key #'resource-name :test #'string=))
+(defclass group (named)
+  ((members :reader members
+	      :type list))
+  
+  (:documentation "A group of resources"))
+
+
+(defun find-member (name group &key (test #'equal))
+  (find name (members group) :key #'name :test test))
 
 
 
-(defun replace-resource (resource resources)
-  (cons resource (remove (resource-name resource) resources :test #'string= :key #'resource-name :count 1)))
+(defun replace-member (new-member group &key (test #'equal))
+  (with-slots (members) group
+    (setf members (cons new-member 
+			(remove (name new-member)
+				members
+				:test test
+				:key #'name 
+				:count 1)))))
+
+
+(defun add-member (new-member group)
+  (with-slots (members) group
+    (setf members (cons new-member members))))
+
+
+;; TODO verify works!
+(defmacro defgroup (name &key (test #'equal))
+  (let ((group (new-symbol name "-group")))
+    (with-gensyms (name-arg member-arg)
+      `(progn
+	 (defvar ,group (make-instance 'group 
+				       :name ,(string name)))
+     
+	 (defun ,(new-symbol "find-" name) (,name-arg)
+	   (find-member ,name-arg ,group :test ,test))
+	 
+	 (defun ,(new-symbol "replace-" name) (,member-arg)
+	   (replace-member ,member-arg ,group :test ,test))))))
+
