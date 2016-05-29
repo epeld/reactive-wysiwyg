@@ -3,18 +3,23 @@
 (in-package peldan.websocket)
 
 
+(defgroup session)
+
 (defparameter *port* 3344)
 
 
+(defclass session (hunchensocket:websocket-resource named)
+  ()
+  (:default-initargs :client-class 'client))
 
-;; TODO make it so pages can connect and somehow get a uuid
-;; that we will then be able to POST to that url to supply the page
-;; with new state!
+
+(defclass client (hunchensocket:websocket-client named)
+  ())
 
 
-(defclass page-client (hunchensocket:websocket-resource)
-  ((uuid :initarg :uuid :initform (error "Each page must have a uuid") :reader uuid))
-  (:default-initargs :client-class 'uuid))
 
-(defclass page-client (hunchensocket:websocket-client)
-  ((uuid :initarg :uuid :reader uuid :initform (error "Each page must have a uuid"))))
+(defun session-for-request (request)
+  "Hunchensocket request dispatch function"
+  (let ((uuid (hunchentoot:script-name request)))
+    (or (find-session uuid)
+	(add-session uuid))))
