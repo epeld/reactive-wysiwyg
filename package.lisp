@@ -36,3 +36,25 @@
   (:use :common-lisp)
   (:import-from :peldan.list :transpose :plist-to-alist :alist-to-plist)
   (:export :psx))
+
+
+(defpackage peldan.ps
+  (:use :common-lisp :parenscript)
+  (:import-from :peldan.list :transpose)
+  (:export :log-message :defsnippet))
+
+
+(defpackage peldan.simple
+  (:use :common-lisp :parenscript :peldan.ps)
+  (:import-from :cl-who :str)
+  (:import-from :peldan.ps :defsnippet :log-message)
+  (:import-from :peldan.component 
+		:defcomponent
+		:defcomponent-macro
+		:render
+		:component))
+
+
+(defpackage peldan.websocket
+  (:use :common-lisp :hunchensocket)
+  (:export :*port*))

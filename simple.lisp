@@ -1,18 +1,5 @@
 
-(defpackage peldan.simple
-  (:use common-lisp parenscript peldan.ps)
-  (:import-from cl-who "STR")
-  (:import-from peldan.ps "DEFSNIPPET" "LOG-MESSAGE")
-  (:import-from peldan.component 
-		"DEFCOMPONENT"
-		"DEFCOMPONENT-MACRO"
-		"RENDER"
-		"COMPONENT"))
-
 (in-package peldan.simple)
-
-
-
 
 (defsnippet bootstrap ()
   (let ((ws (new (-web-socket (lisp (concatenate

@@ -1,15 +1,9 @@
-
 ;; Define the websocket interface of this server
-(defpackage peldan.websocket
-  (:use common-lisp hunchensocket)
-  (:export "*PORT*"))
 
 (in-package peldan.websocket)
 
 
 (defparameter *port* 3344)
-
-;(ql:quickload "hunchensocket")
 
 
 

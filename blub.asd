@@ -16,6 +16,9 @@
 	       (:file "dispatch")
 	       (:file "component")
 	       (:file "list")
+	       (:file "websocket")
 	       (:file "string" :depends-on ("list"))
-	       (:file "psx" :depends-on ("list"))))
+	       (:file "ps" :depends-on ("list"))
+	       (:file "psx" :depends-on ("list"))
+	       (:file "simple" :depends-on ("ps" "component"))))
 

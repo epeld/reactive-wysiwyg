@@ -1,10 +1,4 @@
 
-(defpackage peldan.ps
-  (:use common-lisp parenscript)
-  (:import-from peldan.string 
-		"TRANSPOSE")
-  (:export "LOG-MESSAGE"))
-
 (in-package peldan.ps)
 
 
