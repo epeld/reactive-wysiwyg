@@ -60,3 +60,21 @@
   (:export :*port*))
 
 
+(defpackage :peldan.resource
+  (:use :common-lisp)
+  (:import-from :alexandria :with-gensyms)
+  (:import-from :peldan.symbol :new-symbol)
+  (:export :replace-resource
+	   :find-resource
+	   :resource
+	   :resource-name))
+
+
+(defpackage :peldan.symbol
+  (:use :common-lisp)
+  (:export :new-symbol))
+
+
+(defpackage :peldan.state
+  (:use :common-lisp)
+  (:import-from :peldan.resource :defgroup))
