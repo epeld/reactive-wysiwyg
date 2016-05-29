@@ -4,7 +4,7 @@
 (asdf:defsystem #:blub
   :description "Web page maker"
   :author "Erik Peldan <erik.peldan+lisp@gmail.com>"
-  :license "GNU"
+  :license "GNU GPL"
   :depends-on (#:drakma
                #:cl-who
                #:hunchentoot
