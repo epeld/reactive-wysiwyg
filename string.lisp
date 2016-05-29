@@ -1,14 +1,4 @@
 
-(defpackage :peldan.string
-  (:use :common-lisp)
-  (:import-from :alexandria :with-gensyms)
-  (:export "STRINGS-BIND"
-	   "STRING-BIND-CASE"
-	   "STRING-VAR-MATCH"
-	   "SPLIT-BY"
-	   "TRANSPOSE"
-	   "REPLACE-ALL"))
-
 (in-package :peldan.string)
 
 
@@ -54,9 +44,6 @@ if there were an empty string between them."
 			  (no-match "Incomplete match. Remaining ~s out of ~s" rest strings)
 			  (return-from string-var-match (acons '&rest rest filled)))))))
 
-
-(defun transpose (list-of-lists)
-  (apply #'mapcar #'list list-of-lists))
 
 
 (defmacro strings-bind (vars-and-strings strings &body body)

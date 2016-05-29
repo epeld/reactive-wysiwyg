@@ -1,10 +1,4 @@
 
-(defpackage :peldan.psx
-  (:use :common-lisp)
-  (:import-from :peldan.string :transpose)
-  (:import-from :peldan.alist :interleaved-alist :flatten-alist)
-  (:export :psx))
-
 (in-package :peldan.psx)
 
 
@@ -30,7 +24,7 @@
 
 (defun psx-element (head attrs children)
   `(create-reactive-element ,head
-			    (ps:create ,@(flatten-alist attrs))
+			    (ps:create ,@(alist-to-plist attrs))
 			    (ps:list ,@children)))
 
 
@@ -60,7 +54,7 @@
 
        ;; Sexp looks like: ((:p :attr 2) "child")
        (psx-element (first first) 
-		    (interleaved-alist (rest first))
+		    (plist-to-alist (rest first))
 		    (rest sexp)))
       
       (keyword

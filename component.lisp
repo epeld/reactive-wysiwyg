@@ -1,13 +1,4 @@
 
-(defpackage peldan.component
-  (:use :common-lisp)
-  (:import-from :cl-who 
-		"HTM"
-		"WITH-HTML-OUTPUT"
-		"WITH-HTML-OUTPUT-TO-STRING")
-  (:import-from :alexandria "WITH-GENSYMS")
-  (:export "DEFCOMPONENT" "DEFCOMPONENT-MACRO" "RENDER" "COMPONENT"))
-
 (in-package peldan.component)
 
 

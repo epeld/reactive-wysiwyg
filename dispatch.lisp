@@ -1,11 +1,5 @@
 
-(defpackage peldan.dispatch
-  (:use common-lisp hunchentoot)
-  (:export "*HANDLERS*"))
-
 (in-package peldan.dispatch)
-
-(ql:quickload "hunchentoot")
 
 ;; We define our own list of handlers
 ;; that will get to work on the requests in turn
@@ -31,5 +25,7 @@
 
 (defvar server (make-instance 'easy-acceptor :port 4243))
 
-(quote (start server))
-(setf *show-lisp-errors-p* t)
+
+(defun start-server ()
+  (setf *show-lisp-errors-p* t)
+  (start server))
