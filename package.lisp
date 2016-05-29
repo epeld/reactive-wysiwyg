@@ -1,11 +1,11 @@
 ;;;; package.lisp
 
-(defpackage peldan.dispatch
+(defpackage :peldan.dispatch
   (:use :common-lisp :hunchentoot)
   (:export :*handlers* :server :start-server))
 
 
-(defpackage peldan.component
+(defpackage :peldan.component
   (:use :common-lisp)
   (:import-from :cl-who 
 		:htm
@@ -38,13 +38,13 @@
   (:export :psx))
 
 
-(defpackage peldan.ps
+(defpackage :peldan.ps
   (:use :common-lisp :parenscript)
   (:import-from :peldan.list :transpose)
   (:export :log-message :defsnippet))
 
 
-(defpackage peldan.simple
+(defpackage :peldan.simple
   (:use :common-lisp :parenscript :peldan.ps)
   (:import-from :cl-who :str)
   (:import-from :peldan.ps :defsnippet :log-message)
@@ -55,6 +55,8 @@
 		:component))
 
 
-(defpackage peldan.websocket
+(defpackage :peldan.websocket
   (:use :common-lisp :hunchensocket)
   (:export :*port*))
+
+
