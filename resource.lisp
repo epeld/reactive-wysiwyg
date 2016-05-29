@@ -28,16 +28,18 @@
 				members
 				:test test
 				:key #'name 
-				:count 1)))))
+				:count 1))))
+  new-member)
 
 
 (defun add-member (new-member group)
   (with-slots (members) group
-    (setf members (cons new-member members))))
+    (setf members (cons new-member members)))
+  new-member)
 
 
 ;; TODO verify works!
-(defmacro defgroup (name &key (test #'equal))
+(defmacro defgroup (name &key (test '#'equal))
   (let ((group (new-symbol name "-group")))
     (with-gensyms (name-arg member-arg)
       `(progn
@@ -48,5 +50,8 @@
 	   (find-member ,name-arg ,group :test ,test))
 	 
 	 (defun ,(new-symbol "replace-" name) (,member-arg)
-	   (replace-member ,member-arg ,group :test ,test))))))
+	   (replace-member ,member-arg ,group :test ,test))
+	 
+	 (defun ,(new-symbol "add-" name) (,member-arg)
+	   (add-member ,member-arg ,group))))))
 
