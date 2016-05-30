@@ -9,13 +9,16 @@
   (cdr (assoc :members group)))
 
 
-(defun find-member (name group &key (test #'eql))
+(defun resource-type (object)
+  (cdr (assoc :type object)))
+
+(defun find-member (name group &key (test #'string=))
   (find name (members group)
 	:key #'name
 	:test test))
 
 
-(defun replace-member (new-member group &key (test #'eql))
+(defun replace-member (new-member group &key (test #'string=))
   (let ((assoc (assoc :members group)))
     (setf (cdr assoc)
 	  (cons new-member 
@@ -38,7 +41,7 @@
 	   `(nil ,name 'group)))
 
 
-(defmacro defgroup (name &key (test '#'eql))
+(defmacro defgroup (name &key (test '#'string=))
   (let ((group (new-symbol name "-group")))
     (with-gensyms (name-arg member-arg)
       `(progn
@@ -49,6 +52,9 @@
 	 
 	 (defun ,(new-symbol "replace-" name) (,member-arg)
 	   (replace-member ,member-arg ,group :test ,test))
+	 
+	 (defun ,(new-symbol "make-" name) (,name-arg)
+	   (pairlis '(:name :type) (list ,name-arg ',name)))
 	 
 	 (defun ,(new-symbol "add-" name) (,member-arg)
 	   (add-member ,member-arg ,group))))))
