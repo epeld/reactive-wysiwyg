@@ -1,50 +1,48 @@
 
 (in-package :peldan.resource)
 
-
-(defclass named ()
-  ((name :reader name
-	 :initarg :name
-	 :initform (error "A name is required")))
-  (:documentation "Something that has a name of some sort"))
+(defun name (object)
+  (cdr (assoc :name object)))
 
 
-(defclass group (named)
-  ((members :reader members
-	      :type list))
-  
-  (:documentation "A group of resources"))
+(defun members (group)
+  (cdr (assoc :members group)))
 
 
-(defun find-member (name group &key (test #'equal))
-  (find name (members group) :key #'name :test test))
+(defun find-member (name group &key (test #'eql))
+  (find name (members group)
+	:key #'name
+	:test test))
 
 
-
-(defun replace-member (new-member group &key (test #'equal))
-  (with-slots (members) group
-    (setf members (cons new-member 
-			(remove (name new-member)
-				members
-				:test test
-				:key #'name 
-				:count 1))))
+(defun replace-member (new-member group &key (test #'eql))
+  (let ((assoc (assoc :members group)))
+    (setf (cdr assoc)
+	  (cons new-member 
+		(remove (name new-member)
+			(cdr assoc)
+			:test test
+			:key #'name))))
   new-member)
 
 
 (defun add-member (new-member group)
-  (with-slots (members) group
-    (setf members (cons new-member members)))
+  "Add a member to a group, shadowing any old member with the same name"
+  (push new-member (cdr (assoc :members group)))
   new-member)
 
 
-;; TODO verify works!
-(defmacro defgroup (name &key (test '#'equal))
+(defun empty-group (name)
+  "Create a named group without any members (yet)"
+  (pairlis '(:members :name :type)
+	   `(nil ,name 'group)))
+
+
+(defmacro defgroup (name &key (test '#'eql))
   (let ((group (new-symbol name "-group")))
     (with-gensyms (name-arg member-arg)
       `(progn
-	 (defvar ,group (make-instance 'group 
-				       :name ,(string name)))
+	 (defvar ,group (empty-group ,(string name)))
      
 	 (defun ,(new-symbol "find-" name) (,name-arg)
 	   (find-member ,name-arg ,group :test ,test))
