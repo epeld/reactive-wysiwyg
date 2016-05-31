@@ -10,15 +10,16 @@
                #:hunchentoot
                #:hunchensocket
                #:parenscript
-	       #:alexandria)
+	       #:alexandria
+	       #:yason)
   :serial t
   :components ((:file "package")
 	       (:file "dispatch")
 	       (:file "component")
 	       (:file "list")
 	       (:file "symbol")
-	       (:file "websocket" :depends-on "resource")
-	       (:file "resource" :depends-on "symbol")
+	       (:file "websocket" :depends-on ("resource"))
+	       (:file "resource" :depends-on ("symbol"))
 	       (:file "string" :depends-on ("list"))
 	       (:file "ps" :depends-on ("list"))
 	       (:file "psx" :depends-on ("list"))

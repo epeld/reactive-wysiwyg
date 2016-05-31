@@ -57,6 +57,7 @@
 
 (defpackage :peldan.websocket
   (:use :common-lisp :hunchensocket :hunchentoot)
+  (:import-from :yason :*parse-object-as* :parse :encode)
   (:import-from :peldan.resource :defgroup :named)
   (:export :*port*))
 
@@ -65,6 +66,7 @@
   (:use :common-lisp)
   (:import-from :alexandria :with-gensyms)
   (:import-from :peldan.symbol :new-symbol)
+  (:import-from :peldan.list :plist-to-alist)
   (:export :replace-resource
 	   :find-resource
 	   :resource
