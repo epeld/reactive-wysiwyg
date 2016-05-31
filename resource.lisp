@@ -42,19 +42,26 @@
 
 
 (defmacro defgroup (name &key (test '#'string=))
-  (let ((group (new-symbol name "-group")))
-    (with-gensyms (name-arg member-arg)
+  (let ((group (new-symbol name "-group"))
+	(sname (string name)))
+    (with-gensyms (name-arg member-arg rest)
       `(progn
-	 (defvar ,group (empty-group ,(string name)))
+	 (defvar ,group (empty-group ,sname))
      
-	 (defun ,(new-symbol "find-" name) (,name-arg)
-	   (find-member ,name-arg ,group :test ,test))
+	 (defun ,(new-symbol "find-" name) (,name-arg &key (force nil))
+	   (or (find-member ,name-arg ,group :test ,test)
+	       (and force
+		    (error ,(concatenate 'string "Unknown " sname ": ~a")
+			   ,name-arg))))
 	 
 	 (defun ,(new-symbol "replace-" name) (,member-arg)
 	   (replace-member ,member-arg ,group :test ,test))
 	 
-	 (defun ,(new-symbol "make-" name) (,name-arg)
-	   (pairlis '(:name :type) (list ,name-arg ',name)))
+	 (defun ,(new-symbol "make-" name) (,name-arg &rest ,rest)
+	   ,(concatenate 'string "Construct a new " sname " with the given name and fields")
+	   (pairlis '(:name :type)
+		    (list ,name-arg ',name)
+		    (plist-to-alist ,rest)))
 	 
 	 (defun ,(new-symbol "add-" name) (,member-arg)
 	   (add-member ,member-arg ,group))))))
