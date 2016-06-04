@@ -67,7 +67,7 @@
       (format t "Parsed ~s~%" message)
       
       ;; Command execution
-      (let ((command (cdr (assoc "command" message :test #'string=))))
+      (let ((command (assocdr "command" message :test #'string=)))
 	    (cond
 	      ((string= "set" command)
 	       (setf (cdr (assoc :state session))
@@ -79,7 +79,7 @@
       
       ;; Response generation
       (let ((response (with-output-to-string (s)
-			(encode (cdr (assoc :state session)) 
+			(encode (assocdr :state session) 
 				s))))
 	(format t "Response ~s~%" response)
 	(broadcast instance response)))) 

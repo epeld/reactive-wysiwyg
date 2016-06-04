@@ -16,3 +16,13 @@
 (defun plist-to-alist (list)
   (loop for rest on list by #'cddr
      collect (cons (first rest) (second rest))))
+
+
+(defun assocdr (&rest args)
+  "Take the CDR of the ASSOC"
+  (cdr (apply #'assoc args)))
+
+
+(defun assocar (&rest args)
+  "Take the CAR of the ASSOC"
+  (car (apply #'assoc args)))
