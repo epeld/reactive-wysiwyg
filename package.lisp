@@ -59,6 +59,7 @@
   (:use :common-lisp :hunchensocket :hunchentoot)
   (:import-from :yason :*parse-object-as* :parse :encode)
   (:import-from :peldan.resource :defgroup :named)
+  (:import-from :peldan.list :assocdr)
   (:export :*port*))
 
 
@@ -81,3 +82,8 @@
 (defpackage :peldan.state
   (:use :common-lisp)
   (:import-from :peldan.resource :defgroup))
+
+
+(defpackage :peldan.action
+  (:use :common-lisp :parenscript)
+  (:export :defaction))
