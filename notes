@@ -2,17 +2,8 @@
 Websocket needs to return a WS-resource per URL-request.
 Needs to return the same resource on consequent requests to same URL
  but the resources should be created on-the-fly (and torn down when unused)
- 
-1. On incoming request, search through list of open sessions, return one matching if found
-   
-2. If no one matching, return new resource that is added (add-session or whatever)
-   
-3. Each open session should support updating its state and notifying listeners
-   which requires a signal-instance where the open WS-client is a listener!
-   
-4. Each open session can receive messages using a protocol. E.g either "get" or "set"
-   in the basic implementation. "set" notifies listeners. "get" returns current state
-   (use JSON!)
+
+1, 2, 3, 4 done   
    
 5. Build two HTML-clients; one which pretty prints JSON state and displays it. One
    which tries to render using virtual DOM!
