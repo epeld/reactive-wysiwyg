@@ -12,10 +12,9 @@
   (let (attr-list body)
     (loop for rest on (rest sexp) by #'cddr
        if (keywordp (first rest))
-       collect (cons (first rest) (second rest)) into attr
+       do (push (cons (first rest) (second rest)) attr-list)
        else
-       do (progn (setq attr-list attr)
-		 (setq body rest)
+       do (progn (setq body rest)
 		 (return)))
     
     (values (the atom (first sexp))
