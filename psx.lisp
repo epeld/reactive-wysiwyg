@@ -6,6 +6,7 @@
 ;; This file contains lisp-code for compiling cl-who code to ReactJS
 ;; 
 
+
 (defun extract-element-parts (sexp)
   "Extract the parts from an HTML-like sexp"
   (the list sexp)
@@ -105,19 +106,4 @@
 ;; - createReactiveComponent
 (ps:defpsmacro psx (sexp)
   (psx* sexp))
-
-
-(defun make-renderer (lambda-list html)
-  (ps:with-ps-gensyms (state)
-    `(lambda (,state)
-       (ps:with-slots (,@lambda-list) ,state
-	 ,(psx* html)))))
-
-
-(ps:defpsmacro defcomponent (name lambda-list html)
-  `(ps:defvar ,name 
-     (create-reactive-component ,(make-renderer lambda-list html))))
-
-
-(ps:ps (defcomponent testar (a b) ((:p :class "ff") a "child" b)))
 
