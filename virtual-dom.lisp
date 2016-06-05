@@ -21,7 +21,7 @@
    `(flet ((render (state)
 	     (psx ,html)))
     
-      (let* ((tree (render ,(json-string state)))
+      (let* ((tree (render ((@ -j-s-o-n parse) ,(json-string state))))
 	     (element (reify tree)))
 	((ps:@ document body append-child) element)
 	element))))

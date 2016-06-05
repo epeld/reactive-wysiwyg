@@ -18,7 +18,7 @@
 	(javascript
 	  (read-virtual-dom-js)
 	  (bootstrap-code
-	   '(:div "This is a virtual dom element")
+	   '(:div "This is a virtual dom element" (@ state 0))
 	   (list 1 2 "hej")))))
 
 
