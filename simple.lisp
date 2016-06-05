@@ -12,7 +12,7 @@
 		      collect (list 'str string)))))
 
 
-(defun component-code ()
+(defun component-js-code ()
   (render-loop
 	   
    '(:div "This is a virtual dom element" 
@@ -34,7 +34,7 @@
 	(javascript
 	  (read-virtual-dom-js)
 	  (ps* *ps-lisp-library*)
-	  (component-code))))
+	  (component-js-code))))
 
 
 (defun simple-handler (request)

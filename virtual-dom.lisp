@@ -23,6 +23,7 @@
 	  (let* ((state ((@ -j-s-o-n parse) ,(json-string state)))
 		 (tree (render state))
 		 (element (reify tree)))
+	    
 	    ((ps:@ document body append-child) element)
 	
 	    (lambda (new-state)
