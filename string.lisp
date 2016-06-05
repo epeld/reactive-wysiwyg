@@ -86,3 +86,11 @@ is replaced with replacement."
                              :end (or pos (length string)))
             when pos do (write-string replacement out)
             while pos))) 
+
+
+(defun read-file-to-string (filename)
+  (with-output-to-string (s)
+    (with-open-file (in filename)
+      (loop for line = (read-line in nil 'foo)
+	 until (eq line 'foo)
+	 do (write-line line s)))))
