@@ -3,10 +3,22 @@
 
 
 ;; 
-;; This file contains lisp-code for compiling cl-who code to ReactJS
+;; This file contains lisp-code for compiling cl-who code to Virtual DOM-like JS
 ;; 
 
 
+;; 
+;; Abstract away what type of virtual DOM framework we are using..
+(ps:defpsmacro create-reactive-element (name attrs children)
+  `((ps:@ virtual-dom h) ,name ,attrs ,children))
+
+(ps:defpsmacro reify (arg)
+  `((ps:@ virtual-dom create) ,arg))
+
+
+;; 
+;; Define some code walking routines
+;; 
 (defun extract-element-parts (sexp)
   "Extract the parts from an HTML-like sexp"
   (the list sexp)
