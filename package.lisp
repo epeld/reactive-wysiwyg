@@ -12,13 +12,12 @@
 		:with-html-output
 		:with-html-output-to-string)
   (:import-from :alexandria :with-gensyms)
-  (:export :defcomponent :defcomponent-macro :render :component))
+  (:export :defcomponent :render))
 
 
 (defpackage :peldan.list
   (:use :common-lisp)
   (:export :transpose :alist-to-plist :plist-to-alist))
-
 
 
 (defpackage :peldan.string
@@ -42,7 +41,7 @@
 (defpackage :peldan.ps
   (:use :common-lisp :parenscript)
   (:import-from :peldan.list :transpose)
-  (:export :log-message :defsnippet))
+  (:export :log-message :log-warning))
 
 
 (defpackage :peldan.simple
@@ -50,7 +49,7 @@
   (:import-from :cl-who :str :htm)
   (:import-from :peldan.ps :log-message)
   (:import-from :peldan.psx :psx)
-  (:import-from :peldan.virtual-dom :read-virtual-dom-js :render-loop)
+  (:import-from :peldan.virtual-dom :read-virtual-dom-js :render-loop :json-string :json)
   (:import-from :peldan.component :defcomponent :render))
 
 
@@ -78,10 +77,6 @@
   (:export :new-symbol))
 
 
-(defpackage :peldan.state
-  (:use :common-lisp)
-  (:import-from :peldan.resource :defgroup))
-
 
 (defpackage :peldan.action
   (:use :common-lisp :parenscript)
@@ -94,4 +89,4 @@
   (:import-from :yason :encode)
   (:import-from :peldan.string :read-file-to-string)
   (:import-from :peldan.psx :psx :psx* :diff-tree :apply-patch)
-  (:export :render-loop))
+  (:export :render-loop :json-string :json))
