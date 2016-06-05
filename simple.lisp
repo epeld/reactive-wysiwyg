@@ -24,7 +24,10 @@
      (:div 
       "And this is the end of it. (Rendered " 
       (length state)
-      " elements)"))
+      " elements)")
+     
+     (:textarea
+      :value ((@ -j-s-o-n stringify) state)))
 	   
    (list 1 2 "hej")))
 
