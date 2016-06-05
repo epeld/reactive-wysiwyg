@@ -7,18 +7,11 @@
 
 
 (defmacro defcomponent (name lambda html)
-  (with-gensyms (stream args)
+  (with-gensyms (stream)
     `(defun ,name ,(add-parameter lambda stream)
        (the stream ,stream)
-       (labels ((component (fn &rest ,args)
-		  (apply fn (add-parameter ,args ,stream))))
-	 (with-html-output (,stream)
-	   ,html)))))
-
-
-(defmacro defcomponent-macro (name lambda html)
-  `(defmacro ,name ,lambda
-       (list 'htm ,html)))
+       (with-html-output (,stream)
+	   ,html))))
 
 
 (defmacro render (component &rest args)
