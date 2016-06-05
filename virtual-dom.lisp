@@ -1,27 +1,27 @@
 
+(in-package :peldan.virtual-dom)
 
-;; Define a context for working with the virtual DOM
-(ps:defpsmacro with-virtual-dom (&body body)
-  `(macrolet ((create-reactive-element (name attrs children)
-		`((ps:@ virtual-dom h) ,name ,attrs ,children))
-	   
-	      (reify (arg)
-		`((ps:@ virtual-dom create) ,arg)))
-  
-     ,@body))
+
+(defun read-virtual-dom-js ()
+  (read-file-to-string "js/virtual-dom.js"))
 
 
 
-(ps:defpsmacro component-loop (psx state)
-  `(with-virtual-dom
-     (flet ((render (state)
-	      ;; TODO compile with an action context
-	      (psx ,psx)))
+(ps:defpsmacro json (data)
+  `(lisp (encode ,data)))
+
+
+(defun json-string (data)
+  (with-output-to-string (s)
+    (encode data s)))
+
+
+(defun bootstrap-code (html state)
+  (ps* 
+   `(flet ((render (state)
+	     (psx ,html)))
     
-       (let* ((tree (render (state ,state)))
-	      (element (reify tree)))
-	 
-	 ;; TODO hide this using some macro:
-	 ((ps:@ document body appendChild) element)
-	 
-	 element))))
+      (let* ((tree (render ,(json-string state)))
+	     (element (reify tree)))
+	((ps:@ document body append-child) element)
+	element))))
