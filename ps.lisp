@@ -21,8 +21,5 @@
   (ps-compile-file filename))
 
 
-(defpsmacro include (filename)
-  (with-open-file (s (concatenate 'string "js/" filename))
-    (loop for line = (read-line s nil 'foo)
-       until (eq line 'foo)
-       do (write-line line ps:*parenscript-stream*))))
+
+
