@@ -1,44 +1,25 @@
 
 (in-package peldan.simple)
 
-(defsnippet bootstrap ()
-  (let ((ws (new (-web-socket (lisp (concatenate
-				     'string 
-				     "ws://localhost:"
-				     (write-to-string peldan.websocket:*port*)))))))
-    (with-slots (onclose onmessage onopen) ws
-      
-      (setf onclose (lambda ()
-		      (log-message "Connection closed")))
-      
-      (setf onmessage (lambda (ev)
-		      (log-message "Got message" ev)))
-      
-      (setf onopen (lambda ()
-		      (log-message "Connection estabilished"))))
-    ws))
+
+;; TODO start generating JS here..
 
 
 
+(defmacro javascript (&rest strings)
+  `(htm (:script :type "text/javascript" 
+		 ,@(loop for string in strings
+		      collect (list 'str string)))))
 
-(defcomponent-macro load-scripts (&rest names)
-  `(:script :type "text/javascript" 
-	    ,@(mapcar (lambda (name) `(str ,(funcall name))) names)))
-
-
-(defcomponent-macro javascript (&body ps)
-  `(:script :type "text/javascript" (str (ps ,@ps))))
-
-
-(defcomponent notice ()
-  (:p "Please wait a while as the connection is being set up.."))
 
 
 (defcomponent hello-world ()
-  (:div (:h1 "Hello, World")
-	(component #'notice)
-	(:iframe)
-	(load-scripts bootstrap)))
+  (:div (:h1 "This is an example of using Virtual DOM")
+	(javascript
+	  (read-virtual-dom-js)
+	  (bootstrap-code
+	   '(:div "This is a virtual dom element")
+	   (list 1 2 "hej")))))
 
 
 (defun simple-handler (request)
@@ -46,8 +27,6 @@
   (render hello-world))
 
 
-(render hello-world)
-;(psx ())
 
-
-;(pushnew (lambda (req) (simple-handler req)) peldan.dispatch:*handlers*)
+(defun install-handler ()
+  (pushnew (lambda (req) (simple-handler req)) peldan.dispatch:*handlers*))
