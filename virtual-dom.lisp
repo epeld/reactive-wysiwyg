@@ -16,12 +16,25 @@
     (encode data s)))
 
 
-(defun bootstrap-code (html state)
-  (ps* 
-   `(flet ((render (state)
-	     (psx ,html)))
+(defun make-renderer (html state)
+  `(flet ((render (state)
+		 (psx ,html)))
     
-      (let* ((tree (render ((@ -j-s-o-n parse) ,(json-string state))))
-	     (element (reify tree)))
-	((ps:@ document body append-child) element)
-	element))))
+	  (let* ((state ((@ -j-s-o-n parse) ,(json-string state)))
+		 (tree (render state))
+		 (element (reify tree)))
+	    ((ps:@ document body append-child) element)
+	
+	    (lambda (new-state)
+	      (setf state new-state)
+	      (let* ((new-tree (render new-state))
+		     (patches (diff-tree tree new-tree)))
+		(setf tree new-tree)
+		(apply-patch element patches))))))
+
+
+(defun render-loop (html state)
+  (ps* 
+   `(defvar
+	set-state
+      ,(make-renderer html state))))

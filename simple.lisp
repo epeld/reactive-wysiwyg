@@ -12,14 +12,29 @@
 		      collect (list 'str string)))))
 
 
+(defun component-code ()
+  (render-loop
+	   
+   '(:div "This is a virtual dom element" 
+     
+     (mapcar (lambda (x)
+	       (psx (:p "Value:" x)))
+      state)
+     
+     (:div 
+      "And this is the end of it. (Rendered " 
+      (length state)
+      " elements)"))
+	   
+   (list 1 2 "hej")))
+
 
 (defcomponent hello-world ()
   (:div (:h1 "This is an example of using Virtual DOM")
 	(javascript
 	  (read-virtual-dom-js)
-	  (bootstrap-code
-	   '(:div "This is a virtual dom element" (@ state 0))
-	   (list 1 2 "hej")))))
+	  (ps* *ps-lisp-library*)
+	  (component-code))))
 
 
 (defun simple-handler (request)

@@ -48,14 +48,10 @@
 (defpackage :peldan.simple
   (:use :common-lisp :parenscript :peldan.ps)
   (:import-from :cl-who :str :htm)
-  (:import-from :peldan.ps :defsnippet :log-message)
+  (:import-from :peldan.ps :log-message)
   (:import-from :peldan.psx :psx)
-  (:import-from :peldan.virtual-dom :read-virtual-dom-js :bootstrap-code)
-  (:import-from :peldan.component 
-		:defcomponent
-		:defcomponent-macro
-		:render
-		:component))
+  (:import-from :peldan.virtual-dom :read-virtual-dom-js :render-loop)
+  (:import-from :peldan.component :defcomponent :render))
 
 
 (defpackage :peldan.websocket
@@ -94,8 +90,8 @@
 
 (defpackage :peldan.virtual-dom
   (:use :common-lisp :parenscript)
-  (:import-from :peldan.ps :include :load)
+  (:import-from :peldan.ps :load)
   (:import-from :yason :encode)
   (:import-from :peldan.string :read-file-to-string)
-  (:import-from :peldan.psx :psx :psx*)
-  (:export :bootstrap-code))
+  (:import-from :peldan.psx :psx :psx* :diff-tree :apply-patch)
+  (:export :render-loop))

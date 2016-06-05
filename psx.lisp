@@ -15,6 +15,12 @@
 (ps:defpsmacro reify (arg)
   `((ps:@ virtual-dom create) ,arg))
 
+(ps:defpsmacro diff-tree (old new)
+  `((ps:@ virtual-dom diff) ,old ,new))
+
+(ps:defpsmacro apply-patch (element patches)
+  `((ps:@ virtual-dom patch) ,element ,patches))
+
 
 ;; 
 ;; Define some code walking routines
@@ -55,7 +61,7 @@
      (psx-element-sexp `(,atom)))
     
     (t
-     (string atom))))
+     atom)))
 
 
 (defun psx-list (sexp)
@@ -91,13 +97,7 @@
 
 (defun psx* (sexp)
   ;; Smooth out the 'cl-who edges':
-  `(macrolet ((component (component-expr &rest args)
-		(if (and (list component-expr) 
-			 (eq (first component-expr) 'function))
-		    `(create-reactive-element ,(second component-expr) ,@args)
-		    `(apply create-reactive-element component-expr ,@args)))
-	     
-	      (htm (html)
+  `(macrolet ((htm (html)
 		`(psx ,html))
 	     
 	      (str (code)
@@ -118,4 +118,3 @@
 ;; - createReactiveComponent
 (ps:defpsmacro psx (sexp)
   (psx* sexp))
-
