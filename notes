@@ -3,9 +3,18 @@ Websocket needs to return a WS-resource per URL-request.
 Needs to return the same resource on consequent requests to same URL
  but the resources should be created on-the-fly (and torn down when unused)
 
-1, 2, 3, 4 done   
+1, 2, 3, 4, (5 kind of), 6 done   
    
-5. Build two HTML-clients; one which pretty prints JSON state and displays it. One
-   which tries to render using virtual DOM!
+   
+We want an actions-mechanism.
 
-6. Make sure sessions are pinged and destroyed on client disconnect!
+1. Create some simple building blocks for transforming state, e.g:
+
+ - Adding keys + data
+
+
+2. Allow actions to run both clientside and serverside. Allow switching behaviour
+   using state
+
+
+3. Allow switching into readonly view of clientside state by executing action
