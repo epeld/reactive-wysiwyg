@@ -1,16 +1,27 @@
 
 (in-package :peldan.resource)
 
+(defun field-value (key object)
+  (assocdr key object))
+
 (defun name (object)
-  (cdr (assoc :name object)))
+  (field-value :name object))
 
 
 (defun members (group)
-  (cdr (assoc :members group)))
+  (field-value :members group))
+
+
+(defun unique-members (group key)
+  (remove-duplicates (members group)
+		     :key (if (keywordp key)
+			      (lambda (item) (field-value key item))
+			      key)))
 
 
 (defun resource-type (object)
-  (cdr (assoc :type object)))
+  (field-value :type object))
+
 
 (defun find-member (name group &key (test #'string=))
   (find name (members group)

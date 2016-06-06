@@ -58,6 +58,7 @@
   (:import-from :yason :*parse-object-as* :parse :encode)
   (:import-from :peldan.resource :defgroup :named)
   (:import-from :peldan.list :assocdr)
+  (:import-from :peldan.virtual-dom :json-string)
   (:export :*port*))
 
 
@@ -65,11 +66,16 @@
   (:use :common-lisp)
   (:import-from :alexandria :with-gensyms)
   (:import-from :peldan.symbol :new-symbol)
-  (:import-from :peldan.list :plist-to-alist)
+  (:import-from :peldan.list :plist-to-alist :assocdr)
   (:export :replace-resource
 	   :find-resource
 	   :resource
-	   :resource-name))
+	   :resource-name
+	   :defgroup
+	   :members
+	   :name
+	   :field-value
+	   :unique-members))
 
 
 (defpackage :peldan.symbol
@@ -79,7 +85,7 @@
 
 
 (defpackage :peldan.action
-  (:use :common-lisp :parenscript)
+  (:use :common-lisp :parenscript :peldan.resource)
   (:export :defaction))
 
 
@@ -87,6 +93,6 @@
   (:use :common-lisp :parenscript)
   (:import-from :peldan.ps :load)
   (:import-from :yason :encode)
-  (:import-from :peldan.string :read-file-to-string)
+  (:import-from :peldan.string :read-file-to-string :read-file-to-stream)
   (:import-from :peldan.psx :psx :psx* :diff-tree :apply-patch)
   (:export :render-loop :json-string :json))
