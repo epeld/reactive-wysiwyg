@@ -78,9 +78,8 @@
 				  (format nil "Unknown command '~a'~%" command)))))
       
       ;; Response generation
-      (let ((response (with-output-to-string (s)
-			(encode (assocdr :state session) 
-				s))))
+      (let ((response (json-string (pairlis '(:type :value)
+					    `(:value ,(assocdr :state session))))))
 	(format t "Response ~s~%" response)
 	(broadcast instance response)))) 
 
