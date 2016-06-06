@@ -12,10 +12,8 @@
 		      collect (list 'str string)))))
 
 
-(defun component-js-code ()
-  (render-loop
-	   
-   '(:div "This is a virtual dom element" 
+(defun test-component ()
+  '(:div "This is a virtual dom element" 
      
      (mapcar (lambda (x)
 	       (psx (:p "Value:" x)))
@@ -27,17 +25,18 @@
       " elements)")
      
      (:textarea
-      :value ((@ -j-s-o-n stringify) state)))
-	   
-   (list 1 2 "hej")))
+      :value ((@ -j-s-o-n stringify) state))))
+
 
 
 (defcomponent hello-world ()
   (:div (:h1 "This is an example of using Virtual DOM")
 	(javascript
 	  (read-virtual-dom-js)
-	  (ps* *ps-lisp-library*)
-	  (component-js-code))))
+	  (ps* 
+	   *ps-lisp-library*
+	   (render-loop (test-component)
+			(list 1 2 "haj"))))))
 
 
 (defun simple-handler (request)
