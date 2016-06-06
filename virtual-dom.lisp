@@ -20,22 +20,21 @@
   `(flet ((render (state)
 		 (psx ,html)))
     
-	  (let* ((state ((@ -j-s-o-n parse) ,(json-string state)))
-		 (tree (render state))
-		 (element (reify tree)))
+     (let* ((state ((@ -j-s-o-n parse) ,(json-string state)))
+	    (tree (render state))
+	    (element (reify tree)))
 	    
-	    ((ps:@ document body append-child) element)
+       ((ps:@ document body append-child) element)
 	
-	    (lambda (new-state)
-	      (setf state new-state)
-	      (let* ((new-tree (render new-state))
-		     (patches (diff-tree tree new-tree)))
-		(setf tree new-tree)
-		(apply-patch element patches))))))
+       (lambda (new-state)
+	 (setf state new-state)
+	 (let* ((new-tree (render new-state))
+		(patches (diff-tree tree new-tree)))
+	   (setf tree new-tree)
+	   (apply-patch element patches))))))
 
 
 (defun render-loop (html state)
-  (ps* 
-   `(defvar
-	set-state
-      ,(make-renderer html state))))
+  `(defvar
+       set-state
+     ,(make-renderer html state)))
