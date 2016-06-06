@@ -49,7 +49,8 @@
   (:import-from :cl-who :str :htm)
   (:import-from :peldan.ps :log-message)
   (:import-from :peldan.psx :psx)
-  (:import-from :peldan.virtual-dom :read-virtual-dom-js :render-loop :json-string :json)
+  (:import-from :peldan.websocket :connect-ps)
+  (:import-from :peldan.virtual-dom :read-virtual-dom-js :render-ps :json-string)
   (:import-from :peldan.component :defcomponent :render))
 
 
@@ -59,7 +60,7 @@
   (:import-from :peldan.resource :defgroup :named)
   (:import-from :peldan.list :assocdr)
   (:import-from :peldan.virtual-dom :json-string)
-  (:export :*port*))
+  (:export :*port* :connect-ps))
 
 
 (defpackage :peldan.resource
@@ -95,4 +96,4 @@
   (:import-from :yason :encode)
   (:import-from :peldan.string :read-file-to-string :read-file-to-stream)
   (:import-from :peldan.psx :psx :psx* :diff-tree :apply-patch)
-  (:export :render-loop :json-string :json))
+  (:export :render-ps :json-string))
