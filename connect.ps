@@ -4,12 +4,15 @@
 (ps:ps (defun connect (set-state)
 	 (let ((ws (new (-web-socket "localhost" (lisp 4444)))))
 	   (with-slots (onclose onopen onmessage) ws
+	     
 	     (setf onclose
 		   (lambda ()
 		     (log-message "Connection closed")))
+	     
 	     (setf onopen
 		   (lambda ()
 		     (log-message "Connection estabilished")))
+	     
 	     (setf onmessage
 		   (lambda (msg)
 		     
@@ -17,6 +20,6 @@
 		       (log-message "Got message" type)
 		       (case type
 			 (:state
-			  (set-state data))))))
+			  (set-state value))))))
 	     ws))))
 
