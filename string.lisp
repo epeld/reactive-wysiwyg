@@ -94,3 +94,10 @@ is replaced with replacement."
       (loop for line = (read-line in nil 'foo)
 	 until (eq line 'foo)
 	 do (write-line line s)))))
+
+
+(defun read-file-to-stream (filename stream)
+  (with-open-file (in filename)
+      (loop for line = (read-line in nil 'foo)
+	 until (eq line 'foo)
+	 do (write-line line stream))))
