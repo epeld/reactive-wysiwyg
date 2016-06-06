@@ -70,10 +70,13 @@
       
       (list
 
-       ;; Sexp looks like: ((:p :attr 2) "child")
-       (psx-element (first first) 
-		    (plist-to-alist (rest first))
-		    (rest sexp)))
+       (if (keywordp (first (first sexp)))
+	   ;; Sexp looks like: ((:p :attr 2) "child")
+	   (psx-element (first first) 
+			(plist-to-alist (rest first))
+			(rest sexp))
+	   
+	   sexp))
       
       (keyword
        ;; Sexp looks like (:p :attr 3 :attr2 "val" "child")
