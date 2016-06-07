@@ -97,3 +97,6 @@
   (:import-from :peldan.string :read-file-to-string :read-file-to-stream)
   (:import-from :peldan.psx :psx :psx* :diff-tree :apply-patch)
   (:export :render-ps :json-string))
+
+(defpackage :peldan.shared
+  (:use :common-lisp :parenscript :peldan.resource))
