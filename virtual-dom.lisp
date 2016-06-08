@@ -8,7 +8,7 @@
 
 (defun json-string (data)
   (with-output-to-string (s)
-    (encode data s)))
+    (encode-alist data s)))
 
 
 (defun render-ps (html state)
