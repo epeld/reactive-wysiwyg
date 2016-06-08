@@ -93,7 +93,7 @@
 (defpackage :peldan.virtual-dom
   (:use :common-lisp :parenscript)
   (:import-from :peldan.ps :load)
-  (:import-from :yason :encode)
+  (:import-from :yason :encode :encode-alist)
   (:import-from :peldan.string :read-file-to-string :read-file-to-stream)
   (:import-from :peldan.psx :psx :psx* :diff-tree :apply-patch)
   (:export :render-ps :json-string))
