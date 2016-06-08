@@ -9,47 +9,65 @@
 (defgroup action)
 
 
-;; TODO this is not specific to actions. There may be lots of code that can be shared in this fashion!
+(defun generate-code-defun (item)
+  "Generate a defun from the code stored in code-item"
+  `(defun ,(field-value :name item) ,(field-value :args item)
+     ,@(field-value :body item)))
+
+
+(defun generate-code-flet (item)
+  "Generate a flet-like form from the code stored in code-item"
+  `(,(field-value :name item) ,(field-value :args item)
+     ,@(field-value :body item)))
+
+
+(defun register-action (name lambda-list expr)
+  (replace-action (make-action name
+			       :args lambda-list
+			       :body (list expr)
+			       :action t)))
+
+
 (defmacro defaction (name lambda-list expr)
-  `(progn
-     ;; This defines the action in lisp
-     (defun ,name ,lambda-list
-       ,(format nil "Return a state endofunction representing the action ~a on the current state" name)
-       ,expr)
-     
-     ;; This stores the action source so that it can be made available to PS code later
-     (add-action (make-action ,name
-			    :args (quote ,lambda-list)
-			    :code (quote ,expr)))))
-
-
-(defun find-action-function (name)
-  (let ((action (find-action name)))
-    (unless action
-      (error "Unknown action ~a" name))
-    `(defun ,name (state)
-       )))
-
-
-(defun perform-action (name &rest args)
-  "Invoke an action, given its name and arguments"
-  (let ((action (find-action-function name)))
-    (apply action args)))
-
+  "Define the function as through defun+ps but also mark it as an action"
+  `(register-action ',name ',lambda-list ',expr))
 
 
 
 (defpsmacro action (name &rest args)
-  "This executes an action when I get around to it!"
-  (if *server-side-logic*
-      "serverside"
-      "clientside"))
+  `(funcall (,name ,@args) state))
 
 
-(defun create-actions-ps ()
-  "Creates postscript code for executing each action"
-  (let ((actions (unique-members action-group :name)))
-    `(let ()
-       ,@(loop for action in actions collect
-	    `(defun ,(name action) ,(field-value :args action)
-	       ,@(field-value :code action))))))
+(defun generate-ps (update &optional (actions (members action-group)))
+  `(let ((actions (ps:create)))
+     (flet (,@(mapcar #'generate-code-flet actions))
+       
+       ,@(mapcar (lambda (action)
+		 `(setf (ps:@ actions ,(name action))
+			,(name action)))
+	       actions))))
+
+
+(defaction set-field (val &rest keys)
+  (flet ((set-field-in-state (state)
+		  (let ((obj state))
+	     
+		    ;; Walk keys until only one remains..
+		    (dotimes (ix (- (length keys) 1))
+		      (let ((key (aref keys ix)))
+		 
+			;; Creating empty objects when necessary
+			(unless (defined (ps:@ obj key))
+			  (setf (ps:getprop obj key)
+				(ps:create)))
+		 
+			(setf obj (ps:getprop obj key))))
+	     
+		    (setf (ps:getprop obj (aref keys (- (length keys) 1)))
+			  val))
+	   
+		  state))
+	   #'set-field-in-state))
+
+
+(generate-ps (members action-group))

@@ -87,7 +87,7 @@
 
 (defpackage :peldan.action
   (:use :common-lisp :parenscript :peldan.resource)
-  (:export :defaction))
+  (:export :defaction :generate-ps))
 
 
 (defpackage :peldan.virtual-dom
@@ -98,5 +98,3 @@
   (:import-from :peldan.psx :psx :psx* :diff-tree :apply-patch)
   (:export :render-ps :json-string))
 
-(defpackage :peldan.shared
-  (:use :common-lisp :parenscript :peldan.resource))

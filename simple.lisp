@@ -34,6 +34,9 @@
   `(defvar App
      (let ((module (create)))
        
+       (setf (@ module actions)
+	     ,(peldan.action:generate-ps (@ module update)))
+       
        (setf (@ module state)
 	     ((@ -j-s-o-n parse) ,(json-string initial-state)))
 	      
@@ -51,8 +54,8 @@
   (:div (:h1 "This is an example of using Virtual DOM")
 	(javascript
 	  (read-virtual-dom-js)
-	  (ps* *ps-lisp-library* 
-	       (application-js (list 2 3 "bluu"))))))
+	  (ps* *ps-lisp-library*)
+	  (ps* (application-js (list 2 3 "bluu"))))))
 
 
 (defun simple-handler (request)
