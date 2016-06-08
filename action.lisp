@@ -52,6 +52,12 @@
 
 
 (defaction set-field (val &rest keys)
+  (apply #'update-field
+	 (lambda (ignored) val)
+	 keys))
+
+
+(defaction update-field (fn &rest keys)
   (flet ((set-field-in-state (state)
 		  (let ((obj state))
 	     
@@ -66,8 +72,9 @@
 		 
 			(setf obj (ps:getprop obj key))))
 	     
-		    (setf (ps:getprop obj (aref keys (- (length keys) 1)))
-			  val))
+		    (let ((current (ps:getprop obj (aref keys (- (length keys) 1)))))
+		      (setf (ps:getprop obj (aref keys (- (length keys) 1)))
+			    (funcall fn current))))
 	   
 		  state))
 	   #'set-field-in-state))
