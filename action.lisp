@@ -34,18 +34,21 @@
 
 
 
-(defpsmacro action (name &rest args)
-  `(funcall (,name ,@args) state))
+(defpsmacro with-action-context (set-state &body body)
+  `(defun ((action (name &rest args)
+	    (,set-state ((apply name args) state))))
+     ,@body))
 
 
-(defun generate-ps (update &optional (actions (members action-group)))
+(defun action-ps (&optional (actions (members action-group)))
   `(let ((actions (ps:create)))
      (flet (,@(mapcar #'generate-code-flet actions))
        
        ,@(mapcar (lambda (action)
 		 `(setf (ps:@ actions ,(name action))
 			,(name action)))
-	       actions))))
+	       actions))
+     actions))
 
 
 (defaction set-field (val &rest keys)

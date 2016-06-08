@@ -34,15 +34,20 @@
   `(defvar App
      (let ((module (create)))
        
+       (setf (@ module run-action)
+	     (lambda (name &rest args)
+	       (let ((new-state ((apply (getprop (chain module actions) name) args) (@ module state))))
+		 ((@ module update) new-state))))
+       
        (setf (@ module actions)
-	     ,(peldan.action:generate-ps (@ module update)))
+	     ,(peldan.action:action-ps))
        
        (setf (@ module state)
 	     ((@ -j-s-o-n parse) ,(json-string initial-state)))
 	      
        (setf (@ module update)
 	     ,(render-ps (test-component)
-			 `(@ module state)))
+			   `(@ module state)))
      
        (setf (@ module ws)
 	     ,(connect-ps `(@ module update)))

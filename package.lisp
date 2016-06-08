@@ -87,7 +87,7 @@
 
 (defpackage :peldan.action
   (:use :common-lisp :parenscript :peldan.resource)
-  (:export :defaction :generate-ps))
+  (:export :defaction :action-ps :with-action-context))
 
 
 (defpackage :peldan.virtual-dom
