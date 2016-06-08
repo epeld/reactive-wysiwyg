@@ -19,9 +19,9 @@
      
 	  (mapcar (lambda (x)
 		    (psx (:p "Value:" x)))
-		  state)
+		  (@ state items))
      
-	  (:div :onclick (action peldan.action:set-field 333 0)
+	  (:div :onclick (action peldan.action:set-field 333 4)
 	   "And this is the end of it. (Rendered " 
 	   (length state)
 	   " elements)")
@@ -67,7 +67,7 @@
 	(javascript
 	  (read-virtual-dom-js)
 	  (ps* *ps-lisp-library*)
-	  (ps* (application-js (list 2 3 "bluu"))))))
+	  (ps* (application-js (pairlis '(:a :b :c "items") '(2 3 "bluu" (15 33 77))))))))
 
 
 (defun simple-handler (request)
