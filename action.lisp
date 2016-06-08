@@ -80,4 +80,10 @@
 	   #'set-field-in-state))
 
 
+(defaction debug ()
+  (update-field (lambda (val)
+		  (if val 0 1))
+		"debug"))
+
+
 (generate-ps (members action-group))
