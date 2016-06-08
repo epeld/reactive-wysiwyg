@@ -21,13 +21,20 @@
 		    (psx (:p "Value:" x)))
 		  state)
      
-	  (:div 
+	  (:div :onclick (action peldan.action:set-field 333 0)
 	   "And this is the end of it. (Rendered " 
 	   (length state)
 	   " elements)")
      
 	  (:textarea
 	   :value ((@ -j-s-o-n stringify) state))))))
+
+
+;; TODO remove macro, move into application-js somehow
+(defpsmacro action (name &rest args)
+  `(lambda () 
+     (let ((new-state ((apply (chain module actions ,name) ,@args) (@ module state))))
+       ((@ module update) new-state))))
 
 
 (defun application-js (&optional initial-state)
@@ -47,7 +54,7 @@
 	      
        (setf (@ module update)
 	     ,(render-ps (test-component)
-			   `(@ module state)))
+			 `(@ module state)))
      
        (setf (@ module ws)
 	     ,(connect-ps `(@ module update)))
