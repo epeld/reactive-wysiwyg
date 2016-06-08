@@ -42,13 +42,18 @@
 
 (defun action-ps (&optional (actions (members action-group)))
   `(let ((actions (ps:create)))
-     (flet (,@(mapcar #'generate-code-flet actions))
+     (flet (,@(mapcar #'generate-code-defun actions))
        
        ,@(mapcar (lambda (action)
-		 `(setf (ps:@ actions ,(name action))
-			,(name action)))
-	       actions))
+		   `(setf (ps:@ actions ,(name action))
+			  ,(name action)))
+		 actions))
      actions))
+
+
+;; TODO generate defuns that modify state here!
+(defun shortcuts-ps ()
+  'todo)
 
 
 (defaction set-field (val &rest keys)
@@ -66,7 +71,7 @@
 		      (let ((key (aref keys ix)))
 		 
 			;; Creating empty objects when necessary
-			(unless (defined (ps:@ obj key))
+			(unless (defined (ps:getprop obj key))
 			  (setf (ps:getprop obj key)
 				(ps:create)))
 		 
