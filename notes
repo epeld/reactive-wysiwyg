@@ -8,13 +8,24 @@ Needs to return the same resource on consequent requests to same URL
    
 We want an actions-mechanism.
 
-1. Create some simple building blocks for transforming state, e.g:
+1. Done
 
- - Adding keys + data
+2. Ignored
 
-
-2. Allow actions to run both clientside and serverside. Allow switching behaviour
-   using state
+3. Done
 
 
-3. Allow switching into readonly view of clientside state by executing action
+We want to be able to define components:
+
+(defcomponent mycomp ()
+	      (:mypsx goes here)
+	      (list "This is some initial state")
+	      (css "This is optional styling"))
+
+
+Components are automatically exposed through URLs for easy testing.
+Components can refer to eachother:
+
+> (subcomponent sub-state)
+
+which will actually `include` the whole subcomponent in the resulting hyperscript	
