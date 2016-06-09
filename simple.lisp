@@ -30,7 +30,7 @@
 	   :value ((@ -j-s-o-n stringify) state))))))
 
 
-(defun application-js (&optional initial-state)
+(defun application-js (psx &optional initial-state)
   `(defvar App
      (let ((module (create)))
              
@@ -41,7 +41,7 @@
 	     ((@ -j-s-o-n parse) ,(json-string initial-state)))
 	      
        (setf (@ module set-state)
-	     ,(render-ps (test-component) ;TODO make into arg
+	     ,(render-ps psx 
 			 `(@ module state)))
        
        (setf (@ module update-state)
@@ -53,12 +53,16 @@
        module)))
 
 
+;; TODO this is not a component!! Just the standard html for our pages
+;; The component is called test-component (see above) FIX!!!
 (defcomponent hello-world ()
   (:div (:h1 "This is an example of using Virtual DOM")
 	(javascript
 	  (read-virtual-dom-js)
 	  (ps* *ps-lisp-library*)
-	  (ps* (application-js (pairlis '(:a :b :c "items") '(2 3 "bluu" (15 33 77))))))))
+	  (ps* (application-js
+		(test-component)
+		(pairlis '(:a :b :c "items") '(2 3 "bluu" (15 33 77))))))))
 
 
 (defun simple-handler (request)
