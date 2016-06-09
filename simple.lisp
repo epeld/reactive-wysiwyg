@@ -18,10 +18,10 @@
     (psx (:div "This is a virtual dom element" 
      
 	  (mapcar (lambda (x)
-		    (psx (:p "Value:" x)))
+		    (psx (:div "Value:" x)))
 		  (@ state items))
      
-	  (:div :onclick (action peldan.action:set-field 333 4)
+	  (:div :onclick (action peldan.action:set-field 333 "items")
 	   "And this is the end of it. (Rendered " 
 	   (length state)
 	   " elements)")
@@ -30,31 +30,22 @@
 	   :value ((@ -j-s-o-n stringify) state))))))
 
 
-;; TODO remove macro, move into application-js somehow
-(defpsmacro action (name &rest args)
-  `(lambda () 
-     (let ((new-state ((apply (chain module actions ,name) ,@args) (@ module state))))
-       ((@ module update) new-state))))
-
-
 (defun application-js (&optional initial-state)
   `(defvar App
      (let ((module (create)))
-       
-       (setf (@ module run-action)
-	     (lambda (name &rest args)
-	       (let ((new-state ((apply (getprop (chain module actions) name) args) (@ module state))))
-		 ((@ module update) new-state))))
-       
+             
        (setf (@ module actions)
-	     ,(peldan.action:action-ps))
+	     ,(peldan.action:action-ps `(@ module update-state)))
        
        (setf (@ module state)
 	     ((@ -j-s-o-n parse) ,(json-string initial-state)))
 	      
-       (setf (@ module update)
-	     ,(render-ps (test-component)
+       (setf (@ module set-state)
+	     ,(render-ps (test-component) ;TODO make into arg
 			 `(@ module state)))
+       
+       (setf (@ module update-state)
+	     (lambda (fn) ((@ module set-state) (funcall fn (@ module state)))))
      
        (setf (@ module ws)
 	     ,(connect-ps `(@ module update)))

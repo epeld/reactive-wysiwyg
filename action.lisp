@@ -9,16 +9,14 @@
 (defgroup action)
 
 
-(defun generate-code-defun (item)
-  "Generate a defun from the code stored in code-item"
+(defun generate-action-lambda (item)
+  `(lambda ,(field-value :args item)
+     ,@(field-value :body item)))
+
+
+(defun generate-action-defun (item update-state)
   `(defun ,(field-value :name item) ,(field-value :args item)
-     ,@(field-value :body item)))
-
-
-(defun generate-code-flet (item)
-  "Generate a flet-like form from the code stored in code-item"
-  `(,(field-value :name item) ,(field-value :args item)
-     ,@(field-value :body item)))
+     (update-state (action-))))
 
 
 (defun register-action (name lambda-list expr)
@@ -33,21 +31,51 @@
   `(register-action ',name ',lambda-list ',expr))
 
 
+;; TODO remove macro, move into application-js somehow
+(defpsmacro action (name &rest args)
+  `(lambda () 
+     ((@ module actions do) (@ module actions ,name) ,@args)))
 
-(defpsmacro with-action-context (set-state &body body)
-  `(defun ((action (name &rest args)
-	    (,set-state ((apply name args) state))))
-     ,@body))
 
+(defun action-ps (update-state &optional (actions (members action-group)))
+  `(let ((actions (ps:create :map (ps:create)))
+	 ,@(mapcar #'name actions))
+     
+     ;; Perform an action by calling its lambda
+     ;; and then using that to modify state
+     (setf (@ actions run)
+	   (lambda (name &rest args)
+	     ;; TODO later store all actions
+	     (peldan.ps:log-message "Action: " 
+				    (ps:create :name name :args args))
+	     
+	     (let ((fn (getprop (chain module actions :map) name)))
+	       (if (defined fn) 
+		   (apply (@ actions do) fn args)
+		   (peldan.ps:log-warning "Unkown action" name)))))
+     
 
-(defun action-ps (&optional (actions (members action-group)))
-  `(let ((actions (ps:create)))
-     (flet (,@(mapcar #'generate-code-defun actions))
-       
-       ,@(mapcar (lambda (action)
-		   `(setf (ps:@ actions ,(name action))
-			  ,(name action)))
-		 actions))
+     (setf (@ actions do)
+	   (lambda (fn &rest args)
+	     (,update-state (apply fn args))))
+
+     
+     ,@(loop for action in actions collect 
+	    `(progn 
+
+	       ;; This defines the action's 'lambda' -
+	       ;; a function that produces a state endofunction
+	       (setf (chain actions ,(name action))
+		     (lambda (,@(field-value :args action))
+		       ,@(field-value :body action)))
+	       
+
+	       (setf (@ actions :map ,(string-downcase (name action)))
+		     (chain actions ,(name action)))
+	       
+	       ;; So actions can refer to eachother
+	       (setf ,(name action)
+		     (@ actions ,(name action)))))
      actions))
 
 

@@ -48,6 +48,7 @@
   (:use :common-lisp :parenscript :peldan.ps)
   (:import-from :cl-who :str :htm)
   (:import-from :peldan.ps :log-message)
+  (:import-from :peldan.action :action)
   (:import-from :peldan.psx :psx)
   (:import-from :peldan.websocket :connect-ps)
   (:import-from :peldan.virtual-dom :read-virtual-dom-js :render-ps :json-string)
@@ -87,7 +88,7 @@
 
 (defpackage :peldan.action
   (:use :common-lisp :parenscript :peldan.resource)
-  (:export :defaction :action-ps :with-action-context :set-field))
+  (:export :defaction :action-ps :with-action-context :set-field :action))
 
 
 (defpackage :peldan.virtual-dom
