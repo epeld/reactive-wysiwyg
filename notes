@@ -14,18 +14,20 @@ We want an actions-mechanism.
 
 3. Done
 
+4. Components have been implemented
+   
 
-We want to be able to define components:
+We want to be able to:
+- style components individually
 
-(defcomponent mycomp ()
-	      (:mypsx goes here)
-	      (list "This is some initial state")
-	      (css "This is optional styling"))
+- publish components
 
+- inspect component data, e.g by providing links in debug mode
 
-Components are automatically exposed through URLs for easy testing.
-Components can refer to eachother:
+- edit/update component data using e.g http POST
 
-> (subcomponent sub-state)
+- trigger actions from the server
 
-which will actually `include` the whole subcomponent in the resulting hyperscript	
+- open up a timeline
+
+- trigger actions from a menu? in debug mode
