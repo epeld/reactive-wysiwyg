@@ -6,13 +6,14 @@
 
 
 (defpackage :peldan.component
-  (:use :common-lisp)
+  (:use :common-lisp :parenscript :peldan.psx)
   (:import-from :cl-who 
 		:htm
 		:with-html-output
 		:with-html-output-to-string)
-  (:import-from :alexandria :with-gensyms)
-  (:export :defcomponent :render))
+  (:import-from :peldan.dispatch :*handlers*)
+  (:import-from :peldan.resource :name :field-value :defgroup :members)
+  (:export :defcomponent :render :request-handler))
 
 
 (defpackage :peldan.list
@@ -97,5 +98,5 @@
   (:import-from :yason :encode :encode-alist)
   (:import-from :peldan.string :read-file-to-string :read-file-to-stream)
   (:import-from :peldan.psx :psx :psx* :diff-tree :apply-patch)
-  (:export :render-ps :json-string))
+  (:export :render-ps :json-string :read-virtual-dom-js))
 
