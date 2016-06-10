@@ -76,13 +76,16 @@
 
 
 (defun register-component (name options psx)
-  (replace-component (make-component name
-				     :code psx
-				     :initial-state (eval (getf options :initial-state)))))
+  (destructuring-bind (&key initial-state) options
+    (replace-component (make-component name
+				       :code psx
+				       :initial-state initial-state))))
+
 
 
 (defmacro defcomponent (name options psx)
-  `(register-component ',name ',options ',psx))
+  `(register-component ',name (list ,@options) ',psx))
+
 
 
 (defcomponent testcomponent (:initial-state (acons "debug" 0 (acons "items" (list 1 2 3) nil)))
