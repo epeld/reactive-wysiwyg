@@ -52,6 +52,7 @@
 		 :start 0
 		 :end 1))
 
+
 (defun get-initial-state (request component)
   ;; TODO later on look in request as well
   (field-value :initial-state component))
@@ -70,16 +71,18 @@
 	      (:div (:h1 (cl-who:str (title-ify (string (name component)))))
 		    (javascript *cached-virtual-dom-js*
 				*cached-ps-library* 
-				(ps* (component-ps psx state)))))))))
+				(ps* (component-ps psx state))
+				(ps* (field-value :ps component)))))))))
 
 
 
 
 (defun register-component (name options psx)
-  (destructuring-bind (&key initial-state) options
+  (destructuring-bind (&key initial-state ps) options
     (replace-component (make-component name
 				       :code psx
-				       :initial-state initial-state))))
+				       :initial-state initial-state
+				       :ps ps))))
 
 
 
@@ -87,23 +90,36 @@
   `(register-component ',name (list ,@options) ',psx))
 
 
+(peldan.action:defaction randomize-rows ()
+  (let ((rows (list)))
+    (unless (defined myvar)
+      (setq myvar 0))
+    (dotimes (i 100)
+      (setf (aref rows i) (create :count (or myvar 0)
+				   :value (random 100)))
+      (setf myvar (+ 1 (or myvar 0))))
+    (set-field rows "items")))
 
-(defcomponent testcomponent (:initial-state (acons "debug" 0 (acons "items" (list 1 2 3) nil)))
-  (if (@ state debug)
-      (psx (:div ((@ -j-s-o-n stringify) state nil "    ")))
-      (psx (:div "This is a virtual dom element" 
+
+(defcomponent testcomponent (:initial-state
+			     (acons "debug" 0 (acons "items" (list 1 2 3) nil)))
+  (:div (if (@ state debug)
+	    (psx (:pre ((@ -j-s-o-n stringify) state nil "    ")))
+	    (psx (:div "This is a virtual dom element" 
 		 
-		 (mapcar (lambda (x)
-			   (psx (:div "Value:" x)))
-			 (@ state items))
+		       (:table
+			(:thead (:tr (:th 1) (:th 2) (:th 3) (:th 1) (:th 2) (:th 3)))
+			(mapcar (lambda (x)
+				  (psx (:tr (:td (@ x count)) (:td (@ x value)) (:td "-") (:td (@ x count)) (:td (@ x value)) (:td "-"))))
+				(@ state items)))
      
-		 (:div :onclick (peldan.action:action peldan.action:set-field 333 "items")
-		       "And this is the end of it. (Rendered " 
-		       (length state)
-		       " elements)")
+		       (:div :onclick (peldan.action:action peldan.action:set-field 333 "items")
+			     "And this is the end of it. (Rendered " 
+			     (length state)
+			     " elements)")
      
-		 (:textarea
-		  :value ((@ -j-s-o-n stringify) state))))))
+		       (:textarea
+			:value ((@ -j-s-o-n stringify) state)))))))
 
 
 (defun install-handler ()
