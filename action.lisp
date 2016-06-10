@@ -47,7 +47,7 @@
 	   (lambda (name &rest args)
 	     ;; TODO later store all actions
 	     (peldan.ps:log-message "Action: " 
-				    (ps:create :name name :args args))
+				    (peldan.ps:json-stringify (ps:create :name name :args args)))
 	     
 	     (let ((fn (getprop (chain module actions :map) name)))
 	       (if (defined fn) 
