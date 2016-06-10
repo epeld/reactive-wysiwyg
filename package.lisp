@@ -42,7 +42,7 @@
 (defpackage :peldan.ps
   (:use :common-lisp :parenscript)
   (:import-from :peldan.list :transpose)
-  (:export :log-message :log-warning))
+  (:export :log-message :log-warning :json-stringify :json-parse))
 
 
 (defpackage :peldan.simple
