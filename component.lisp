@@ -12,27 +12,27 @@
 (defgroup component)
 
 
-(defun component-ps (psx &optional initial-state)
+(defun component-ps (component &optional initial-state)
   "Generate all the PS needed to render a component"
-  `(defvar App
-     (let ((module (create)))
+  `(let ((module (create)))
              
-       (setf (@ module actions)
-	     ,(peldan.action:action-ps `(@ module update-state)))
+     (setf (@ module actions)
+	   ,(peldan.action:action-ps `(@ module update-state)))
        
-       (setf (@ module state)
-	     ((@ -j-s-o-n parse) ,(peldan.virtual-dom:json-string initial-state)))
+     (setf (@ module state)
+	   (or ,initial-state (create)))
        
-       (setf (@ module set-state)
-	     ,(peldan.virtual-dom:render-ps psx `(@ module state)))
+     (setf (@ module set-state)
+	   ,(peldan.virtual-dom:render-ps (field-value :code component)
+					  `(@ module state)))
        
-       (setf (@ module update-state)
-	     (lambda (fn) ((@ module set-state) (funcall fn (@ module state)))))
+     (setf (@ module update-state)
+	   (lambda (fn) ((@ module set-state) (funcall fn (@ module state)))))
      
-       (setf (@ module ws)
-	     ,(peldan.websocket:connect-ps `(@ module update)))
+     (setf (@ module ws)
+	   ,(peldan.websocket:connect-ps `(@ module update)))
      
-       module)))
+     module))
 
 
 (defmacro javascript (&rest strings)
@@ -63,15 +63,21 @@
      
      if (string-equal (hunchentoot:script-name request)
 		      (concatenate 'string "/component/" (string (name component))))
-     do (let ((psx (field-value :code component))
-	      (state (get-initial-state request component)))
+     do (let ((state (get-initial-state request component)))
       
 	  (return 
 	    (cl-who:with-html-output-to-string (s)
 	      (:div (:h1 (cl-who:str (title-ify (string (name component)))))
 		    (javascript *cached-virtual-dom-js*
-				*cached-ps-library* 
-				(ps* (component-ps psx state))
+				*cached-ps-library*
+				(ps* `(defvar component
+					,(component-ps component 
+						       `((@ -j-s-o-n parse) ,(peldan.virtual-dom:json-string state))))
+				     
+				     `(defun continuously (action interval &rest args)
+					(set-interval (lambda ()
+							(apply (chain component actions run) ((chain action to-lower-case)) args))
+						      (or interval 300))))
 				(ps* (field-value :ps component)))))))))
 
 
@@ -90,6 +96,22 @@
   `(register-component ',name (list ,@options) ',psx))
 
 
+(defpsmacro subcomponent (name &optional (state :initial-state))
+  (let ((component (find-component name)))
+    (unless component
+      (error "Component doesn't exist: ~a" name))
+   
+    (component-ps component 
+		  (if (eq state :initial-state)
+		      (field-value :initial-state component) ;TODO this need to go through JSON parse/stringify
+		      state))))
+
+
+(register-component 
+ 'debugger ()
+ `(:div (:pre ((@ -j-s-o-n stringify) state nil "    "))))
+
+
 (peldan.action:defaction randomize-rows ()
   (let ((rows (list)))
     (unless (defined myvar)
@@ -104,7 +126,7 @@
 (defcomponent testcomponent (:initial-state
 			     (acons "debug" 0 (acons "items" (list 1 2 3) nil)))
   (:div (if (@ state debug)
-	    (psx (:pre ((@ -j-s-o-n stringify) state nil "    ")))
+	    (subcomponent debugger state)
 	    (psx (:div "This is a virtual dom element" 
 		 
 		       (:table
