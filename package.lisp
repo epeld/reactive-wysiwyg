@@ -13,7 +13,7 @@
 		:with-html-output-to-string)
   (:import-from :peldan.dispatch :*handlers*)
   (:import-from :peldan.resource :name :field-value :defgroup :members)
-  (:export :defcomponent :render :request-handler))
+  (:export :defcomponent :render :request-handler :register-component :subcomponent :state))
 
 
 (defpackage :peldan.list
@@ -100,3 +100,7 @@
   (:import-from :peldan.psx :psx :psx* :diff-tree :apply-patch)
   (:export :render-ps :json-string :read-virtual-dom-js))
 
+
+(defpackage :peldan.debugger
+  (:use :common-lisp :parenscript :peldan.action :peldan.ps)
+  (:export :debugger))

@@ -101,18 +101,13 @@
     (unless component
       (error "Component doesn't exist: ~a" name))
    
+    ;; TODO how do we expose state to subcomponents? this doesn't work!
     `(let ((state ,state))
        (peldan.psx:psx ,(field-value :code component)))))
 
 
-(register-component 
- 'debugger ()
- `(:div (:h2 "Debbuging")
-	(:pre ((@ -j-s-o-n stringify) (@ state component state) nil "    "))
-	(:button :onclick (peldan.action:action peldan.action:debug)
-		 "Back")))
 
-
+;; This is a test action to see how fast the updates can be
 (peldan.action:defaction randomize-rows ()
   (let ((rows (list)))
     (unless (defined myvar)
@@ -127,7 +122,7 @@
 (defcomponent testcomponent (:initial-state
 			     (acons "debug" 0 (acons "items" (list 1 2 3) nil)))
   (:div (if (@ state debug)
-	    (subcomponent debugger (create :component (create :state state :name "bub")))
+	    (subcomponent peldan.debugger:debugger (create :component (create :state state :name "bub")))
 	    (psx (:div "This is a virtual dom element" 
 		 
 		       (:table
