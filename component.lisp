@@ -107,7 +107,8 @@
 
 (register-component 
  'debugger ()
- `(:div (:pre ((@ -j-s-o-n stringify) state nil "    "))
+ `(:div (:h2 "Debbuging")
+	(:pre ((@ -j-s-o-n stringify) (@ state component state) nil "    "))
 	(:button :onclick (peldan.action:action peldan.action:debug)
 		 "Back")))
 
@@ -126,7 +127,7 @@
 (defcomponent testcomponent (:initial-state
 			     (acons "debug" 0 (acons "items" (list 1 2 3) nil)))
   (:div (if (@ state debug)
-	    (subcomponent debugger state)
+	    (subcomponent debugger (create :component (create :state state :name "bub")))
 	    (psx (:div "This is a virtual dom element" 
 		 
 		       (:table
