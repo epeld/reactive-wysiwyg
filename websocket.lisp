@@ -144,7 +144,7 @@
 		       (,set-state value))
 		      
 		      (:pong
-		       (peldan.ps:log-message "Pong!"))
+		       (return))
 		      (t
 		       (peldan.ps:log-message "Got strange message" msg)))))))
        ws)))
