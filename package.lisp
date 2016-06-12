@@ -89,7 +89,7 @@
 
 (defpackage :peldan.action
   (:use :common-lisp :parenscript :peldan.resource)
-  (:export :defaction :action-ps :with-action-context :set-field :action))
+  (:export :defaction :action-ps :with-action-context :set-field :action :debug))
 
 
 (defpackage :peldan.virtual-dom

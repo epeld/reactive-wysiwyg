@@ -13,7 +13,7 @@
 
 (defun render-ps (html state)
   `(flet ((render (state)
-		 (psx ,html)))
+	    (psx ,html)))
     
      (let* ((tree (render ,state))
 	    (element (reify tree)))

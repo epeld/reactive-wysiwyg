@@ -96,20 +96,20 @@
   `(register-component ',name (list ,@options) ',psx))
 
 
-(defpsmacro subcomponent (name &optional (state :initial-state))
+(defpsmacro subcomponent (name state)
   (let ((component (find-component name)))
     (unless component
       (error "Component doesn't exist: ~a" name))
    
-    (component-ps component 
-		  (if (eq state :initial-state)
-		      (field-value :initial-state component) ;TODO this need to go through JSON parse/stringify
-		      state))))
+    `(let ((state ,state))
+       (peldan.psx:psx ,(field-value :code component)))))
 
 
 (register-component 
  'debugger ()
- `(:div (:pre ((@ -j-s-o-n stringify) state nil "    "))))
+ `(:div (:pre ((@ -j-s-o-n stringify) state nil "    "))
+	(:button :onclick (peldan.action:action peldan.action:debug)
+		 "Back")))
 
 
 (peldan.action:defaction randomize-rows ()
