@@ -89,7 +89,13 @@
 
 (defpackage :peldan.action
   (:use :common-lisp :parenscript :peldan.resource)
-  (:export :defaction :action-ps :with-action-context :set-field :action :debug))
+  (:export :defaction
+	   :action-ps
+	   :with-action-context
+	   :set-field
+	   :action
+	   :list-of-actions
+	   :debug))
 
 
 (defpackage :peldan.virtual-dom
@@ -103,4 +109,6 @@
 
 (defpackage :peldan.debugger
   (:use :common-lisp :parenscript :peldan.action :peldan.ps)
+  (:import-from :peldan.resource :members)
+  (:import-from :peldan.psx :psx)
   (:export :debugger))
