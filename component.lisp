@@ -120,7 +120,7 @@
 
 
 (defcomponent testcomponent (:initial-state
-			     (acons "debug" 0 (acons "items" (list 1 2 3) nil)))
+			     (acons "debug" 1 (acons "items" (list 1 2 3 "foo" "bar" "baz") nil)))
   (:div (if (@ state debug)
 	    (subcomponent peldan.debugger:debugger (create :component (create :state state :name "bub")))
 	    (psx (:div "This is a virtual dom element" 
