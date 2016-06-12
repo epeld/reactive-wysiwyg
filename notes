@@ -28,6 +28,20 @@ We want to be able to:
 
 - trigger actions from the server
 
-- open up an action timeline
+- open up an action timeline (maintain log of all performed actions + initial state!)
 
-- trigger actions from a menu? in debug mode
+- trigger actions from a menu? in debug mode (not THAT important I guess..)
+  
+
+THOUGHT:
+- Identify ALL resources using a uuid (including state, component, actions etc).
+This allows to edit e.g state on different pages as well as cross referencing
+and all sorts of stuff..
+
+
+- Seems like we are moving towards a layered approach to state:
+we have e.g application state (data) but we also have appliation meta data
+such as:
+- Debug mode yes/no
+- uuid of state object?
+- Action timeline + initial state + current 'time position' wrt time line
