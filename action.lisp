@@ -79,6 +79,10 @@
      actions))
 
 
+(defun list-of-actions ()
+  (members action-group))
+
+
 ;; TODO generate defuns that modify state here!
 (defun shortcuts-ps ()
   'todo)
@@ -118,5 +122,3 @@
 		  (if val 0 1))
 		"debug"))
 
-
-(generate-ps (members action-group))
