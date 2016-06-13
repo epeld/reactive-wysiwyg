@@ -92,27 +92,19 @@
 				     `(defun continuously (action interval &rest args)
 					(set-interval (lambda ()
 							(apply (chain component actions run) ((chain action to-lower-case)) args))
-						      (or interval 300))))
-				
-				;; Allow the component to include some optional custom PS
-				(ps* (field-value :ps component)))))))))
+						      (or interval 300)))))))))))
 
 
 
 
-(defun register-component (name options psx)
-  (destructuring-bind (&key initial-state ps) options
-    (replace-component (make-component name
-				       :code psx
-				       :initial-state initial-state
-				       :ps ps))))
+(defun register-component (name &rest args)
+  "Register a new component, making it accessible by HTTP request"
+  (replace-component (apply #'make-component name args)))
 
 
 
-(defmacro defcomponent (name options psx)
-  `(register-component ',name (list ,@options) ',psx))
 
-
+;; TODO not sure if this will ever be needed. Consider removing
 (defpsmacro subcomponent (name state)
   (let ((component (find-component name)))
     (unless component
@@ -136,23 +128,23 @@
     (set-field rows "items")))
 
 
-(defcomponent testcomponent (:initial-state
-			     (acons "debug" 1 (acons "items" (list 1 2 3 "foo" "bar" "baz") nil)))
-  (:div "This is a virtual dom element" 
+(register-component'testcomponent 
+ :initial-state (acons "debug" 1 (acons "items" (list 1 2 3 "foo" "bar" "baz") nil))
+ :code `(:div "This is a Virtual DOM element" 
 		       
-	(:table
-	 (:thead (:tr (:th 1) (:th 2) (:th 3) (:th 1) (:th 2) (:th 3)))
-	 (mapcar (lambda (x)
-		   (psx (:tr (:td (@ x count)) (:td (@ x value)) (:td "-") (:td (@ x count)) (:td (@ x value)) (:td "-"))))
-		 (@ state items)))
+	      (:table
+	       (:thead (:tr (:th 1) (:th 2) (:th 3) (:th 1) (:th 2) (:th 3)))
+	       (mapcar (lambda (x)
+			 (psx (:tr (:td (@ x count)) (:td (@ x value)) (:td "-") (:td (@ x count)) (:td (@ x value)) (:td "-"))))
+		       (@ state items)))
      
-	(:div :onclick (peldan.action:action peldan.action:set-field 333 "items")
-	      "And this is the end of it. (Rendered " 
-	      (length state)
-	      " elements)")
+	      (:div :onclick (peldan.action:action peldan.action:set-field 333 "items")
+		    "And this is the end of it. (Rendered " 
+		    (length state)
+		    " elements)")
      
-	(:textarea
-	 :value ((@ -j-s-o-n stringify) state))))
+	      (:textarea
+	       :value ((@ -j-s-o-n stringify) state))))
 
 
 (defun install-handler ()

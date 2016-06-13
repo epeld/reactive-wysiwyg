@@ -13,7 +13,7 @@
 		:with-html-output-to-string)
   (:import-from :peldan.dispatch :*handlers*)
   (:import-from :peldan.resource :name :field-value :defgroup :members)
-  (:export :defcomponent :render :request-handler :register-component :subcomponent :state))
+  (:export :request-handler :register-component :state))
 
 
 (defpackage :peldan.list
