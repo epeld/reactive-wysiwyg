@@ -23,7 +23,7 @@
 		      (psx ,psx)))))))
 
 
-(defun component-render-loop-ps (component &optional initial-state)
+(defun component-module-ps (component &optional initial-state)
   "Generate all the PS needed to render a component"
   `(let ((module (create)))
              
@@ -34,7 +34,6 @@
 	   (or ,initial-state (create)))
        
      (setf (@ module set-state)
-	   ;; TODO no need to all psx inside render-ps!
 	   ,(peldan.virtual-dom:render-ps (component-ps component)
 					  `(@ module state)))
        
@@ -85,7 +84,7 @@
 				
 				;; Define the component loop and make it accessible through the js inspector
 				(ps* `(defvar component
-					,(component-render-loop-ps component 
+					,(component-module-ps component 
 						       `((@ -j-s-o-n parse) ,(peldan.virtual-dom:json-string state))))
 				     
 				     ;; Helper function for periodically executing an action (to be moved)
