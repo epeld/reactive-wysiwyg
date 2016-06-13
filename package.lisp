@@ -45,17 +45,6 @@
   (:export :log-message :log-warning :json-stringify :json-parse))
 
 
-(defpackage :peldan.simple
-  (:use :common-lisp :parenscript :peldan.ps)
-  (:import-from :cl-who :str :htm)
-  (:import-from :peldan.ps :log-message)
-  (:import-from :peldan.action :action)
-  (:import-from :peldan.psx :psx)
-  (:import-from :peldan.websocket :connect-ps)
-  (:import-from :peldan.virtual-dom :read-virtual-dom-js :render-ps :json-string)
-  (:import-from :peldan.component :defcomponent :render))
-
-
 (defpackage :peldan.websocket
   (:use :common-lisp :hunchensocket :hunchentoot)
   (:import-from :yason :*parse-object-as* :parse :encode)
