@@ -12,7 +12,18 @@
 (defgroup component)
 
 
-(defun component-ps (component &optional initial-state)
+(defun component-ps (component)
+  "Extracts (and wraps) the PS contained in this component for appearing on a page"
+  (let ((psx (field-value :code component)))
+    `(psx (:div (if (@ state debug)
+		    (lisp (peldan.debugger:debugger))
+
+		    ;; TODO replace state by actual state later
+		    (let ((state state))
+		      (psx ,psx)))))))
+
+
+(defun component-render-loop-ps (component &optional initial-state)
   "Generate all the PS needed to render a component"
   `(let ((module (create)))
              
@@ -23,7 +34,8 @@
 	   (or ,initial-state (create)))
        
      (setf (@ module set-state)
-	   ,(peldan.virtual-dom:render-ps (field-value :code component)
+	   ;; TODO no need to all psx inside render-ps!
+	   ,(peldan.virtual-dom:render-ps (component-ps component)
 					  `(@ module state)))
        
      (setf (@ module update-state)
@@ -70,14 +82,19 @@
 	      (:div (:h1 (cl-who:str (title-ify (string (name component)))))
 		    (javascript *cached-virtual-dom-js*
 				*cached-ps-library*
+				
+				;; Define the component loop and make it accessible through the js inspector
 				(ps* `(defvar component
-					,(component-ps component 
+					,(component-render-loop-ps component 
 						       `((@ -j-s-o-n parse) ,(peldan.virtual-dom:json-string state))))
 				     
+				     ;; Helper function for periodically executing an action (to be moved)
 				     `(defun continuously (action interval &rest args)
 					(set-interval (lambda ()
 							(apply (chain component actions run) ((chain action to-lower-case)) args))
 						      (or interval 300))))
+				
+				;; Allow the component to include some optional custom PS
 				(ps* (field-value :ps component)))))))))
 
 
@@ -121,23 +138,21 @@
 
 (defcomponent testcomponent (:initial-state
 			     (acons "debug" 1 (acons "items" (list 1 2 3 "foo" "bar" "baz") nil)))
-  (:div (if (@ state debug)
-	    (subcomponent peldan.debugger:debugger (create :component (create :state state :name "bub")))
-	    (psx (:div "This is a virtual dom element" 
-		 
-		       (:table
-			(:thead (:tr (:th 1) (:th 2) (:th 3) (:th 1) (:th 2) (:th 3)))
-			(mapcar (lambda (x)
-				  (psx (:tr (:td (@ x count)) (:td (@ x value)) (:td "-") (:td (@ x count)) (:td (@ x value)) (:td "-"))))
-				(@ state items)))
+  (:div "This is a virtual dom element" 
+		       
+	(:table
+	 (:thead (:tr (:th 1) (:th 2) (:th 3) (:th 1) (:th 2) (:th 3)))
+	 (mapcar (lambda (x)
+		   (psx (:tr (:td (@ x count)) (:td (@ x value)) (:td "-") (:td (@ x count)) (:td (@ x value)) (:td "-"))))
+		 (@ state items)))
      
-		       (:div :onclick (peldan.action:action peldan.action:set-field 333 "items")
-			     "And this is the end of it. (Rendered " 
-			     (length state)
-			     " elements)")
+	(:div :onclick (peldan.action:action peldan.action:set-field 333 "items")
+	      "And this is the end of it. (Rendered " 
+	      (length state)
+	      " elements)")
      
-		       (:textarea
-			:value ((@ -j-s-o-n stringify) state)))))))
+	(:textarea
+	 :value ((@ -j-s-o-n stringify) state))))
 
 
 (defun install-handler ()

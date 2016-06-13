@@ -12,17 +12,11 @@
 				 (list ,@action-names)))))))
 
 
-(peldan.component:register-component 
- 'debugger ()
- `(:div (:h2 "Debbuging!")
-	(:pre ((@ -j-s-o-n stringify) (@ peldan.component:state component state) nil "    "))
-	(lisp (action-list (peldan.action:list-of-actions)))
-	(:button :onclick (action debug)
-		 "Back")))
+(defun debugger ()
+  "Creates ps code for a debugger"
+  `(psx (:div (:h2 "Debugger")
+	      (:pre ((@ -j-s-o-n stringify) peldan.component:state nil "    "))
+	      (lisp (action-list (peldan.action:list-of-actions)))
+	      (:button :onclick (action debug)
+		       "Back"))))
 
-
-
-
-;; TODO create an action timeline component
-(sxhash 'peldan.ps:stringify)
-(sxhash 'stringify)
