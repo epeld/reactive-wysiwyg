@@ -29,7 +29,7 @@
   `(let ((module (create)))
              
      (setf (@ module state)
-	   (peldan.ps:json-parse ,(peldan.virtual-dom:json-string initial-state)))
+	   ,initial-state)
        
      (setf (@ module actions)
 	   ,(peldan.action:action-ps `(@ module update-state)))
@@ -112,26 +112,42 @@
       (setf (aref rows i) (create :count (or myvar 0)
 				   :value (random 100)))
       (setf myvar (+ 1 (or myvar 0))))
-    (set-field rows "items")))
+    (set-field rows "data" "items")))
 
 
 (register-component 'testcomponent 
- :initial-state (acons "debug" 1 (acons "items" (list 1 2 3 "foo" "bar" "baz") nil))
- :code `(psx (:div "This is a Virtual DOM element" 
+ :initial-state 
+ (let ((test-data-string
+	(yason:with-output-to-string* ()
+	  (yason:with-object ()
+	    (yason:with-object-element ("data")
+	      (yason:with-object ()
+		(yason:with-object-element ("items")
+		  (yason:with-array ()
+		    (yason:encode-array-element 1)
+		    (yason:encode-array-element 2)
+		    (yason:encode-array-element 3)
+		    (yason:encode-array-element "foo")
+		    (yason:encode-array-element "bar")))))))))
+   `(peldan.ps:json-parse 
+     ,test-data-string))
+ 
+ :code 
+ `(psx (:div "This is a Virtual DOM element" 
 		       
-		   (:table
-		    (:thead (:tr (:th 1) (:th 2) (:th 3) (:th 1) (:th 2) (:th 3)))
-		    (mapcar (lambda (x)
-			      (psx (:tr (:td (@ x count)) (:td (@ x value)) (:td "-") (:td (@ x count)) (:td (@ x value)) (:td "-"))))
-			    (@ state items)))
+	     (:table
+	      (:thead (:tr (:th 1) (:th 2) (:th 3) (:th 1) (:th 2) (:th 3) (:th 1) (:th 2) (:th 3) (:th 1) (:th 2) (:th 3)))
+	      (mapcar (lambda (x)
+			(psx (:tr (:td (@ x count)) (:td (@ x value)) (:td "-") (:td (@ x count)) (:td (@ x value)) (:td "-") (:td (@ x count)) (:td (@ x value)) (:td "-") (:td (@ x count)) (:td (@ x value)) (:td "-"))))
+		      (@ state data items)))
      
-		   (:div :onclick (peldan.action:action peldan.action:set-field 333 "items")
-			 "And this is the end of it. (Rendered " 
-			 (length state)
-			 " elements)")
+	     (:div :onclick (peldan.action:action peldan.action:set-field 333 "data" "items")
+		   "And this is the end of it. (Rendered " 
+		   (length (@ state data items))
+		   " elements)")
      
-		   (:textarea
-		    :value ((@ -j-s-o-n stringify) state)))))
+	     (:div "Current data " (:b "(not state!)" ":")
+		   (:div (:i ((@ -j-s-o-n stringify) (@ state data))))))))
 
 
 (defun install-handler ()
