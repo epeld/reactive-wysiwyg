@@ -27,11 +27,11 @@
   "Generate all the PS needed to render a component"
   `(let ((module (create)))
              
-     (setf (@ module actions)
-	   ,(peldan.action:action-ps `(@ module update-state)))
-       
      (setf (@ module state)
 	   (peldan.ps:json-parse ,(peldan.virtual-dom:json-string initial-state)))
+       
+     (setf (@ module actions)
+	   ,(peldan.action:action-ps `(@ module update-state)))
        
      (setf (@ module set-state)
 	   ,(peldan.virtual-dom:render-ps (component-ps component)
