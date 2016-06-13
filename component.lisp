@@ -103,18 +103,6 @@
 
 
 
-;; TODO not sure if this will ever be needed. Consider removing
-(defpsmacro subcomponent (name state)
-  (let ((component (find-component name)))
-    (unless component
-      (error "Component doesn't exist: ~a" name))
-   
-    ;; TODO how do we expose state to subcomponents? this doesn't work!
-    `(let ((state ,state))
-       (peldan.psx:psx ,(field-value :code component)))))
-
-
-
 ;; This is a test action to see how fast the updates can be
 (peldan.action:defaction randomize-rows ()
   (let ((rows (list)))
