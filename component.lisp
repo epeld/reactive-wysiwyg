@@ -20,7 +20,7 @@
 
 		    ;; TODO replace state by actual state later
 		    (let ((state state))
-		      (psx ,psx)))))))
+		      ,psx))))))
 
 
 (defun component-module-ps (component &optional initial-state)
@@ -115,21 +115,21 @@
 
 (register-component 'testcomponent 
  :initial-state (acons "debug" 1 (acons "items" (list 1 2 3 "foo" "bar" "baz") nil))
- :code `(:div "This is a Virtual DOM element" 
+ :code `(psx (:div "This is a Virtual DOM element" 
 		       
-	      (:table
-	       (:thead (:tr (:th 1) (:th 2) (:th 3) (:th 1) (:th 2) (:th 3)))
-	       (mapcar (lambda (x)
-			 (psx (:tr (:td (@ x count)) (:td (@ x value)) (:td "-") (:td (@ x count)) (:td (@ x value)) (:td "-"))))
-		       (@ state items)))
+		   (:table
+		    (:thead (:tr (:th 1) (:th 2) (:th 3) (:th 1) (:th 2) (:th 3)))
+		    (mapcar (lambda (x)
+			      (psx (:tr (:td (@ x count)) (:td (@ x value)) (:td "-") (:td (@ x count)) (:td (@ x value)) (:td "-"))))
+			    (@ state items)))
      
-	      (:div :onclick (peldan.action:action peldan.action:set-field 333 "items")
-		    "And this is the end of it. (Rendered " 
-		    (length state)
-		    " elements)")
+		   (:div :onclick (peldan.action:action peldan.action:set-field 333 "items")
+			 "And this is the end of it. (Rendered " 
+			 (length state)
+			 " elements)")
      
-	      (:textarea
-	       :value ((@ -j-s-o-n stringify) state))))
+		   (:textarea
+		    :value ((@ -j-s-o-n stringify) state)))))
 
 
 (defun install-handler ()
