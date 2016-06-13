@@ -95,11 +95,9 @@
 
 
 
-
 (defun register-component (name &rest args)
   "Register a new component, making it accessible by HTTP request"
   (replace-component (apply #'make-component name args)))
-
 
 
 
@@ -115,7 +113,7 @@
     (set-field rows "items")))
 
 
-(register-component'testcomponent 
+(register-component 'testcomponent 
  :initial-state (acons "debug" 1 (acons "items" (list 1 2 3 "foo" "bar" "baz") nil))
  :code `(:div "This is a Virtual DOM element" 
 		       
