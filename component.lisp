@@ -133,4 +133,5 @@
 
 
 (defun install-handler ()
+  "Install the request handler that will maek components accessible through hunchentoot"
   (pushnew (lambda (req) (request-handler req)) peldan.dispatch:*handlers*))
