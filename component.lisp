@@ -16,6 +16,7 @@
   "Extracts (and wraps) the PS contained in this component for appearing on a page"
   (let ((psx (field-value :code component)))
     `(psx (:div (if (@ state debug)
+		    ;; Wrap in (lisp ..) form to ensure it gets reevaluated on every PS compilation
 		    (lisp (peldan.debugger:debugger))
 
 		    ;; TODO replace state by actual state later
@@ -37,9 +38,11 @@
 	   ,(peldan.virtual-dom:render-ps (component-ps component)
 					  `(@ module state)))
        
+     ;; Helper for *updating* (as opposed to just *setting*) state
      (setf (@ module update-state)
 	   (lambda (fn) ((@ module set-state) (funcall fn (@ module state)))))
      
+     ;; Establish server connection
      (setf (@ module ws)
 	   ,(peldan.websocket:connect-ps `(@ module update)))
      
