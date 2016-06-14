@@ -24,7 +24,7 @@
 		      ,psx))))))
 
 
-(defun component-module-ps (component initial-state)
+(defun component-module-ps (renderer initial-state)
   "Generate all the PS needed to render a component"
   `(let ((module (create)))
              
@@ -35,7 +35,7 @@
 	   ,(peldan.action:action-ps `(@ module update-state)))
        
      (setf (@ module set-state)
-	   ,(peldan.virtual-dom:render-ps (component-ps component)
+	   ,(peldan.virtual-dom:render-ps renderer
 					  `(@ module state)))
        
      ;; Helper for *updating* (as opposed to just *setting*) state
@@ -82,12 +82,22 @@
 	  (return 
 	    (cl-who:with-html-output-to-string (s)
 	      (:div (:h1 (cl-who:str (title-ify (string (name component)))))
+
+		    ;; This defines common functionality, e.g for defining new modules
 		    (javascript *cached-virtual-dom-js*
 				*cached-ps-library*
 				
-				;; Define the component loop and make it accessible through the js inspector
-				(ps* `(defvar component
-					,(component-module-ps component state))
+				(ps* `(defun make-module (renderer state)
+					,(component-module-ps 'renderer 'state))))
+		    
+
+		    ;; This defines the component
+		    (javascript (ps* `(defun render (state)
+					,(component-ps component))
+				
+				     ;; Define the component loop and make it accessible through the js inspector
+				     `(defvar component
+					(make-module render ,state))
 				     
 				     ;; Helper function for periodically executing an action (to be moved)
 				     `(defun continuously (action interval &rest args)

@@ -11,10 +11,9 @@
     (encode-alist data s)))
 
 
-(defun render-ps (psx state)
+(defun render-ps (render state)
   "Render and attach the resulting psx element to the DOM, returning a lambda for changing state"
-  `(flet ((render (state)
-	    ,psx))
+  `(let ((render ,render))
     
      (let* ((tree (render ,state))
 	    (element (reify tree)))
