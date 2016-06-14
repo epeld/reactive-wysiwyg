@@ -69,7 +69,15 @@
 			  (set-interval (lambda ()
 					  (apply (chain component actions run) ((chain action to-lower-case)) args))
 					(or interval 300))
-			  interval)))
+			  interval))
+		     
+		     ;; Helper
+		     `(defun imapcar (fn &rest args)
+			"Like mapcar but adds an index as the first argument"
+			(let ((is (list)))
+			  (dotimes (i (length (@ args 0)))
+			    ((@ is push) i))
+			  (apply #'mapcar fn is args))))
 		stream))
 
 ;(with-output-to-string (s) (library-js s))
@@ -138,9 +146,8 @@
 	   (set-field rows "data" "items"))))
 
 
-(register-component 'testcomponent 
- :initial-state 
- (let ((test-data-string
+(defun generate-test-state ()
+  (let ((test-data-string
 	(yason:with-output-to-string* ()
 	  (yason:with-object ()
 	    (yason:with-object-element ("data")
@@ -152,8 +159,12 @@
 			   (loop for j upto 12 do
 				(yason:encode-array-element (random 100)))))))))))))
    `(peldan.ps:json-parse 
-     ,test-data-string))
+     ,test-data-string)))
 
+
+(register-component 'testcomponent 
+ :initial-state 
+ (generate-test-state)
  
  :code 
  `(psx (:div "This is a Virtual DOM element" 
