@@ -43,8 +43,10 @@
 	   (lambda (fn) ((@ module set-state) (funcall fn (@ module state)))))
      
      ;; Establish server connection
-     (setf (@ module ws)
-	   ,(peldan.websocket:connect-ps `(@ module update)))
+     (lisp (when (peldan.websocket:websockets-enabled)
+	     `(setf (@ module ws)
+		    ,(peldan.websocket:connect-ps `(@ module update)))))
+     
      
      module))
 
@@ -54,7 +56,23 @@
 			,@(loop for string in strings
 			     collect (list 'cl-who:str string)))))
 
+(defun library-js (stream)
+  "Generate a string containing all the javascript needed to render components"
+  (write-string *cached-virtual-dom-js* stream)
+  (write-string *cached-ps-library* stream)
+  (write-string (ps* `(defun make-module (renderer state)
+			,(component-module-ps 'renderer 'state))
+		     
+		     ;; Helper function for periodically executing an action (to be moved)
+		     `(defun continuously (action interval &rest args)
+			(let ((interval (or interval 300)))
+			  (set-interval (lambda ()
+					  (apply (chain component actions run) ((chain action to-lower-case)) args))
+					(or interval 300))
+			  interval)))
+		stream))
 
+(library-js)
 
 (defun title-ify (string)
   ; Currently only upper cases first letter..
@@ -82,28 +100,18 @@
 	  (return 
 	    (cl-who:with-html-output-to-string (s)
 	      (:div (:h1 (cl-who:str (title-ify (string (name component)))))
-
-		    ;; This defines common functionality, e.g for defining new modules
-		    (javascript *cached-virtual-dom-js*
-				*cached-ps-library*
-				
-				(ps* `(defun make-module (renderer state)
-					,(component-module-ps 'renderer 'state))))
+		    (:script :type "text/javascript" (library-js s))
 		    
-
-		    ;; This defines the component
-		    (javascript (ps* `(defun render (state)
-					,(component-ps component))
-				
-				     ;; Define the component loop and make it accessible through the js inspector
-				     `(defvar component
-					(make-module render ,state))
+		    (:script :type "text/javascript" 
+			     (let ((*parenscript-stream* s))
+			       (ps*
+				;; A publicly available virtual DOM renderer for the component
+				`(defun render (state)
+				   ,(component-ps component))
 				     
-				     ;; Helper function for periodically executing an action (to be moved)
-				     `(defun continuously (action interval &rest args)
-					(set-interval (lambda ()
-							(apply (chain component actions run) ((chain action to-lower-case)) args))
-						      (or interval 300)))))))))))
+				;; Define the component module
+				`(defvar component
+				   (make-module render ,state)))))))))))
 
 
 

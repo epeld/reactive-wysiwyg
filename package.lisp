@@ -51,7 +51,7 @@
   (:import-from :peldan.resource :defgroup :named)
   (:import-from :peldan.list :assocdr)
   (:import-from :peldan.virtual-dom :json-string)
-  (:export :*port* :connect-ps))
+  (:export :*port* :connect-ps :websockets-enabled))
 
 
 (defpackage :peldan.resource

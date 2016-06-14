@@ -155,4 +155,6 @@
 	     (make-message :state :value state)))
 
 
-
+;; TODO later return true if server started
+(defun websockets-enabled ()
+  nil)
