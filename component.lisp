@@ -109,8 +109,12 @@
     (unless (defined myvar)
       (setq myvar 0))
     (dotimes (i 100)
-      (setf (aref rows i) (create :count (or myvar 0)
-				   :value (random 100)))
+      (let ((cols (list)))
+	(dotimes (j 12)
+	  (setf (aref cols j) 
+		((@ -math round) (* 100 ((@ -math random))))))
+	(setf (aref rows i) 
+	      cols))
       (setf myvar (+ 1 (or myvar 0))))
     (set-field rows "data" "items")))
 
@@ -124,30 +128,33 @@
 	      (yason:with-object ()
 		(yason:with-object-element ("items")
 		  (yason:with-array ()
-		    (yason:encode-array-element 1)
-		    (yason:encode-array-element 2)
-		    (yason:encode-array-element 3)
-		    (yason:encode-array-element "foo")
-		    (yason:encode-array-element "bar")))))))))
+		    (loop for i upto 99 do
+			 (yason:with-array ()
+			   (loop for j upto 12 do
+				(yason:encode-array-element (random 100)))))))))))))
    `(peldan.ps:json-parse 
      ,test-data-string))
+
  
  :code 
  `(psx (:div "This is a Virtual DOM element" 
 		       
 	     (:table
-	      (:thead (:tr (:th 1) (:th 2) (:th 3) (:th 1) (:th 2) (:th 3) (:th 1) (:th 2) (:th 3) (:th 1) (:th 2) (:th 3)))
-	      (mapcar (lambda (x)
-			(psx (:tr (:td (@ x count)) (:td (@ x value)) (:td "-") (:td (@ x count)) (:td (@ x value)) (:td "-") (:td (@ x count)) (:td (@ x value)) (:td "-") (:td (@ x count)) (:td (@ x value)) (:td "-"))))
-		      (@ state data items)))
+	      (:thead (:tr (mapcar (lambda (item)
+				     (psx (:th "Column")))
+				   (@ state data items 0))))
+	      
+	      (:tbody (mapcar (lambda (item)
+				(psx (:tr (mapcar (lambda (x)
+						    (psx (:td x)))
+						  item))))
+		      
+			      (@ state data items))))
      
 	     (:div :onclick (peldan.action:action peldan.action:set-field 333 "data" "items")
 		   "And this is the end of it. (Rendered " 
 		   (length (@ state data items))
-		   " elements)")
-     
-	     (:div "Current data " (:b "(not state!)" ":")
-		   (:div (:i ((@ -j-s-o-n stringify) (@ state data))))))))
+		   " elements)"))))
 
 
 (defun install-handler ()
