@@ -78,7 +78,7 @@
 
 (defpackage :peldan.action
   (:use :common-lisp :parenscript :peldan.resource)
-  (:export :defaction
+  (:export :register-action
 	   :action-ps
 	   :with-action-context
 	   :set-field

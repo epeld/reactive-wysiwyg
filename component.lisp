@@ -72,7 +72,7 @@
 			  interval)))
 		stream))
 
-(library-js)
+;(with-output-to-string (s) (library-js s))
 
 (defun title-ify (string)
   ; Currently only upper cases first letter..
@@ -122,19 +122,20 @@
 
 
 ;; This is a test action to see how fast the updates can be
-(peldan.action:defaction randomize-rows ()
-  (let ((rows (list)))
-    (unless (defined myvar)
-      (setq myvar 0))
-    (dotimes (i 100)
-      (let ((cols (list)))
-	(dotimes (j 12)
-	  (setf (aref cols j) 
-		((@ -math round) (* 100 ((@ -math random))))))
-	(setf (aref rows i) 
-	      cols))
-      (setf myvar (+ 1 (or myvar 0))))
-    (set-field rows "data" "items")))
+(peldan.action:register-action 
+ 'randomize-rows 
+ :body '((let ((rows (list)))
+	   (unless (defined myvar)
+	     (setq myvar 0))
+	   (dotimes (i 100)
+	     (let ((cols (list)))
+	       (dotimes (j 12)
+		 (setf (aref cols j) 
+		       ((@ -math round) (* 100 ((@ -math random))))))
+	       (setf (aref rows i) 
+		     cols))
+	     (setf myvar (+ 1 (or myvar 0))))
+	   (set-field rows "data" "items"))))
 
 
 (register-component 'testcomponent 
