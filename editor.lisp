@@ -58,3 +58,8 @@
      `(:div "<List>"))))
 
 (generate test)
+
+;; TODO generate an endpoint for POSTING data and producing a rendered component
+;; that can edit said data and serialie it back out
+
+;; TODO make the GET for the same URL be a html form for POSTing
