@@ -80,7 +80,6 @@
 			  (apply #'mapcar fn is args))))
 		stream))
 
-;(with-output-to-string (s) (library-js s))
 
 (defun title-ify (string)
   ; Currently only upper cases first letter..
