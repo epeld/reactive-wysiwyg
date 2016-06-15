@@ -29,9 +29,8 @@
 (loop for k being the hash-keys of test collect k)
 
 
-;; TODO maintain a path into the object so we can dynamically refer to state within it!
-(defun generate (object)
-  "Generate psx for editing object"
+(defun generate (object &optional data)
+  "Generate psx for editing object. Use the second arg to make it a live view"
   (etypecase object
     (hash-table
      `(:div :class "editor"
@@ -45,15 +44,17 @@
 				  
 			  (:div :class "value"
 				;; Recurse
-				,(generate value))))))
+				,(generate value (or data 
+						     `(chain data ,key))))))))
 		   
     (string
-     `(:input :value ,object))
+     `(:input :value ,(or data object)))
 		   
     (number
-     `(:input :value ,object))
+     `(:input :value ,(or data object)))
 		   
     (cons
+     ;; TODO
      `(:div "<List>"))))
 
 (generate test)
