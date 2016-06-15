@@ -101,3 +101,9 @@
   (:import-from :peldan.resource :members)
   (:import-from :peldan.psx :psx)
   (:export :debugger))
+
+
+(defpackage :peldan.editor
+  (:use :common-lisp :parenscript :peldan.action)
+  (:import-from :peldan.psx :psx)
+  (:export :generate))
