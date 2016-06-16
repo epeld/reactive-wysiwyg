@@ -99,14 +99,15 @@
 
 (defun request-handler (request)
   (loop for component in (members component-group)
+        for name = (name component)
      
      if (string-equal (hunchentoot:script-name request)
-		      (concatenate 'string "/component/" (string (name component))))
+		      (concatenate 'string "/component/" (string name)))
      do (let ((state (get-initial-state request component)))
       
 	  (return 
 	    (cl-who:with-html-output-to-string (s)
-	      (:div (:h1 (cl-who:str (title-ify (string (name component)))))
+	      (:div (:h1 (cl-who:str (title-ify (string name))))
 		    (:script :type "text/javascript" (library-js s))
 		    
 		    (:script :type "text/javascript" 
