@@ -92,9 +92,9 @@
 		 :end 1))
 
 
-(defun get-initial-state (request component)
-  ;; TODO later on look in request as well
-  (field-value :initial-state component))
+(defun get-initial-state (request)
+  ;; TODO later on look in request 
+  nil)
 
 
 (defun request-handler (request)
@@ -103,23 +103,29 @@
      
      if (string-equal (hunchentoot:script-name request)
 		      (concatenate 'string "/component/" (string name)))
-     do (let ((state (get-initial-state request component)))
-      
-	  (return 
-	    (cl-who:with-html-output-to-string (s)
-	      (:div (:h1 (cl-who:str (title-ify (string name))))
-		    (:script :type "text/javascript" (library-js s))
+     do (return
+	  (generate-component-html component (get-initial-state request)))))
+
+
+(defun generate-component-html (component &optional state)
+  "Generate a string of html representing the component"
+  (let ((name (name component))
+	(state (or state (field-value :initial-state component))))
+    
+    (cl-who:with-html-output-to-string (s)
+      (:div (:h1 (cl-who:str (title-ify (string name))))
+	    (:script :type "text/javascript" (library-js s))
 		    
-		    (:script :type "text/javascript" 
-			     (let ((*parenscript-stream* s))
-			       (ps*
-				;; A publicly available virtual DOM renderer for the component
-				`(defun render (state)
-				   ,(component-ps component))
+	    (:script :type "text/javascript" 
+		     (let ((*parenscript-stream* s))
+		       (ps*
+			;; A publicly available virtual DOM renderer for the component
+			`(defun render (state)
+			   ,(component-ps component))
 				     
-				;; Define the component module
-				`(defvar component
-				   (make-module render ,state)))))))))))
+			;; Define the component module
+			`(defvar component
+			   (make-module render ,state)))))))))
 
 
 
