@@ -101,7 +101,7 @@
   (loop for component in (members component-group)
         for name = (name component)
      
-     if (string-equal (hunchentoot:script-name request)
+     when (string-equal (hunchentoot:script-name request)
 		      (concatenate 'string "/component/" (string name)))
      do (return
 	  (generate-component-html component (get-initial-state request)))))
