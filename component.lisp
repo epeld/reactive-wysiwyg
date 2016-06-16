@@ -98,13 +98,21 @@
 
 
 (defun request-handler (request)
-  (loop for component in (members component-group)
-        for name = (name component)
+  "Handle requests for components"
+  (let ((script-name (hunchentoot:script-name request)))
+    
+    (when (string-equal #1="/component/" script-name
+			:end2 (length #1#))
+      
+      (loop for component in (members component-group)
+	 for name = (name component)
+	 with requested = (subseq script-name (length #1#))
      
-     when (string-equal (hunchentoot:script-name request)
-		      (concatenate 'string "/component/" (string name)))
-     do (return
-	  (generate-component-html component (get-initial-state request)))))
+	 when (string-equal requested name)
+	 do (return
+	      (generate-component-html component (get-initial-state request)))
+	   
+	 finally (return (format nil "No such component '~a'" (string-downcase name)))))))
 
 
 (defun generate-component-html (component &optional state)
