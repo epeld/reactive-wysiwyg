@@ -110,7 +110,8 @@
 (defun generate-component-html (component &optional state)
   "Generate a string of html representing the component"
   (let ((name (name component))
-	(state (or state (field-value :initial-state component))))
+	(state (or state 
+		   (field-value :initial-state component))))
     
     (cl-who:with-html-output-to-string (s)
       (:div (:h1 (cl-who:str (title-ify (string name))))

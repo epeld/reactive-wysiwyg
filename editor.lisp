@@ -29,7 +29,8 @@
 (loop for k being the hash-keys of test collect k)
 
 
-(defun generate (object &optional data)
+;; class lambda, action lambda
+(defun generate (object &key data class action)
   "Generate psx for editing object. Use the second arg to make it a live view"
   (etypecase object
     (hash-table
