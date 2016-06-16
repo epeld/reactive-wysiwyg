@@ -29,34 +29,54 @@
 (loop for k being the hash-keys of test collect k)
 
 
+(defun hash-table-editor (hash-table &key data)
+  `(:div :class "editor"
+	 ,@(loop for key being the hash-keys of hash-table
+	      for value being the hash-values of hash-table
+	      collect
+		`(:div :class "entry"
+				  
+		       (:div :class "key"
+			     (cl-who:str ,key))
+				  
+		       (:div :class "value"
+			     ;; Recurse
+			     ,(generate value 
+					:data (and data 
+						   `(chain ,data ,key))))))))
+
+
+(defun list-editor (list &key data (template (and list 
+						  (first list))))
+  "Generate a list editor, basing each individuall element off of the indicated template"
+  (with-ps-gensyms (index item)
+    `(:div :class "list-editor"
+	   (imapcar (lambda (,index ,item)
+		      (psx ,(generate template 
+				      :data item)))
+		    ,(if data 
+			 data
+			 `(list ,@list))))))
+
+
 ;; class lambda, action lambda
-(defun generate (object &key data class action)
+(defun generate (object &key data)
   "Generate psx for editing object. Use the second arg to make it a live view"
   (etypecase object
+    ;; 
+    ;; Composites
     (hash-table
-     `(:div :class "editor"
-	    ,@(loop for key being the hash-keys of object
-		 for value being the hash-values of object
-		 collect
-		   `(:div :class "entry"
-				  
-			  (:div :class "key"
-				(cl-who:str ,key))
-				  
-			  (:div :class "value"
-				;; Recurse
-				,(generate value (or data 
-						     `(chain data ,key))))))))
+     (hash-table-editor object :data data))
 		   
+    (list
+     (list-editor object :data data))
+		 
+    ;; Leaves
     (string
      `(:input :value ,(or data object)))
 		   
     (number
-     `(:input :value ,(or data object)))
-		   
-    (cons
-     ;; TODO
-     `(:div "<List>"))))
+     `(:input :value ,(or data object)))))
 
 (generate test)
 
