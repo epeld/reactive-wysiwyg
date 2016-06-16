@@ -59,6 +59,7 @@
 			 `(list ,@list))))))
 
 
+;; TODO use the set-field action to give life to the editor
 ;; class lambda, action lambda
 (defun generate (object &key data)
   "Generate psx for editing object. Use the second arg to make it a live view"
