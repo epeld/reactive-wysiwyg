@@ -89,10 +89,12 @@
 	(if (and raw 
 		 (< 0 (length raw)))
 	    ;; TODO generate editor HTML here for the data
-	    (format nil "You posted: ~a"
-		    (with-output-to-string (s)
-		      (yason:encode (yason:parse raw) 
-				    s)))
+	    (let ((data (yason:parse raw)))
+	      (format nil "You posted: ~&~a~%Generated code: ~&~s"
+		      (with-output-to-string (s)
+			(yason:encode data s))
+		      (with-output-to-string (s)
+			(pprint (generate data) s))))
 
 	    (cl-who:with-html-output-to-string (s)
 	      (:div (:h1 "Editor Generator")
