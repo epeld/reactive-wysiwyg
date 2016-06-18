@@ -29,3 +29,6 @@
 (defun start-server ()
   (setf *show-lisp-errors-p* t)
   (start server))
+
+(defun stop-server ()
+  (stop server))
