@@ -37,7 +37,7 @@
 		`(:div :class "entry"
 				  
 		       (:div :class "key"
-			     (cl-who:str ,key))
+			     ,key)
 				  
 		       (:div :class "value"
 			     ;; Recurse
@@ -90,12 +90,15 @@
 		 (< 0 (length raw)))
 	    ;; TODO generate editor HTML here for the data
 	    (let ((data (yason:parse raw)))
-	      (format nil "You posted: ~&~a~%Generated code: ~&~s"
-		      (with-output-to-string (s)
-			(yason:encode data s))
-		      (with-output-to-string (s)
-			(pprint (generate data) s))))
-
+	      (cl-who:with-html-output-to-string (s)
+		(:div (:h1 "Result")
+		      (:div "You posted:"
+			    (:pre :class "data"
+				  (yason:encode data s)))
+		      (:div "Result:"
+			    (:pre :class "editor"
+				  (pprint (generate data) s))))))
+	    
 	    (cl-who:with-html-output-to-string (s)
 	      (:div (:h1 "Editor Generator")
 		    (:form :method "POST"
