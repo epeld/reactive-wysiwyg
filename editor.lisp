@@ -85,14 +85,24 @@
     
     (when (peldan.string:starts-with-p "/edit/" script-name)
       
-      (let ((raw (hunchentoot:raw-post-data :want-stream nil)))
-	(if raw
+      (let ((raw (hunchentoot:post-parameter "json")))
+	(if (and raw 
+		 (< 0 (length raw)))
+	    ;; TODO generate editor HTML here for the data
 	    (format nil "You posted: ~a"
 		    (with-output-to-string (s)
 		      (yason:encode (yason:parse raw) 
 				    s)))
 
-	    "No data to read")))))
+	    (cl-who:with-html-output-to-string (s)
+	      (:div (:h1 "Editor Generator")
+		    (:form :method "POST"
+			   (:div
+			    (:p "Please enter some JSON below to be used as a template")
+			    (:textarea :name "json"
+				       :rows 20 :cols 50))
+			   (:button :type "submit"
+				    "OK")))))))))
 
 
 (defun install-handler ()
