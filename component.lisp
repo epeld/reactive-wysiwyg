@@ -101,8 +101,7 @@
   "Handle requests for components"
   (let ((script-name (hunchentoot:script-name request)))
     
-    (when (string-equal #1="/component/" script-name
-			:end2 (length #1#))
+    (when (peldan.string:starts-with-p #1="/component/" script-name)
       
       (loop for component in (members component-group)
 	 for name = (name component)
@@ -141,7 +140,6 @@
 (defun register-component (name &rest args)
   "Register a new component, making it accessible by HTTP request"
   (replace-component (apply #'make-component name args)))
-
 
 
 ;; This is a test action to see how fast the updates can be

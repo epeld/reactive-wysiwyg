@@ -101,3 +101,10 @@ is replaced with replacement."
       (loop for line = (read-line in nil 'foo)
 	 until (eq line 'foo)
 	 do (write-line line stream))))
+
+
+(defun starts-with-p (prefix s)
+  "Return true if s starts with prefix"
+  (when (< (length prefix) (length s))
+    (string-equal prefix s
+		  :end2 (length prefix))))

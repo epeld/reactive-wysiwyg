@@ -79,7 +79,20 @@
     (number
      `(:input :value ,(or data object)))))
 
-(generate test)
+
+(defun request-handler (request)
+  (let ((script-name (hunchentoot:script-name request)))
+    
+    (when (peldan.string:starts-with-p "/edit/" script-name)
+      
+      "you found it!")))
+
+
+(defun install-handler ()
+  "Install the request handler that will maek components accessible through hunchentoot"
+  (pushnew #'request-handler peldan.dispatch:*handlers*))
+
+
 
 ;; TODO generate an endpoint for POSTING data and producing a rendered component
 ;; that can edit said data and serialie it back out

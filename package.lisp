@@ -26,6 +26,7 @@
   (:import-from :alexandria :with-gensyms)
   (:import-from :peldan.list :transpose)
   (:export :strings-bind
+	   :starts-with-p
 	   :string-bind-case
 	   :string-var-match
 	   :read-file-to-string
