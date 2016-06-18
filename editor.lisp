@@ -85,12 +85,19 @@
     
     (when (peldan.string:starts-with-p "/edit/" script-name)
       
-      "you found it!")))
+      (let ((raw (hunchentoot:raw-post-data :want-stream nil)))
+	(if raw
+	    (format nil "You posted: ~a"
+		    (with-output-to-string (s)
+		      (yason:encode (yason:parse raw) 
+				    s)))
+
+	    "No data to read")))))
 
 
 (defun install-handler ()
   "Install the request handler that will maek components accessible through hunchentoot"
-  (pushnew #'request-handler peldan.dispatch:*handlers*))
+  (pushnew (lambda (req) (request-handler req)) peldan.dispatch:*handlers*))
 
 
 
