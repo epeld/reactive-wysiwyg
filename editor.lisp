@@ -168,4 +168,4 @@
 ;; TODO make the GET for the same URL be a html form for POSTing
 
 ;(ql:quickload "cl-html-parse")
-(cl-html-parse:parse-html (drakma:http-request "http://lisp.org"))
+;(cl-html-parse:parse-html (drakma:http-request "http://lisp.org"))
