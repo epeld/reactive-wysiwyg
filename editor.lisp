@@ -133,7 +133,7 @@
 	    (cl-who:fmt (peldan.component:generate-component-html (anonymous-editor data)))))))
 
 
-(defun generate-form-html ()
+(defun generate-editor-form-html ()
   (cl-who:with-html-output-to-string (s)
     (:div (:h1 "Editor Generator")
 	  (:form :method "POST"
@@ -153,7 +153,7 @@
       (let ((raw (hunchentoot:post-parameter "json")))
 	(if (and raw (< 0 (length raw)))
 	    (generate-editor-html (yason:parse raw))
-	    (generate-form-html))))))
+	    (generate-editor-form-html))))))
 
 
 (defun install-handler ()
