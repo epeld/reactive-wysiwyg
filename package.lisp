@@ -108,3 +108,8 @@
   (:use :common-lisp :parenscript :peldan.action)
   (:import-from :peldan.psx :psx)
   (:export :generate))
+
+
+(defpackage :peldan.import
+  (:use :common-lisp :parenscript :drakma)
+  (:import-from :cl-html-parse :parse-html))

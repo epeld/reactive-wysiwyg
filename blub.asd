@@ -11,6 +11,7 @@
                #:hunchensocket
                #:parenscript
 	       #:alexandria
+	       #:cl-html-parse
 	       #:yason)
   :serial t
   :components ((:file "package")
