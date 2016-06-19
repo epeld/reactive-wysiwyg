@@ -50,3 +50,12 @@ ACTION LOG:
 
 if server connection is maintained, then a timeline can be just another component
 rendered in an iframe, whose data is the action log of the 'real' component 
+
+
+
+-------------------
+
+CLEAN UP:
+
+When making a component, we shouldn't need to do the whole dance with JSON serialize/deserialize as in editor
+right now.
