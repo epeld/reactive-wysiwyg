@@ -31,7 +31,11 @@
   (let (attr-list body)
     (loop for rest on (rest sexp) by #'cddr
        if (keywordp (first rest))
-       do (push (cons (first rest) (second rest)) attr-list)
+	 
+       ;; Note: it is important to convert keywords to symbols here
+       ;; because of how PS stringifies them
+       do (push (cons (make-symbol (string (first rest)))
+		      (second rest)) attr-list)
        else
        do (progn (setq body rest)
 		 (return)))
