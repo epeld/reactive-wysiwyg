@@ -4,9 +4,7 @@
 (defparameter *cached-editor-styling*
   ".editor {
     border: solid 1px black;
-    border-top: solid 1px black;
     padding: 0.25em;
-    padding-top: 0.25em;
     display: flex;
     flex-direction: column;
     flex-shrink: 1;
@@ -103,48 +101,59 @@
      `(:input :value ,(or data object)))))
 
 
+(defun anonymous-editor (initial-state)
+  "Create an anonymous editor for the state passed in"
+  (peldan.component:make-component 
+   'anonymous-component
+   :code `(psx ,(generate initial-state))
+   :initial-state `(peldan.ps:json-parse 
+		    ,(with-output-to-string (s) 
+					    (yason:encode initial-state s)))))
+
+
+(defun generate-editor-html (data)
+  (let ((code (generate data)))
+    (cl-who:with-html-output-to-string (s)
+      
+      (:style :type "text/css" 
+	      (cl-who:str *cached-editor-styling*))
+      
+      (:div (:h1 "Result")
+	    (:div "You posted:"
+		  (:pre :class "result"
+			(yason:encode data s)))
+	    (:div "Result:"
+		  (:pre :class "result"
+			(pprint code s)))
+	    (:div "JS:"
+		  (:pre :class "result"
+			(let ((*parenscript-stream* s))
+			  (ps* `(psx ,code)))))
+		      
+	    (cl-who:fmt (peldan.component:generate-component-html (anonymous-editor data)))))))
+
+
+(defun generate-form-html ()
+  (cl-who:with-html-output-to-string (s)
+    (:div (:h1 "Editor Generator")
+	  (:form :method "POST"
+		 (:div
+		  (:p "Please enter some JSON below to be used as a template")
+		  (:textarea :name "json"
+			     :rows 20 :cols 50))
+		 (:button :type "submit"
+			  "OK")))))
+
+
 (defun request-handler (request)
   (let ((script-name (hunchentoot:script-name request)))
     
     (when (peldan.string:starts-with-p "/edit/" script-name)
       
       (let ((raw (hunchentoot:post-parameter "json")))
-	(if (and raw 
-		 (< 0 (length raw)))
-	    ;; TODO generate editor HTML here for the data
-	    (let ((data (yason:parse raw)))
-	      (cl-who:with-html-output-to-string (s)
-		(:style :type "text/css"
-			(cl-who:str *cached-editor-styling*))
-		(:div (:h1 "Result")
-		      (:div "You posted:"
-			    (:pre :class "editor"
-				  (yason:encode data s)))
-		      (:div "Result:"
-			    (:pre :class "editor"
-				  (pprint (generate data) s)))
-		      (:div "JS:"
-			    (:pre :class "editor"
-				  (let ((*parenscript-stream* s))
-				    (ps* `(psx ,(generate data))))))
-		      
-		      (let ((component (peldan.component:make-component 
-					'anonymous-component
-					:code `(psx ,(generate data))
-					:initial-state `(peldan.ps:json-parse 
-							 ,(with-output-to-string (s) 
-										 (yason:encode data s))))))
-			(cl-who:fmt (peldan.component:generate-component-html component))))))
-	    
-	    (cl-who:with-html-output-to-string (s)
-	      (:div (:h1 "Editor Generator")
-		    (:form :method "POST"
-			   (:div
-			    (:p "Please enter some JSON below to be used as a template")
-			    (:textarea :name "json"
-				       :rows 20 :cols 50))
-			   (:button :type "submit"
-				    "OK")))))))))
+	(if (and raw (< 0 (length raw)))
+	    (generate-editor-html (yason:parse raw))
+	    (generate-form-html))))))
 
 
 (defun install-handler ()
@@ -157,3 +166,6 @@
 ;; that can edit said data and serialie it back out
 
 ;; TODO make the GET for the same URL be a html form for POSTing
+
+;(ql:quickload "cl-html-parse")
+(cl-html-parse:parse-html (drakma:http-request "http://lisp.org"))
