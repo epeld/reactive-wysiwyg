@@ -1,7 +1,29 @@
 
 (in-package :peldan.editor)
 
+(defparameter *cached-editor-styling*
+  ".editor {
+    border: solid 1px black;
+    border-top: solid 1px black;
+    padding: 0.25em;
+    padding-top: 0.25em;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 1;
+}
 
+.entry {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    margin-bottom: 0.5em;
+}
+
+.key {
+    margin-right: 0.5em;
+}")
+
+#|
 (defparameter test
   (make-hash-table :test #'equal))
 
@@ -20,26 +42,25 @@
 
 (setf (gethash :mykey4 test)
       (list 1 2 3 4))
+|#
 
 ;; For compatibility with PS, downcase symbols in JSON
 (defmethod yason:encode ((symbol symbol) &optional stream)
   (yason:encode (string-downcase symbol)
 		stream))
 
-(loop for k being the hash-keys of test collect k)
-
 
 (defun hash-table-editor (hash-table &key data)
-  `(:div :class "editor"
+  `(:div :class-name "editor"
 	 ,@(loop for key being the hash-keys of hash-table
 	      for value being the hash-values of hash-table
 	      collect
-		`(:div :class "entry"
+		`(:div :class-name "entry"
 				  
-		       (:div :class "key"
+		       (:div :class-name "key"
 			     ,key)
 				  
-		       (:div :class "value"
+		       (:div :class-name "value"
 			     ;; Recurse
 			     ,(generate value 
 					:data (and data 
@@ -50,7 +71,7 @@
 						  (first list))))
   "Generate a list editor, basing each individuall element off of the indicated template"
   (with-ps-gensyms (index item)
-    `(:div :class "list-editor"
+    `(:div :class-name "list-editor"
 	   (imapcar (lambda (,index ,item)
 		      (psx ,(generate template 
 				      :data item)))
@@ -60,6 +81,8 @@
 
 
 ;; TODO use the set-field action to give life to the editor
+;; TODO we need some way of tracking the path on recursive calls to generate
+;; then we need functions for producing e.g actions and classes etc
 ;; class lambda, action lambda
 (defun generate (object &key data)
   "Generate psx for editing object. Use the second arg to make it a live view"
@@ -91,13 +114,27 @@
 	    ;; TODO generate editor HTML here for the data
 	    (let ((data (yason:parse raw)))
 	      (cl-who:with-html-output-to-string (s)
+		(:style :type "text/css"
+			(cl-who:str *cached-editor-styling*))
 		(:div (:h1 "Result")
 		      (:div "You posted:"
-			    (:pre :class "data"
+			    (:pre :class "editor"
 				  (yason:encode data s)))
 		      (:div "Result:"
 			    (:pre :class "editor"
-				  (pprint (generate data) s))))))
+				  (pprint (generate data) s)))
+		      (:div "JS:"
+			    (:pre :class "editor"
+				  (let ((*parenscript-stream* s))
+				    (ps* `(psx ,(generate data))))))
+		      
+		      (let ((component (peldan.component:make-component 
+					'anonymous-component
+					:code `(psx ,(generate data))
+					:initial-state `(peldan.ps:json-parse 
+							 ,(with-output-to-string (s) 
+										 (yason:encode data s))))))
+			(cl-who:fmt (peldan.component:generate-component-html component))))))
 	    
 	    (cl-who:with-html-output-to-string (s)
 	      (:div (:h1 "Editor Generator")

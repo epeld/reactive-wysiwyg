@@ -171,8 +171,8 @@
 			 (yason:with-array ()
 			   (loop for j upto 12 do
 				(yason:encode-array-element (random 100)))))))))))))
-   `(peldan.ps:json-parse 
-     ,test-data-string)))
+    `(peldan.ps:json-parse 
+      ,test-data-string)))
 
 
 (register-component 'testcomponent 
