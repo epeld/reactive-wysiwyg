@@ -59,3 +59,13 @@ CLEAN UP:
 
 When making a component, we shouldn't need to do the whole dance with JSON serialize/deserialize as in editor
 right now.
+
+
+----------------------
+
+We want a 'component-launcher'.
+
+a page where we can choose component from a dropdown list and have its source code listed
+when selected.
+
+we want to be able to specify its initial data and press "start" to see it live!
