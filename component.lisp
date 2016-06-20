@@ -15,21 +15,23 @@
 (defun component-ps (component)
   "Extracts (and wraps) the PS contained in this component for appearing on a page"
   (let ((psx (field-value :code component)))
-    `(psx (:div (if (@ state debug)
-		    ;; Wrap in (lisp ..) form to ensure it gets reevaluated on every PS compilation
-		    (lisp (peldan.debugger:debugger))
+    `(psx (:div (when state
+		  (if (@ state debug)
+		      ;; Wrap in (lisp ..) form to ensure it gets reevaluated on every PS compilation
+		      (lisp (peldan.debugger:debugger))
 
-		    ;; TODO replace state by actual state later
-		    (let ((state state))
-		      ,psx))))))
+		      ;; TODO replace state by actual state later
+		      (let ((state state))
+			,psx)))))))
 
 
-(defun component-module-ps (renderer initial-state)
+(defun component-module-ps (renderer)
   "Generate all the PS needed to render a component"
   `(let ((module (create)))
              
+     ;; This is typically set when WS connection is established
      (setf (@ module state)
-	   ,initial-state)
+	   nil)
        
      (setf (@ module actions)
 	   ,(peldan.action:action-ps `(@ module update-state)))
@@ -41,17 +43,6 @@
      ;; Helper for *updating* (as opposed to just *setting*) state
      (setf (@ module update-state)
 	   (lambda (fn) ((@ module set-state) (funcall fn (@ module state)))))
-     
-     ;; Establish server connection
-     (lisp 
-      (when (peldan.websocket:websockets-enabled)
-	`(progn (setf (@ module ws)
-		      ,(peldan.websocket:connect-ps `(@ module update)))
-		
-		(setf send-message 
-		      (lambda (obj)
-			(peldan.ps:log-message "Sending" obj)
-			((@ module ws send) (peldan.ps:json-stringify obj)))))))
      
      module))
 
@@ -65,11 +56,8 @@
   "Generate a string containing all the javascript needed to render components"
   (write-string *cached-virtual-dom-js* stream)
   (write-string *cached-ps-library* stream)
-  (write-string (ps* `(defvar send-message (lambda (obj)
-					     (peldan.ps:log-warning "Cannot send message" obj)))
-		     
-		     `(defun make-module (renderer state)
-			,(component-module-ps 'renderer 'state))
+  (write-string (ps* `(defun make-module (renderer)
+			,(component-module-ps 'renderer))
 		     
 		     ;; Helper function for periodically executing an action (to be moved)
 		     `(defun continuously (action interval &rest args)
@@ -153,7 +141,21 @@
 				     
 			;; Define the component module
 			`(defvar component
-			   (make-module render ,state)))))))))
+			   (make-module render))
+			
+			(lisp 
+			 
+			 ;; Estabilish WebSocket Connection
+			 (if (peldan.websocket:websockets-enabled)
+			   `(progn (setf (@ component ws)
+					 ,(peldan.websocket:connect-ps state 
+								       `(@ component set-state)))
+				   (defun send-message (obj)
+				     (peldan.ps:log-message "Sending" obj)
+				     ((@ component ws send) (peldan.ps:json-stringify obj))))
+			   
+			   `(defun send-message (obj)
+			      (peldan.ps:log-warning "Cannot send message" obj)))))))))))
 
 
 
@@ -180,19 +182,15 @@
 
 
 (defun generate-test-state ()
-  (let ((test-data-string
-	(yason:with-output-to-string* ()
-	  (yason:with-object ()
-	    (yason:with-object-element ("data")
-	      (yason:with-object ()
-		(yason:with-object-element ("items")
-		  (yason:with-array ()
-		    (loop for i upto 99 do
-			 (yason:with-array ()
-			   (loop for j upto 12 do
-				(yason:encode-array-element (random 100)))))))))))))
-    `(peldan.ps:json-parse 
-      ,test-data-string)))
+  (acons :data
+	 (acons :items
+		(loop for i upto 100 collect 
+		     (loop for j upto 12 collect
+			  (random 100)))
+		nil)
+	 (acons :debug 
+		t
+		nil)))
 
 
 (register-component 'testcomponent 

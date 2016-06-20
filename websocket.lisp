@@ -21,17 +21,21 @@
 
 
 (defun session-with-uuid (uuid)
-  (or (find uuid *sessions* 
-	    :key #'session-uuid 
-	    :test #'string=)
+  (the hunchensocket-session 
+       (or (find uuid *sessions* 
+		 :key #'session-uuid 
+		 :test #'string=)
 	
-      (push (make-instance 'hunchensocket-session 
-			   :uuid uuid)
-	    *sessions*)))
+	   (let ((instance (make-instance 'hunchensocket-session 
+					  :uuid uuid)))
+	     (format t "Creating new session '~a'~%" uuid)
+	     (push instance *sessions*)
+	     instance))))
 
 (defun request-handler (request)
   "Hunchensocket request dispatch function"
-  (let ((uuid (script-name request)))
+  (let ((uuid (subseq (script-name request) 
+		      1)))
     (format t "Got WS request for ~a" uuid)
     (session-with-uuid uuid)))
 
@@ -62,13 +66,14 @@
 ;; Event handling
 ;; 
 (defmethod client-connected ((instance hunchensocket-session) client)
-  (format t "Client connected!~%")
+  (format t "Client connected to ~a!~%" (session-uuid instance))
   (send-message client 
 		:type :message
 		:message "Hello!")
-  (send-message client
+  ;; TODO FIX!
+  (quote (send-message client
 		:type :state
-		:state (session-state instance)))
+		:state (session-state instance))))
 
 
 (defmethod client-disconnected ((instance hunchensocket-session) client)
@@ -102,6 +107,14 @@
 		 (cdr (assoc "value" message :test #'string=)))
 		 
 	   (broadcast-message instance :state :value state)))
+	
+	((and (string= "action" command)
+	      (string= "debug" (cdr (assoc "name" message :test #'string=))))
+	 
+	 (with-slots (state) instance
+	   (format t "State was ~s" state)
+	   (setf state (acons :debug t nil))
+	   (broadcast-message instance :state :value state)))
 	      
 	(t
 	 (send-text-message client 
@@ -118,18 +131,21 @@
   (start server))
 
 
-(defun generate-uri ()
-  (concatenate 'string (format nil "ws://localhost:~s/" *port*) "123")) ;TODO give different uuids
+(defun generate-uuid ()
+  "123") 				;TODO
+
+(defun generate-uri (uuid)
+  (concatenate 'string (format nil "ws://localhost:~s/" *port*) uuid)) ;TODO give different uuids
 
 
-(defun connect-ps (initial-state set-state &optional uuid)
+(defun connect-ps (initial-state set-state &optional (uuid (generate-uuid)))
   "Produce PS code for connecting to this websocket server"
-  (let ((session (session-with-uuid (or uuid (generate-uri)))))
+  (let ((session (session-with-uuid uuid)))
     
-    (setf (slot-value session 'session-state)
+    (setf (slot-value session 'state)
 	  initial-state)
     
-    `(let (interval (ws (ps:new (-web-socket (ps:lisp uri)))))
+    `(let (interval (ws (ps:new (-web-socket ,(generate-uri uuid)))))
        (with-slots (onclose onopen onmessage) ws
        
 	 ;; Setup a keep-alive timer
@@ -145,11 +161,11 @@
 	     
 	 (setf onopen
 	       (lambda ()
-		 (peldan.ps:log-message "Connection estabilished")))
+		 (peldan.ps:log-message "Connection established")))
 	     
 	 (setf onmessage
 	       (lambda (msg)
-		 (let ((content ((ps:@ -j-s-o-n parse) msg.data)))
+		 (let ((content ((ps:@ -j-s-o-n parse) (ps:@ msg data))))
 		   (with-slots (type state) content
 		     (case type
 		       (:state
