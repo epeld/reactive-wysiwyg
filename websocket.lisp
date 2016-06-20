@@ -75,6 +75,13 @@
   (format t "Client disconnected!~%"))
 
 
+(defun unknown-command-message (command)
+  (yason:with-output-to-string* ()
+    (yason:with-object ()
+      (yason:encode-object-element "type" "message")
+      (yason:encode-object-element "message" 
+				   (format nil "Unknown command '~a'~%" command)))))
+
 (defmethod text-message-received ((instance hunchensocket-session) client message)
   (format t "Got message ~s!~%" message)
   
@@ -98,7 +105,7 @@
 	
 	      (t
 	       (send-text-message client 
-				  (format nil "Unknown command '~a'~%" command))))))) 
+				  (unknown-command-message command))))))) 
 
 
 (setf *websocket-dispatch-table* '(session-for-request))
@@ -145,6 +152,10 @@
 		      
 		      (:pong
 		       (return))
+		      
+		      (:message
+		       (peldan.ps:log-message "Server:" (ps:@ content message)))
+		      
 		      (t
 		       (peldan.ps:log-message "Got strange message" msg)))))))
        ws)))
@@ -157,4 +168,5 @@
 
 ;; TODO later return true if server started
 (defun websockets-enabled ()
-  nil)
+  (hunchentoot:started-p server))
+
