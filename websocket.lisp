@@ -3,12 +3,11 @@
 (in-package peldan.websocket)
 
 
-(defgroup session)
-
-
 (defparameter *port* 3344)
 
 (defparameter *ping-interval* 5000)
+
+(defparameter *sessions* nil)
 
 
 (defclass hunchensocket-client (websocket-client)
@@ -16,27 +15,25 @@
 
 
 (defclass hunchensocket-session (hunchensocket:websocket-resource)
-  ((uuid :initarg :uuid :initform (error "UUID required") :reader session-uuid))
+  ((uuid :initarg :uuid :initform (error "UUID required") :reader session-uuid)
+   (state :initarg :state :initform '((:debug . t)) :reader session-state))
   (:default-initargs :client-class 'hunchensocket-client))
 
 
+(defun session-with-uuid (uuid)
+  (or (find uuid *sessions* 
+	    :key #'session-uuid 
+	    :test #'string=)
+	
+      (push (make-instance 'hunchensocket-session 
+			   :uuid uuid)
+	    *sessions*)))
 
-(defun make-session-from-request (request)
-  (let ((uuid (script-name request)))
-    (make-session uuid
-		  :instance (make-instance 'hunchensocket-session
-					   :uuid uuid)
-		  :state nil)))
-
-
-(defun session-for-request (request)
+(defun request-handler (request)
   "Hunchensocket request dispatch function"
   (let ((uuid (script-name request)))
-    (let ((result (cdr (assoc :instance (or (find-session uuid)
-					    (add-session (make-session-from-request request)))))))
-      (format t "UUID ~a~%" uuid)
-      (the hunchensocket-session result)
-      result)))
+    (format t "Got WS request for ~a" uuid)
+    (session-with-uuid uuid)))
 
 
 (defun broadcast (instance message)
@@ -45,18 +42,18 @@
        do (send-text-message client message)))
 
 
-(defun make-message (type &rest rest)
-  (with-output-to-string (s)
-    (yason:with-output (s)
-      (yason:with-object ()
-	(apply #'yason:encode-object-elements 
-	       "type" 
-	       (string type) 
-	       (mapcar #'string rest))))))
+(defun make-message (&rest rest)
+  (yason:with-output-to-string* ()
+    (yason:with-object ()
+      (apply #'yason:encode-object-elements
+	     rest))))
 
 
-(defun send-message (client type &rest rest)
-  (send-text-message client (apply #'make-message type rest)))
+(defun send-message (client &rest rest)
+  (let ((msg (apply #'make-message rest)))
+    (format t "Sending message ~a" msg)
+    (send-text-message client msg)))
+
 
 (defun broadcast-message (instance type &rest rest)
   (broadcast instance (apply #'make-message type rest)))
@@ -65,50 +62,53 @@
 ;; Event handling
 ;; 
 (defmethod client-connected ((instance hunchensocket-session) client)
-  (declare (ignore instance))
-  (format t "Client connected!~%"))
+  (format t "Client connected!~%")
+  (send-message client 
+		:type :message
+		:message "Hello!")
+  (send-message client
+		:type :state
+		:state (session-state instance)))
 
 
 (defmethod client-disconnected ((instance hunchensocket-session) client)
-  ;; TODO consider removing the session here!
   (declare (ignore instance))
   (format t "Client disconnected!~%"))
 
 
 (defun unknown-command-message (command)
-  (yason:with-output-to-string* ()
-    (yason:with-object ()
-      (yason:encode-object-element "type" "message")
-      (yason:encode-object-element "message" 
-				   (format nil "Unknown command '~a'~%" command)))))
+  (make-message :type :message
+		:message (format nil "Unknown command '~a'~%" command)))
+
 
 (defmethod text-message-received ((instance hunchensocket-session) client message)
   (format t "Got message ~s!~%" message)
   
   ;; JSON parsing
-  (let* ((session (find-session (session-uuid instance) :force t))
-	 (*parse-object-as* :alist)
+  (let* ((*parse-object-as* :alist)
 	 (message (parse message)))
+    
+    (format t "Parsed ~s~%" message)
       
-      (format t "Parsed ~s~%" message)
-      
-      ;; Command execution
-      (let ((command (assocdr "type" message :test #'string=)))
-	    (cond
-	      ((string= "ping" command)
-	       (send-message client :pong))
+    ;; Command execution
+    (let ((command (assocdr "type" message :test #'string=)))
+      (cond
+	((string= "ping" command)
+	 (send-message client :type :pong))
 	      
-	      ((string= "state" command)
-	       (setf (cdr (assoc :state session))
-		     (cdr (assoc "value" message :test #'string=)))
-	       (broadcast-message instance :state :value (assocdr :state session)))
-	
-	      (t
-	       (send-text-message client 
-				  (unknown-command-message command))))))) 
+	((string= "state" command)
+	 (with-slots (state) instance
+	   (setf state
+		 (cdr (assoc "value" message :test #'string=)))
+		 
+	   (broadcast-message instance :state :value state)))
+	      
+	(t
+	 (send-text-message client 
+			    (unknown-command-message command))))))) 
 
 
-(setf *websocket-dispatch-table* '(session-for-request))
+(setf *websocket-dispatch-table* '(request-handler))
 
 
 (defvar server (make-instance 'websocket-acceptor :port *port*))
@@ -122,51 +122,50 @@
   (concatenate 'string (format nil "ws://localhost:~s/" *port*) "123")) ;TODO give different uuids
 
 
-(defun connect-ps (set-state)
+(defun connect-ps (initial-state set-state &optional uuid)
   "Produce PS code for connecting to this websocket server"
-  `(let (interval (ws (ps:new (-web-socket (ps:lisp (generate-uri))))))
-     (with-slots (onclose onopen onmessage) ws
+  (let ((session (session-with-uuid (or uuid (generate-uri)))))
+    
+    (setf (slot-value session 'session-state)
+	  initial-state)
+    
+    `(let (interval (ws (ps:new (-web-socket (ps:lisp uri)))))
+       (with-slots (onclose onopen onmessage) ws
        
-       ;; Setup a keep-alive timer
-       (setf interval
-	     (set-interval (lambda ()
-			     ((ps:@ ws send) ((ps:@ -j-s-o-n stringify) (ps:create :type :ping))))
-			   (ps:lisp *ping-interval*)))
+	 ;; Setup a keep-alive timer
+	 (setf interval
+	       (set-interval (lambda ()
+			       ((ps:@ ws send) ((ps:@ -j-s-o-n stringify) (ps:create :type :ping))))
+			     (ps:lisp *ping-interval*)))
        
-       (setf onclose
-	     (lambda ()
-	       (peldan.ps:log-message "Connection closed")
-	       (clear-interval interval)))
+	 (setf onclose
+	       (lambda ()
+		 (peldan.ps:log-message "Connection closed")
+		 (clear-interval interval)))
 	     
-       (setf onopen
-	     (lambda ()
-	       (peldan.ps:log-message "Connection estabilished")))
+	 (setf onopen
+	       (lambda ()
+		 (peldan.ps:log-message "Connection estabilished")))
 	     
-       (setf onmessage
-	     (lambda (msg)
-	       (let ((content ((ps:@ -j-s-o-n parse) msg.data)))
-		  (with-slots (type value) content
-		    (case ((ps:@ type to-lower-case))
-		      (:state
-		       (,set-state value))
+	 (setf onmessage
+	       (lambda (msg)
+		 (let ((content ((ps:@ -j-s-o-n parse) msg.data)))
+		   (with-slots (type state) content
+		     (case type
+		       (:state
+			(,set-state state))
 		      
-		      (:pong
-		       (return))
+		       (:pong
+			(return))
 		      
-		      (:message
-		       (peldan.ps:log-message "Server:" (ps:@ content message)))
+		       (:message
+			(peldan.ps:log-message "Server:" (ps:@ content message)))
 		      
-		      (t
-		       (peldan.ps:log-message "Got strange message" msg)))))))
-       ws)))
+		       (t
+			(peldan.ps:log-message "Got strange message" msg)))))))
+	 ws))))
 
 
-(defun broadcast-state (state)
-  (broadcast (assocdr :instance (find-session "/123"))
-	     (make-message :state :value state)))
-
-
-;; TODO later return true if server started
 (defun websockets-enabled ()
   (hunchentoot:started-p server))
 
