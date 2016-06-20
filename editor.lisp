@@ -124,7 +124,7 @@
 			(yason:encode data s)))
 	    (:div "Result:"
 		  (:pre :class "result"
-			(pprint code s)))
+			(princ code s)))
 	    (:div "JS:"
 		  (:pre :class "result"
 			(let ((*parenscript-stream* s))
