@@ -43,10 +43,15 @@
 	   (lambda (fn) ((@ module set-state) (funcall fn (@ module state)))))
      
      ;; Establish server connection
-     (lisp (when (peldan.websocket:websockets-enabled)
-	     `(setf (@ module ws)
-		    ,(peldan.websocket:connect-ps `(@ module update)))))
-     
+     (lisp 
+      (when (peldan.websocket:websockets-enabled)
+	`(progn (setf (@ module ws)
+		      ,(peldan.websocket:connect-ps `(@ module update)))
+		
+		(setf send-message 
+		      (lambda (obj)
+			(peldan.ps:log-message "Sending" obj)
+			((@ module ws send) (peldan.ps:json-stringify obj)))))))
      
      module))
 
@@ -60,7 +65,10 @@
   "Generate a string containing all the javascript needed to render components"
   (write-string *cached-virtual-dom-js* stream)
   (write-string *cached-ps-library* stream)
-  (write-string (ps* `(defun make-module (renderer state)
+  (write-string (ps* `(defvar send-message (lambda (obj)
+					     (peldan.ps:log-warning "Cannot send message" obj)))
+		     
+		     `(defun make-module (renderer state)
 			,(component-module-ps 'renderer 'state))
 		     
 		     ;; Helper function for periodically executing an action (to be moved)
@@ -70,6 +78,18 @@
 					  (apply (chain component actions run) ((chain action to-lower-case)) args))
 					(or interval 300))
 			  interval))
+		     
+		     
+		     ;; Execute an action (helper)
+		     `(defun action (action &rest args)
+			(lisp 
+			 (if (peldan.websocket:websockets-enabled)
+			     `(send-message (create :type :action
+						    :name action
+						    :args args))
+			     `(apply (chain component actions run)
+				     ((chain action to-lower-case))
+				     args))))
 		     
 		     ;; Helper
 		     `(defun imapcar (fn &rest args)
@@ -194,7 +214,8 @@
 		      
 			      (@ state data items))))
      
-	     (:div :onclick (peldan.action:action peldan.action:set-field 333 "data" "items")
+	     (:div :onclick (lambda () 
+			      (action "hello-world"))
 		   "And this is the end of it. (Rendered " 
 		   (length (@ state data items))
 		   " elements)"))))
@@ -202,4 +223,4 @@
 
 (defun install-handler ()
   "Install the request handler that will maek components accessible through hunchentoot"
-  (pushnew (lambda (req) (request-handler req)) peldan.dispatch:*handlers*))
+  (pushnew 'request-handler peldan.dispatch:*handlers*))

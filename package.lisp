@@ -83,7 +83,6 @@
 	   :action-ps
 	   :with-action-context
 	   :set-field
-	   :action
 	   :list-of-actions
 	   :debug))
 

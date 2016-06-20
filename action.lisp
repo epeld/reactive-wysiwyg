@@ -24,19 +24,6 @@
   (replace-action (apply #'make-action name args)))
 
 
-
-;; TODO remove macro, move into application-js somehow
-(defpsmacro action (name &rest args)
-  `(lambda () 
-     ((@ module actions do) (@ module actions ,name) ,@args)))
-
-
-(defpsmacro change-action (name &rest args)
-  (with-ps-gensyms (change)
-    `(lambda (,change) 
-       ((@ module actions do) (@ module actions ,name) ,@args ,change))))
-
-
 (defun action-ps (update-state &optional (actions (members action-group)))
   `(let ((actions (ps:create :map (ps:create) :log (list)))
 	 ,@(mapcar #'name actions))
