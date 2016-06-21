@@ -112,3 +112,8 @@
 (defpackage :peldan.import
   (:use :common-lisp :parenscript :drakma)
   (:import-from :cl-html-parse :parse-html))
+
+
+(defpackage :peldan.data
+  (:use :common-lisp)
+  (:export :encode-nested-plist :map-inside))
