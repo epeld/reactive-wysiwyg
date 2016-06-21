@@ -182,15 +182,9 @@
 
 
 (defun generate-test-state ()
-  (acons :data
-	 (acons :items
-		(loop for i upto 100 collect 
-		     (loop for j upto 12 collect
-			  (random 100)))
-		nil)
-	 (acons :debug 
-		t
-		nil)))
+  (list :data (list :items (loop for i upto 100 collect 
+				      (loop for j upto 12 collect
+					   (random 100))))))
 
 
 (register-component 'testcomponent 

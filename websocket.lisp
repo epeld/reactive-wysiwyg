@@ -47,10 +47,9 @@
 
 
 (defun make-message (&rest rest)
-  (yason:with-output-to-string* ()
-    (yason:with-object ()
-      (apply #'yason:encode-object-elements
-	     rest))))
+  (with-output-to-string (s)
+    (yason:with-output (s)
+      (peldan.data:encode-nested-plist rest))))
 
 
 (defun send-message (client &rest rest)
@@ -70,10 +69,10 @@
   (send-message client 
 		:type :message
 		:message "Hello!")
-  ;; TODO FIX!
-  (quote (send-message client
+
+  (send-message client
 		:type :state
-		:state (session-state instance))))
+		:state (session-state instance)))
 
 
 (defmethod client-disconnected ((instance hunchensocket-session) client)
@@ -106,15 +105,15 @@
 	   (setf state
 		 (cdr (assoc "value" message :test #'string=)))
 		 
-	   (broadcast-message instance :state :value state)))
+	   (broadcast-message instance :type :state :value state)))
 	
 	((and (string= "action" command)
 	      (string= "debug" (cdr (assoc "name" message :test #'string=))))
 	 
 	 (with-slots (state) instance
 	   (format t "State was ~s" state)
-	   (setf state (acons :debug t nil))
-	   (broadcast-message instance :state :value state)))
+	   (setf state (cons :debug (cons t state)))
+	   (broadcast-message instance :type :state :value state)))
 	      
 	(t
 	 (send-text-message client 
@@ -165,6 +164,7 @@
 	     
 	 (setf onmessage
 	       (lambda (msg)
+		 (peldan.ps:log-message "Server message" msg)
 		 (let ((content ((ps:@ -j-s-o-n parse) (ps:@ msg data))))
 		   (with-slots (type state) content
 		     (case type
