@@ -3,6 +3,7 @@
 
 
 (defun map-inside (fn plist &rest keys)
+  "Behaves like mapcar without a third argument, otherwise recurses into plist using keys first"
   (if (endp keys)
       (funcall fn plist)
       (let ((key (first keys)))
@@ -18,6 +19,7 @@
 
 
 (defun encode-nested-plist (plist &optional (stream *standard-output*))
+  "Like encode-plist but tries to be recursive"
   (yason:with-object ()
     (loop for (key value) on plist by #'cddr
        with keys = nil
