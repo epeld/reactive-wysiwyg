@@ -100,32 +100,6 @@
     (broadcast session (state-message state))))
 
 
-(defun action-function (action args)
-  (the string action)
-  (the list args)
-  (cond ((string= "debug" action)
-	 (lambda (state)
-	   (peldan.data:map-inside #'not state :debug)))
-	
-	((string= "randomize" action)
-	 (lambda (state)
-	   (peldan.data:map-inside (lambda (item)
-				     (loop for i in item collect (random 100))) 
-				   state
-				   :data :items 10)))
-	
-	((string= "generate-rows" action)
-	 (lambda (state)
-	   (peldan.data:set-inside (loop for i upto (min 500 (first args)) collect
-					(loop for j upto 12 collect (random 100))) 
-				   state
-				   :data :items)))
-	
-	(t
-	 (error "Unkown action ~a called with ~a" action args))))
-
-
-
 (defmethod text-message-received ((instance hunchensocket-session) client message)
   (format t "Got message ~s!~%" message)
   
@@ -146,8 +120,8 @@
 	   (send-message client (ping-message)))
 	      
 	  ((string= "action" type)
-	   (update-state (action-function (getf message :name) 
-					  (getf message :args)) 
+	   (update-state (apply (peldan.action:find-action (getf message :name))
+				(getf message :args)) 
 			 instance))
 	      
 	  (t
