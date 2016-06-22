@@ -18,6 +18,14 @@
 			plist))))))
 
 
+(defun set-inside (val plist &rest keys)
+  (apply #'map-inside
+	 (constantly val)
+	 plist
+	 keys))
+
+
+
 (defun encode-nested-plist (plist &optional (stream *standard-output*))
   "Like encode-plist but tries to be recursive"
   (yason:with-object ()
@@ -33,7 +41,4 @@
 		     (encode-nested-plist value stream))
 		  
 		  (yason:encode-object-element key value))))))
-
-
-
 
