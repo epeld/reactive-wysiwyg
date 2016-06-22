@@ -17,6 +17,7 @@
   `(psx (:div (:h2 "Debugger")
 	      (:pre ((@ -j-s-o-n stringify) peldan.component:state nil "    "))
 	      (lisp (action-list (peldan.action:list-of-actions)))
-	      (:button :onclick (action debug)
+	      (:button :onclick (lambda () 
+				  (peldan.component:action debug))
 		       "Back"))))
 
