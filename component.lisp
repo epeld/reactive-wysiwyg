@@ -199,9 +199,12 @@
 				     (psx (:th "Column")))
 				   (@ state data items 0))))
 	      
-	      (:tbody (mapcar (lambda (item)
+	      (:tbody (imapcar (lambda (ix item)
 				(psx (:tr (mapcar (lambda (x)
-						    (psx (:td x)))
+						    (psx (:td 
+							  (if (eq ix 10)
+							      (psx (:b x))
+							      x))))
 						  item))))
 		      
 			      (@ state data items))))
