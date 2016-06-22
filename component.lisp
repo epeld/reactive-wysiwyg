@@ -60,10 +60,10 @@
 			,(component-module-ps 'renderer))
 		     
 		     ;; Helper function for periodically executing an action (to be moved)
-		     `(defun continuously (action interval &rest args)
+		     `(defun continuously (action-name interval &rest args)
 			(let ((interval (or interval 300)))
 			  (set-interval (lambda ()
-					  (apply (chain component actions run) ((chain action to-lower-case)) args))
+					  (apply #'action action-name args))
 					(or interval 300))
 			  interval))
 		     
