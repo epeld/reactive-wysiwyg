@@ -77,9 +77,9 @@
   (format t "Client disconnected!~%"))
 
 
-(defun unknown-command-message (command)
+(defun unknown-type-message (type)
   (make-message :type :message
-		:message (format nil "Unknown command '~a'~%" command)))
+		:message (format nil "Unknown command '~a'~%" type)))
 
 
 (defun state-message (new-state)
@@ -87,42 +87,65 @@
   (make-message :type :state
 		:value new-state))
 
+(defun ping-message ()
+  "Construct a ping message"
+  (make-message :type :pong))
+
+
+(defun update-state (update session)
+  "Update the sessions state by applying the function update to it"
+  (with-slots (state) session
+    (setf state
+	  (funcall update state))
+    (broadcast session (state-message state))))
+
+
+(defun action-function (action args)
+  (the string action)
+  (the list args)
+  (cond ((string= "debug" action)
+	 (lambda (state)
+	   (peldan.data:map-inside #'not state :debug)))
+	
+	((string= "randomize" action)
+	 (lambda (state)
+	   (peldan.data:map-inside (lambda (item)
+				     (loop for i in item collect (random 100))) 
+				   state
+				   :data :items 10)))
+	
+	(t
+	 (error "Unkown action ~a called with ~a" action args))))
+
+
 
 (defmethod text-message-received ((instance hunchensocket-session) client message)
   (format t "Got message ~s!~%" message)
   
   ;; JSON parsing
-  (let* ((*parse-object-as* :alist)
-	 (message (parse message)))
+  (let* ((message (parse message 
+			 :object-as :plist
+			 :object-key-fn #'peldan.data:find-keyword)))
     
     (format t "Parsed ~s~%" message)
       
     ;; Command execution
-    (let ((command (assocdr "type" message :test #'string=)))
-      (cond
-	((string= "ping" command)
-	 (send-message client :type :pong))
+    (let ((type (getf message :type)))
+      (handler-bind ((error
+		      (lambda (c)
+			(format t "Error: ~a" c))))
+	(cond
+	  ((string= "ping" type)
+	   (send-message client (ping-message)))
 	      
-	((string= "state" command)
-	 (with-slots (state) instance
-	   (setf state
-		 (cdr (assoc "value" message :test #'string=)))
-		 
-	   ;; TODO dont use broadcast here
-	   (broadcast instance (state-message state))))
-	
-	((and (string= "action" command)
-	      (string= "debug" (cdr (assoc "name" message :test #'string=))))
-	 
-	 (with-slots (state) instance
-	   (format t "State was ~s" state)
-	   (setf state (peldan.data:map-inside #'not state :debug))
-	   ;; TODO this shouldn't be broadcast but just send-message etc
-	   (broadcast instance (state-message state))))
+	  ((string= "action" type)
+	   (update-state (action-function (getf message :name) 
+					  (getf message :args)) 
+			 instance))
 	      
-	(t
-	 (send-text-message client 
-			    (unknown-command-message command))))))) 
+	  (t
+	   (send-text-message client 
+			      (unknown-type-message type)))))))) 
 
 
 (setf *websocket-dispatch-table* '(request-handler))
