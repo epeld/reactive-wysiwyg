@@ -42,3 +42,9 @@
 		  
 		  (yason:encode-object-element key value))))))
 
+(defun find-keyword (key)
+  "Finds the keyword with name equal to the upcased string key"
+  (or (find-symbol (string-upcase key)
+		   'keyword)
+      (error "Unknown key ~a" key)))
+

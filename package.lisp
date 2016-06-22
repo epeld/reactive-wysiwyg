@@ -123,4 +123,5 @@
   (:use :common-lisp)
   (:export :encode-nested-plist 
 	   :map-inside
-	   :set-inside))
+	   :set-inside
+	   :find-keyword))
