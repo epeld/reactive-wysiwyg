@@ -16,7 +16,7 @@
 
 (defclass hunchensocket-session (hunchensocket:websocket-resource)
   ((uuid :initarg :uuid :initform (error "UUID required") :reader session-uuid)
-   (state :initarg :state :initform '((:debug . t)) :reader session-state))
+   (state :initarg :state :initform '(:debug t) :reader session-state))
   (:default-initargs :client-class 'hunchensocket-client))
 
 
@@ -72,7 +72,7 @@
 
   (send-message client
 		:type :state
-		:state (session-state instance)))
+		:value (session-state instance)))
 
 
 (defmethod client-disconnected ((instance hunchensocket-session) client)
@@ -112,7 +112,7 @@
 	 
 	 (with-slots (state) instance
 	   (format t "State was ~s" state)
-	   (setf state (cons :debug (cons t state)))
+	   (setf state (peldan.data:map-inside #'not state :debug))
 	   (broadcast-message instance :type :state :value state)))
 	      
 	(t
@@ -166,10 +166,10 @@
 	       (lambda (msg)
 		 (peldan.ps:log-message "Server message" msg)
 		 (let ((content ((ps:@ -j-s-o-n parse) (ps:@ msg data))))
-		   (with-slots (type state) content
+		   (with-slots (type value) content
 		     (case type
 		       (:state
-			(,set-state state))
+			(,set-state value))
 		      
 		       (:pong
 			(return))
