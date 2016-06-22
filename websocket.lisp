@@ -58,9 +58,6 @@
     (send-text-message client msg)))
 
 
-(defun broadcast-message (instance type &rest rest)
-  (broadcast instance (apply #'make-message type rest)))
-
 ;; 
 ;; Event handling
 ;; 
@@ -85,6 +82,12 @@
 		:message (format nil "Unknown command '~a'~%" command)))
 
 
+(defun state-message (new-state)
+  "Construct a message for changing the state of a client to a new value"
+  (make-message :type :state
+		:value new-state))
+
+
 (defmethod text-message-received ((instance hunchensocket-session) client message)
   (format t "Got message ~s!~%" message)
   
@@ -105,7 +108,8 @@
 	   (setf state
 		 (cdr (assoc "value" message :test #'string=)))
 		 
-	   (broadcast-message instance :type :state :value state)))
+	   ;; TODO dont use broadcast here
+	   (broadcast instance (state-message state))))
 	
 	((and (string= "action" command)
 	      (string= "debug" (cdr (assoc "name" message :test #'string=))))
@@ -113,7 +117,8 @@
 	 (with-slots (state) instance
 	   (format t "State was ~s" state)
 	   (setf state (peldan.data:map-inside #'not state :debug))
-	   (broadcast-message instance :type :state :value state)))
+	   ;; TODO this shouldn't be broadcast but just send-message etc
+	   (broadcast instance (state-message state))))
 	      
 	(t
 	 (send-text-message client 
