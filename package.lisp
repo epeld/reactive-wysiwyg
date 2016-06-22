@@ -13,7 +13,12 @@
 		:with-html-output-to-string)
   (:import-from :peldan.dispatch :*handlers*)
   (:import-from :peldan.resource :name :field-value :defgroup :members)
-  (:export :request-handler :register-component :state :generate-component-html :make-component))
+  (:export :request-handler
+	   :register-component
+	   :state
+	   :action
+	   :generate-component-html
+	   :make-component))
 
 
 (defpackage :peldan.list
@@ -116,4 +121,6 @@
 
 (defpackage :peldan.data
   (:use :common-lisp)
-  (:export :encode-nested-plist :map-inside))
+  (:export :encode-nested-plist 
+	   :map-inside
+	   :set-inside))
