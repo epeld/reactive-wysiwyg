@@ -165,7 +165,7 @@
 	 (setf onmessage
 	       (lambda (msg)
 		 (peldan.ps:log-message "Server message" msg)
-		 (let ((content ((ps:@ -j-s-o-n parse) (ps:@ msg data))))
+		 (let ((content (peldan.ps:json-parse (ps:@ msg data))))
 		   (with-slots (type value) content
 		     (case type
 		       (:state
