@@ -114,6 +114,13 @@
 				   state
 				   :data :items 10)))
 	
+	((string= "generate-rows" action)
+	 (lambda (state)
+	   (peldan.data:set-inside (loop for i upto (min 500 (first args)) collect
+					(loop for j upto 12 collect (random 100))) 
+				   state
+				   :data :items)))
+	
 	(t
 	 (error "Unkown action ~a called with ~a" action args))))
 
