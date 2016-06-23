@@ -1,6 +1,6 @@
 ;; Define the websocket interface of this server
 
-(in-package peldan.websocket)
+(in-package :peldan.websocket)
 
 
 (defparameter *port* 3344)
@@ -8,7 +8,6 @@
 (defparameter *ping-interval* 5000)
 
 (defparameter *sessions* nil)
-
 
 (defclass hunchensocket-client (websocket-client)
   ())
@@ -19,24 +18,49 @@
    (state :initarg :state :initform '(:debug t) :reader session-state))
   (:default-initargs :client-class 'hunchensocket-client))
 
+(defun update-state (update session)
+  "Update the session's state by applying the function update to it,
+ broadcasting out the update"
+  (with-slots (state) session
+    (setf state
+	  (funcall update state))
+    (broadcast session (state-message state))))
 
-(defun session-with-uuid (uuid)
-  (the hunchensocket-session 
-       (or (find uuid *sessions* 
-		 :key #'session-uuid 
-		 :test #'string=)
-	
-	   (let ((instance (make-instance 'hunchensocket-session 
-					  :uuid uuid)))
-	     (format t "Creating new session '~a'~%" uuid)
-	     (push instance *sessions*)
-	     instance))))
+
+(defun run-action (session name args)
+  "Execute an action in a given session,
+ broadcasting out the change of state"
+  (update-state (apply (peldan.action:find-action name) args) 
+		session))
+
+
+(defun generate-uuid ()
+  "123")
+
+
+(defun session-with-uuid (uuid &optional initial-state)
+  "Returns a session with the given uuid and state
+ by either looking it up or creating"
+  (let ((instance (find uuid *sessions* 
+			:key #'session-uuid 
+			:test #'string=)))
+    (unless instance
+      (format t "~&Creating new session '~a'" uuid)
+      (setf instance (make-instance 'hunchensocket-session :uuid uuid))
+      (push instance *sessions*))
+    
+    (when initial-state
+      (format t "~&Setting state to ~&~s" initial-state)
+      (setf (slot-value instance 'state) initial-state))
+    
+    instance))
+
 
 (defun request-handler (request)
   "Hunchensocket request dispatch function"
   (let ((uuid (subseq (script-name request) 
 		      1)))
-    (format t "Got WS request for ~a" uuid)
+    (format t "~&Got WS request for ~a" uuid)
     (session-with-uuid uuid)))
 
 
@@ -92,22 +116,6 @@
   (make-message :type :pong))
 
 
-(defun update-state (update session)
-  "Update the session's state by applying the function update to it,
- broadcasting out the update"
-  (with-slots (state) session
-    (setf state
-	  (funcall update state))
-    (broadcast session (state-message state))))
-
-
-(defun run-action (session name args)
-  "Execute an action in a given session,
- broadcasting out the change of state"
-  (update-state (apply (peldan.action:find-action name) args) 
-		session))
-
-
 (defmethod text-message-received ((instance hunchensocket-session) client message)
   (format t "Got message ~s!~%" message)
   
@@ -146,56 +154,50 @@
   (start server))
 
 
-(defun generate-uuid ()
-  "123") 				;TODO
-
 (defun generate-uri (uuid)
   (concatenate 'string (format nil "ws://localhost:~s/" *port*) uuid)) ;TODO give different uuids
 
 
 (defun connect-ps (initial-state set-state &optional (uuid (generate-uuid)))
   "Produce PS code for connecting to this websocket server"
-  (let ((session (session-with-uuid uuid)))
-    
-    (setf (slot-value session 'state)
-	  initial-state)
-    
-    `(let (interval (ws (ps:new (-web-socket ,(generate-uri uuid)))))
-       (with-slots (onclose onopen onmessage) ws
+  ;; Ensure session exists with state
+  (session-with-uuid uuid initial-state)
+  `(let (interval (ws (ps:new (-web-socket ,(generate-uri uuid)))))
+     (with-slots (onclose onopen onmessage) ws
        
-	 ;; Setup a keep-alive timer
-	 (setf interval
-	       (set-interval (lambda ()
-			       ((ps:@ ws send) ((ps:@ -j-s-o-n stringify) (ps:create :type :ping))))
-			     (ps:lisp *ping-interval*)))
+       ;; Setup a keep-alive timer
+       (setf interval
+	     (set-interval (lambda ()
+			     ((ps:@ ws send) ((ps:@ -j-s-o-n stringify) (ps:create :type :ping))))
+			   (ps:lisp *ping-interval*)))
        
-	 (setf onclose
-	       (lambda ()
-		 (peldan.ps:log-message "Connection closed")
-		 (clear-interval interval)))
+       (setf onclose
+	     (lambda ()
+	       (peldan.ps:log-message "Connection closed")
+	       (clear-interval interval)))
 	     
-	 (setf onopen
-	       (lambda ()
-		 (peldan.ps:log-message "Connection established")))
+       (setf onopen
+	     (lambda ()
+	       (peldan.ps:log-message "Connection established")))
 	     
-	 (setf onmessage
-	       (lambda (msg)
-		 (peldan.ps:log-message "Server message" msg)
-		 (let ((content (peldan.ps:json-parse (ps:@ msg data))))
-		   (with-slots (type value) content
-		     (case type
-		       (:state
-			(,set-state value))
+       (setf onmessage
+	     (lambda (msg)
+	       (peldan.ps:log-message "Server message" msg)
+	       (let ((content (peldan.ps:json-parse (ps:@ msg data))))
+		 (with-slots (type value) content
+		   (case type
+		     (:state
+		      (,set-state value))
 		      
-		       (:pong
-			(return))
+		     (:pong
+		      (return))
 		      
-		       (:message
-			(peldan.ps:log-message "Server:" (ps:@ content message)))
+		     (:message
+		      (peldan.ps:log-message "Server:" (ps:@ content message)))
 		      
-		       (t
-			(peldan.ps:log-message "Got strange message" msg)))))))
-	 ws))))
+		     (t
+		      (peldan.ps:log-message "Got strange message" msg)))))))
+       ws)))
 
 
 (defun websockets-enabled ()
