@@ -15,8 +15,10 @@
 
 (defclass hunchensocket-session (hunchensocket:websocket-resource)
   ((uuid :initarg :uuid :initform (error "UUID required") :reader session-uuid)
-   (state :initarg :state :initform '(:debug t) :reader session-state))
+   (state :initarg :state :initform '(:debug t) :reader session-state)
+   (action-log :initform nil :reader action-log))
   (:default-initargs :client-class 'hunchensocket-client))
+
 
 (defun update-state (update session)
   "Update the session's state by applying the function update to it,
@@ -27,10 +29,12 @@
     (broadcast session (state-message state))))
 
 
-(defun run-action (session name args)
+;; TODO remove this and start using peldan.action:compute-state
+(defun run-action (session action)
   "Execute an action in a given session,
  broadcasting out the change of state"
-  (update-state (apply (peldan.action:find-action name) args) 
+  (update-state (lambda (state)
+		  (peldan.action:run-action action state))
 		session))
 
 
@@ -116,6 +120,12 @@
   (make-message :type :pong))
 
 
+(defun get-action (message)
+  (make-instance 'peldan.action:action 
+		 :name (getf message :name)
+		 :args (getf message :args)))
+
+
 (defmethod text-message-received ((instance hunchensocket-session) client message)
   (format t "Got message ~s!~%" message)
   
@@ -136,8 +146,7 @@
 	   (send-message client (ping-message)))
 	      
 	  ((string= "action" type)
-	   (run-action instance 
-		       (getf message :name) (getf message :args)))
+	   (run-action instance (get-action message)))
 	      
 	  (t
 	   (send-text-message client 

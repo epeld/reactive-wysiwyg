@@ -84,7 +84,10 @@
 
 (defpackage :peldan.action
   (:use :common-lisp :parenscript :peldan.resource)
-  (:export :find-action))
+  (:export :push-action 
+	   :run-action
+	   :compute-state
+	   :action))
 
 
 (defpackage :peldan.virtual-dom
