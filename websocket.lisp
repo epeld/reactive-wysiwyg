@@ -93,11 +93,19 @@
 
 
 (defun update-state (update session)
-  "Update the sessions state by applying the function update to it"
+  "Update the session's state by applying the function update to it,
+ broadcasting out the update"
   (with-slots (state) session
     (setf state
 	  (funcall update state))
     (broadcast session (state-message state))))
+
+
+(defun run-action (session name args)
+  "Execute an action in a given session,
+ broadcasting out the change of state"
+  (update-state (apply (peldan.action:find-action name) args) 
+		session))
 
 
 (defmethod text-message-received ((instance hunchensocket-session) client message)
@@ -120,9 +128,8 @@
 	   (send-message client (ping-message)))
 	      
 	  ((string= "action" type)
-	   (update-state (apply (peldan.action:find-action (getf message :name))
-				(getf message :args)) 
-			 instance))
+	   (run-action instance 
+		       (getf message :name) (getf message :args)))
 	      
 	  (t
 	   (send-text-message client 
