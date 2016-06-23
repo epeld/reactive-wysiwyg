@@ -33,9 +33,11 @@
 (defun run-action (session action)
   "Execute an action in a given session,
  broadcasting out the change of state"
-  (update-state (lambda (state)
+  (if (stringp action)
+    (run-action session (make-instance 'action :name action))
+    (update-state (lambda (state)
 		  (peldan.action:run-action action state))
-		session))
+		session)))
 
 
 (defun generate-uuid ()
