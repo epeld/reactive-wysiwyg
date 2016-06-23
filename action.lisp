@@ -37,7 +37,8 @@
 	 :reader action-name)
    (args :initarg :args 
 	 :type list
-	 :reader action-args))
+	 :reader action-args
+	 :initform nil))
   (:documentation
   "Represents an action invocation"))
 
