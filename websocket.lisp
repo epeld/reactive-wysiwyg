@@ -40,9 +40,6 @@
 		session)))
 
 
-(defun generate-uuid ()
-  "123")
-
 
 (defun session-with-uuid (uuid &optional initial-state)
   "Returns a session with the given uuid and state
@@ -169,7 +166,7 @@
   (concatenate 'string (format nil "ws://localhost:~s/" *port*) uuid)) ;TODO give different uuids
 
 
-(defun connect-ps (initial-state set-state &optional (uuid (generate-uuid)))
+(defun connect-ps (initial-state set-state)
   "Produce PS code for connecting to this websocket server"
   ;; Ensure session exists with state
   (session-with-uuid uuid initial-state)

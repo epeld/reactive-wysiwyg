@@ -11,14 +11,8 @@
 		:htm
 		:with-html-output
 		:with-html-output-to-string)
-  (:import-from :peldan.dispatch :*handlers*)
-  (:import-from :peldan.resource :name :field-value :defgroup :members)
-  (:export :request-handler
-	   :register-component
-	   :state
-	   :action
-	   :generate-component-html
-	   :make-component))
+  (:import-from :peldan.string :generate-uuid)
+  (:export :generate-component-html))
 
 
 (defpackage :peldan.list
@@ -36,7 +30,8 @@
 	   :string-var-match
 	   :read-file-to-string
 	   :split-by
-	   :replace-all))
+	   :replace-all
+	   :generate-uuid))
 
 
 (defpackage :peldan.psx
@@ -54,26 +49,10 @@
 (defpackage :peldan.websocket
   (:use :common-lisp :hunchensocket :hunchentoot)
   (:import-from :yason :*parse-object-as* :parse :encode)
-  (:import-from :peldan.resource :defgroup :named)
   (:import-from :peldan.list :assocdr)
   (:import-from :peldan.virtual-dom :json-string)
   (:export :*port* :connect-ps :websockets-enabled))
 
-
-(defpackage :peldan.resource
-  (:use :common-lisp)
-  (:import-from :alexandria :with-gensyms)
-  (:import-from :peldan.symbol :new-symbol)
-  (:import-from :peldan.list :plist-to-alist :assocdr)
-  (:export :replace-resource
-	   :find-resource
-	   :resource
-	   :resource-name
-	   :defgroup
-	   :members
-	   :name
-	   :field-value
-	   :unique-members))
 
 
 (defpackage :peldan.symbol
@@ -83,7 +62,7 @@
 
 
 (defpackage :peldan.action
-  (:use :common-lisp :parenscript :peldan.resource)
+  (:use :common-lisp :parenscript)
   (:export :push-action 
 	   :run-action
 	   :compute-state
@@ -93,15 +72,13 @@
 (defpackage :peldan.virtual-dom
   (:use :common-lisp :parenscript)
   (:import-from :peldan.ps :load)
-  (:import-from :yason :encode :encode-alist)
   (:import-from :peldan.string :read-file-to-string :read-file-to-stream)
   (:import-from :peldan.psx :psx :psx* :diff-tree :apply-patch)
-  (:export :render-ps :json-string :read-virtual-dom-js))
+  (:export :library-ps))
 
 
 (defpackage :peldan.debugger
   (:use :common-lisp :parenscript :peldan.action :peldan.ps)
-  (:import-from :peldan.resource :members)
   (:import-from :peldan.psx :psx)
   (:export :debugger))
 

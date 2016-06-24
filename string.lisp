@@ -108,3 +108,18 @@ is replaced with replacement."
   (when (< (length prefix) (length s))
     (string-equal prefix s
 		  :end2 (length prefix))))
+
+
+(defun title-ify (string)
+  ; Currently only upper cases first letter..
+  (the string string)
+  (when (string= "" string)
+    (error "Empty string"))
+  (string-upcase (peldan.string:replace-all (string-downcase string)
+					    "-" " ")
+		 :start 0
+		 :end 1))
+
+
+(defun generate-uuid ()
+  "123")
