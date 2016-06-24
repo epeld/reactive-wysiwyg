@@ -88,28 +88,5 @@
 (ps:defpsmacro h (ml)
   (generate-hyperscript ml))
 
-(ps:ps*
- (generate-hyperscript '(:div (:class "emphasis")
-			"This will be bold"
-			(mapcar (lambda (x)
-				  (h (:p x)))
-			 (list 1 2 3))
-			(:p "child element")
-			(:p (:width "100px")
-			 "This is a child element"))))
 
-(quote (convert-to-who '(:div (:class "emphasis")
-		  "This will be bold"
-		  (:p "child element")
-		  (:p (:width "100px")
-		   "This is a child element"))))
-
-(quote (with-output-to-string (s)
-  (write-html '(:div (:class "emphasis")
-		"This will be bold"
-		(:br)
-		(:p "child element aah")
-		(:p (:width "100px")
-		 "This is a child element"))
-	      s)))
 
