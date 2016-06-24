@@ -1,61 +1,37 @@
 
-QUICK ROADMAP:
 
-We want to be able to:
-- style components individually
-
-- publish components
-
-- inspect component data, e.g by providing links in debug mode
-
-- edit/update component data using e.g http POST
-
-- trigger actions from the server
-
-- open up an action timeline (maintain log of all performed actions + initial state!)
-
-- trigger actions from a menu? in debug mode (not THAT important I guess..)
-
-- devise a schema for where data ends up e.g where do we store the action log?
-transitive state? etc
-  
----------------------------
-IMPROVEMENT:
-
-- Identify ALL resources using a uuid (including state, component, actions etc).
-This allows to edit e.g state on different pages as well as cross referencing
-and all sorts of stuff..
-
----------------------------
-DATA STRUCTURE:
-
-- Seems like we are moving towards a layered approach to state:
-we have e.g application state (data) but we also have appliation meta data
-such as:
-- Debug mode yes/no
-- uuid of state object?
-- Action timeline + initial state + current 'time position' wrt time line
+Random thoughts:
+------------------------
 
 
------------------------
-IMPROVEMENT:
+We want styling that looks like:
+(rule (selector (class "emphasis"))
+      (selector (class "other"))
+      (style
+            (:font-weight :bold)
+	    (:font-size" 1.5 (:unit "em"))))
 
-in the long run we probably also want to move away from alists and towards classes
-
+which would compile down to
+.emphasis, .other {
+  font-weight: bold;
+  font-size: 1.5em;
+}
 
 ----------------
 
+we want HTML/hyperscript that looks like:
+(:div (:class "emphasis") "This will be bold"
+      	      		  (:p "child element")
+      	      		  (:p (:width "100px") "This is a child element"))
+
+That is, no distinction between args and children. 
+When converting back to attrs, use knowledge of existing attr names to
+figure out what is what
+
+
+----------------------------
+ 
 ACTION LOG:
 
 
 server maintains a log of all actions. for every nth action it consolidates the state into a "snapshot" to improve performance
-
-
-----------------------
-
-We want a 'component-launcher'.
-
-a page where we can choose component from a dropdown list and have its source code listed
-when selected.
-
-we want to be able to specify its initial data and press "start" to see it live!
