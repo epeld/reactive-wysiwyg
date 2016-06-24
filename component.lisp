@@ -7,7 +7,7 @@
   "Generates a standard HTML 'frame' containing the passed in PS code"
   (cl-who:with-html-output-to-string (s)
     (:div (:small "Generated using component package")
-	  (:script :type "text/javascript" (library-js s))
+	  (:script :type "text/javascript" (peldan.virtual-dom:library-js s))
 		    
 	  (:script :type "text/javascript" 
 		   (let ((*parenscript-stream* s))
@@ -16,13 +16,15 @@
 
 (defun generate-component-renderer (psx)
   "Extracts (and wraps) the PS contained in this component for appearing on a page"
-  (with-ps-gensyms (state)
-    `(defun render (,state)
-       (psx (:div (when ,state
-		    (if (@ ,state debug)
-			;; Wrap in (lisp ..) form to ensure it gets reevaluated on every PS compilation
-			(lisp (peldan.debugger:debugger))
-
+  `(lambda (state)
+     (peldan.ps:log-message "Rendering")
+       
+     ;; Allow components to references state easily
+     (macrolet ((state (&rest args)
+		  `(@ state ,@args)))
+       (psx (:div (when (state)
+		    (if (state debug)
+			,(peldan.debugger:debugger)
 			(psx ,psx))))))))
 
 
@@ -46,3 +48,11 @@
        ;; Define a dummy send-message
        `(defun send-message (obj)
 	  (peldan.ps:log-warning "Cannot send message" obj)))))
+
+
+;; Test code
+(defun test-it (req)
+  (generate-component-html `(:b "Hello, " (state name)) :state '(:name "Erik" :data (:items nil))))
+
+(push 'test-it peldan.dispatch:*handlers*)
+

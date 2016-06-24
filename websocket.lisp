@@ -5,7 +5,7 @@
 
 (defparameter *port* 3344)
 
-(defparameter *ping-interval* 5000)
+(defparameter *ping-interval* 10000)
 
 (defparameter *sessions* nil)
 

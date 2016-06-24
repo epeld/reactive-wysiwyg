@@ -12,7 +12,7 @@
 		:with-html-output
 		:with-html-output-to-string)
   (:import-from :peldan.string :generate-uuid)
-  (:export :generate-component-html))
+  (:export :generate-component-html :state))
 
 
 (defpackage :peldan.list
@@ -37,7 +37,7 @@
 (defpackage :peldan.psx
   (:use :common-lisp)
   (:import-from :peldan.list :transpose :plist-to-alist :alist-to-plist)
-  (:export :psx))
+  (:export :psx :reify :diff-tree))
 
 
 (defpackage :peldan.ps
@@ -50,7 +50,7 @@
   (:use :common-lisp :hunchensocket :hunchentoot)
   (:import-from :yason :*parse-object-as* :parse :encode)
   (:import-from :peldan.list :assocdr)
-  (:import-from :peldan.virtual-dom :json-string)
+  (:import-from :peldan.virtual-dom)
   (:export :*port* :connect-ps :websockets-enabled))
 
 
@@ -74,7 +74,7 @@
   (:import-from :peldan.ps :load)
   (:import-from :peldan.string :read-file-to-string :read-file-to-stream)
   (:import-from :peldan.psx :psx :psx* :diff-tree :apply-patch)
-  (:export :library-ps))
+  (:export :library-js :action))
 
 
 (defpackage :peldan.debugger

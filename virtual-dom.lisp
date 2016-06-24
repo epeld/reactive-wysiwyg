@@ -19,14 +19,14 @@
     `(let ((,render ,render-fn))
     
        (let* ((tree (,render ,state))
-	      (element (reify tree)))
+	      (element (peldan.psx:reify tree)))
 	    
 	 ((ps:@ document body append-child) element)
 	
 	 (lambda (new-state)
 	   (setf ,state new-state)
 	   (let* ((new-tree (,render new-state))
-		  (patches (diff-tree tree new-tree)))
+		  (patches (peldan.psx:diff-tree tree new-tree)))
 	     (setf tree new-tree)
 	     (apply-patch element patches)))))))
 
@@ -36,16 +36,15 @@
   (write-string *cached-virtual-dom-js* stream)
   (write-string *cached-ps-library* stream)
   (write-string (ps* `(defun make-module (renderer)
-			(with-ps-gensyms (module)
-			  `(let ((,module (create)))
+			(let ((module (create)))
              
-			     ;; This is typically set when WS connection is established
-			     (setf (@ ,module state) nil)
+			  ;; This is typically set when WS connection is established
+			  (setf (@ module state) nil)
        
-			     (setf (@ ,module set-state)
-				   ,(render-ps renderer `(@ ,module state)))
+			  (setf (@ module set-state)
+				,(render-ps 'renderer `(@ module state)))
        
-			     ,module)))
+			  module))
 		     
 		     ;; Helper function for periodically executing an action (to be moved)
 		     `(defun continuously (action-name interval &rest args)
