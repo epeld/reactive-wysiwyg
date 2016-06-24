@@ -166,7 +166,7 @@
   (concatenate 'string (format nil "ws://localhost:~s/" *port*) uuid)) ;TODO give different uuids
 
 
-(defun connect-ps (initial-state set-state)
+(defun connect-ps (initial-state set-state uuid)
   "Produce PS code for connecting to this websocket server"
   ;; Ensure session exists with state
   (session-with-uuid uuid initial-state)
