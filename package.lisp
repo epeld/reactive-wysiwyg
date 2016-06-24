@@ -6,7 +6,7 @@
 
 
 (defpackage :peldan.component
-  (:use :common-lisp :parenscript :peldan.psx)
+  (:use :common-lisp :parenscript)
   (:import-from :cl-who 
 		:htm
 		:with-html-output
@@ -32,12 +32,6 @@
 	   :split-by
 	   :replace-all
 	   :generate-uuid))
-
-
-(defpackage :peldan.psx
-  (:use :common-lisp)
-  (:import-from :peldan.list :transpose :plist-to-alist :alist-to-plist)
-  (:export :psx :reify :diff-tree))
 
 
 (defpackage :peldan.ps
@@ -73,19 +67,16 @@
   (:use :common-lisp :parenscript)
   (:import-from :peldan.ps :load)
   (:import-from :peldan.string :read-file-to-string :read-file-to-stream)
-  (:import-from :peldan.psx :psx :psx* :diff-tree :apply-patch)
   (:export :library-js :action))
 
 
 (defpackage :peldan.debugger
   (:use :common-lisp :parenscript :peldan.action :peldan.ps)
-  (:import-from :peldan.psx :psx)
   (:export :debugger))
 
 
 (defpackage :peldan.editor
   (:use :common-lisp :parenscript :peldan.action)
-  (:import-from :peldan.psx :psx)
   (:export :generate))
 
 
@@ -100,3 +91,8 @@
 	   :map-inside
 	   :set-inside
 	   :find-keyword))
+
+
+(defpackage :peldan.ml
+  (:use :common-lisp)
+  (:export :generate-hyperscript :h))

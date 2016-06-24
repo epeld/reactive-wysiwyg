@@ -1,11 +1,5 @@
 
-
-
-'(:div (:class "emphasis")
-      "This will be bold"
-      (:p "child element")
-      (:p (:width "100px")
-          "This is a child element"))
+(in-package :peldan.ml)
 
 
 (defmacro any-of (x &rest alternatives)
@@ -44,6 +38,9 @@
 	    (contents (rest ml))
 	    children)
 	(progn 
+	  (when (not (keywordp (first ml)))
+	    (return-from write-html))
+	  
 	  (format stream "<~a" name)
        
 	  
@@ -63,45 +60,56 @@
   nil)
 
 
+
 (defun generate-hyperscript (ml)
-  (if (atom ml)
-      ml
-      (let ((name (string-downcase (first ml)))
-	    (contents (rest ml))
-	    children)
+  (when (or (atom ml) (not (keywordp (first ml))))
+    (return-from generate-hyperscript ml))
+  
+
+  (let ((name (string-downcase (first ml)))
+	(contents (rest ml))
+	children)
 	
-	`(create-element ,name
-			 (
-			  ;; items
-			  ,@(loop for (item . rest) on contents
-			       until (not (attrp item))
-			       nconc item
-			       finally (setf children (cons item rest))))
+    `(peldan.virtual-dom:create-element ,name
+					(ps:create
+					 ;; items
+					 ,@(loop for (item . rest) on contents
+					      until (not (attrp item))
+					      nconc item
+					      finally (setf children (cons item rest))))
 			 
 			 
        
-			 ,@(when children
-				(loop for child in children collect
-				     (generate-hyperscript child)))))))
+					,@(when children
+						(loop for child in children collect
+						     (generate-hyperscript child))))))
 
+;; h as in hyperscript
+(ps:defpsmacro h (ml)
+  (generate-hyperscript ml))
 
-(generate-hyperscript '(:div (:class "emphasis")
+(ps:ps*
+ (generate-hyperscript '(:div (:class "emphasis")
 			"This will be bold"
+			(mapcar (lambda (x)
+				  (h (:p x)))
+			 (list 1 2 3))
 			(:p "child element")
 			(:p (:width "100px")
-			 "This is a child element")))
+			 "This is a child element"))))
 
-(convert-to-who '(:div (:class "emphasis")
+(quote (convert-to-who '(:div (:class "emphasis")
 		  "This will be bold"
 		  (:p "child element")
 		  (:p (:width "100px")
-		   "This is a child element")))
+		   "This is a child element"))))
 
-(with-output-to-string (s)
+(quote (with-output-to-string (s)
   (write-html '(:div (:class "emphasis")
 		"This will be bold"
 		(:br)
-		(:p "child element ååh")
+		(:p "child element aah")
 		(:p (:width "100px")
 		 "This is a child element"))
-	      s))
+	      s)))
+

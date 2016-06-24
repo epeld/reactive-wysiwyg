@@ -71,8 +71,8 @@
   (with-ps-gensyms (index item)
     `(:div :class-name "list-editor"
 	   (imapcar (lambda (,index ,item)
-		      (psx ,(generate template 
-				      :data item)))
+		      (peldan.ml:h ,(generate template 
+					      :data item)))
 		    ,(if data 
 			 data
 			 `(list ,@list))))))
@@ -83,7 +83,7 @@
 ;; then we need functions for producing e.g actions and classes etc
 ;; class lambda, action lambda
 (defun generate (object &key data)
-  "Generate psx for editing object. Use the second arg to make it a live view"
+  "Generate hyperscript for editing object. Use the second arg to make it a live view"
   (etypecase object
     ;; 
     ;; Composites
@@ -100,15 +100,6 @@
     (number
      `(:input :value ,(or data object)))))
 
-
-(defun anonymous-editor (initial-state)
-  "Create an anonymous editor for the state passed in"
-  (peldan.component:make-component 
-   'anonymous-component
-   :code `(psx ,(generate initial-state))
-   :initial-state `(peldan.ps:json-parse 
-		    ,(with-output-to-string (s) 
-					    (yason:encode initial-state s)))))
 
 
 (defun generate-editor-html (data)
@@ -128,7 +119,7 @@
 	    (:div "JS:"
 		  (:pre :class "result"
 			(let ((*parenscript-stream* s))
-			  (ps* `(psx ,code)))))
+			  (ps* `(peldan.ml:h ,code)))))
 		      
 	    (cl-who:fmt (peldan.component:generate-component-html (anonymous-editor data)))))))
 

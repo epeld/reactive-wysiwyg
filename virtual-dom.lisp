@@ -13,20 +13,34 @@
   (ps* *ps-lisp-library*))
 
 
+;; Macros to try and hide which virtual dom library we are using
+(ps:defpsmacro create-element (name attrs &rest children)
+  `((ps:@ virtual-dom h) ,name ,attrs (list ,@children)))
+
+(ps:defpsmacro reify (arg)
+  `((ps:@ virtual-dom create) ,arg))
+
+(ps:defpsmacro diff-tree (old new)
+  `((ps:@ virtual-dom diff) ,old ,new))
+
+(ps:defpsmacro apply-patch (element patches)
+  `((ps:@ virtual-dom patch) ,element ,patches))
+
+
 (defun render-ps (render-fn state)
   "Defines a PS block that will render and attach a new element to BODY"
   (with-ps-gensyms (render)
     `(let ((,render ,render-fn))
     
        (let* ((tree (,render ,state))
-	      (element (peldan.psx:reify tree)))
+	      (element (reify tree)))
 	    
 	 ((ps:@ document body append-child) element)
 	
 	 (lambda (new-state)
 	   (setf ,state new-state)
 	   (let* ((new-tree (,render new-state))
-		  (patches (peldan.psx:diff-tree tree new-tree)))
+		  (patches (diff-tree tree new-tree)))
 	     (setf tree new-tree)
 	     (apply-patch element patches)))))))
 

@@ -14,7 +14,7 @@
 		     (apply #'ps* ps))))))
 
 
-(defun generate-component-renderer (psx)
+(defun generate-component-renderer (h)
   "Extracts (and wraps) the PS contained in this component for appearing on a page"
   `(lambda (state)
      (peldan.ps:log-message "Rendering")
@@ -22,18 +22,18 @@
      ;; Allow components to references state easily
      (macrolet ((state (&rest args)
 		  `(@ state ,@args)))
-       (psx (:div (when (state)
-		    (if (state debug)
-			,(peldan.debugger:debugger)
-			(psx ,psx))))))))
+       (peldan.ml:h (:div (when (state)
+			    (if (state debug)
+				,(peldan.debugger:debugger)
+				(peldan.ml:h ,h))))))))
 
 
-(defun generate-component-html (psx &key state (uuid (generate-uuid)))
+(defun generate-component-html (h &key state (uuid (generate-uuid)))
   (generate-html
    
    ;; Define the component module
    `(defvar component
-      (make-module ,(generate-component-renderer psx)))
+      (make-module ,(generate-component-renderer h)))
    
    ;; Web socket support
    (if (and uuid (peldan.websocket:websockets-enabled))
@@ -54,5 +54,4 @@
 (defun test-it (req)
   (generate-component-html `(:b "Hello, " (state name)) :state '(:name "Erik" :data (:items nil))))
 
-(push 'test-it peldan.dispatch:*handlers*)
 
