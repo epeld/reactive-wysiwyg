@@ -15,11 +15,6 @@
   (:export :generate-component-html :state))
 
 
-(defpackage :peldan.list
-  (:use :common-lisp)
-  (:export :transpose :alist-to-plist :plist-to-alist))
-
-
 (defpackage :peldan.string
   (:use :common-lisp)
   (:import-from :alexandria :with-gensyms)
@@ -46,12 +41,6 @@
   (:import-from :peldan.list :assocdr)
   (:import-from :peldan.virtual-dom)
   (:export :*port* :connect-ps :websockets-enabled))
-
-
-
-(defpackage :peldan.symbol
-  (:use :common-lisp)
-  (:export :new-symbol))
 
 
 
