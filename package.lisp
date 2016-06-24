@@ -67,7 +67,7 @@
   (:use :common-lisp :parenscript)
   (:import-from :peldan.ps :load)
   (:import-from :peldan.string :read-file-to-string :read-file-to-stream)
-  (:export :library-js :action))
+  (:export :library-js :action :create-element))
 
 
 (defpackage :peldan.debugger
