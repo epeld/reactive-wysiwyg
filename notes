@@ -20,11 +20,13 @@ which would compile down to
 ----------------
 
 we want HTML/hyperscript that looks like:
-(:div (:class "emphasis") "This will be bold"
-      	      		  (:p "child element")
-      	      		  (:p (:width "100px") "This is a child element"))
+(:div (:class "emphasis")
+      "This will be bold"
+      (:p "child element")
+      (:p (:width "100px")
+          "This is a child element"))
 
-That is, no distinction between args and children. 
+That is, no distinction between attrs and children. 
 When converting back to attrs, use knowledge of existing attr names to
 figure out what is what
 
@@ -35,3 +37,5 @@ ACTION LOG:
 
 
 server maintains a log of all actions. for every nth action it consolidates the state into a "snapshot" to improve performance
+
+for general usage we just need a "latest" snapshot really
