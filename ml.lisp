@@ -89,4 +89,38 @@
   (generate-hyperscript ml))
 
 
+(defun find-children-by-tag-name (name el)
+  "find all children with a given tag name"
+  (remove-if-not (lambda (el)
+		  (and (consp el)
+		       (eq (first el) 
+			   name)))
+	     (rest el)))
+
+
+(defun join (element &rest others)
+  "Create a new element with same tag name as element and all children"
+  `(element
+    ,@(rest element)
+    ,@(loop for other in others
+	   nconc (rest other))))
+
+
+(defun write-css (ml &optional (stream *standard-output*))
+  (assert (eq (first ml) 'rule))
+  (let ((selectors (find-children-by-tag-name 'selector ml))
+	(styles (find-children-by-tag-name 'style ml)))
+    (format stream "~s" (apply #'join styles))))
+
+
+(defvar example
+  '(rule 
+    (selector (class "emphasis"))
+    (selector (class "other"))
+    (style
+     (:font-weight :bold)
+     (:font-size 1.5 (:unit "em")))))
+
+
+(write-css example)
 

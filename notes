@@ -9,7 +9,7 @@ We want styling that looks like:
       (selector (class "other"))
       (style
             (:font-weight :bold)
-	    (:font-size" 1.5 (:unit "em"))))
+	    (:font-size 1.5 (:unit "em")))))
 
 which would compile down to
 .emphasis, .other {
