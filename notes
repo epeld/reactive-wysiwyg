@@ -12,4 +12,22 @@ for general usage we just need a "latest" snapshot really
 
 -------------------------
 
+make new endpoints!
 we want to allow viewing open sessions as well as modifying the data live
+
+
+
+-----------------------------
+
+We want different kinds of sessions, e.g stateful sessions, meta sessions etc
+
+a session should be able to:
+- handle a given set of actions
+- return its current state as a plist
+
+if we create a stateful session, we can then specialize its generic action handling method
+for doing what we want. This also creates a nice way of separating example actions into
+a stateful-example-session so that they don't pollute the rest of the code
+
+TODO figure out how we want the 'stateful' class to behave. this is the basis
+for our standard ws sessions
