@@ -46,8 +46,11 @@
 		 ((@ component ws send) (peldan.ps:json-stringify obj))))
        
        ;; Define a dummy send-message
-       `(defun send-message (obj)
-	  (peldan.ps:log-warning "Cannot send message" obj)))))
+       `(progn (defun send-message (obj)
+		 (peldan.ps:log-warning "Cannot send message" obj))
+	       
+	       ;; TODO pass state to client as JSON
+	       ((@ component set-state) (peldan.ps:json-parse "{}"))))))
 
 
 ;; Test code
