@@ -98,14 +98,6 @@
 	     (rest el)))
 
 
-(defun join (element &rest others)
-  "Create a new element with same tag name as element and all children"
-  `(element
-    ,@(rest element)
-    ,@(loop for other in others
-	   nconc (rest other))))
-
-
 (defun write-selector (selector stream)
   (write-string (ecase (first selector)
 			(class (concatenate 'string "." (second selector)))
