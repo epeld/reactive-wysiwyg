@@ -14,6 +14,8 @@
 
 (defun request-handler (req)
   (when (string= "/sessions" (hunchentoot:script-name req))
+    ;; TODO move into separate function in a different package
+    ;; to avoid circular dependencies between component and debugger
     (peldan.component:generate-component-html
      `(:div (:class "sessions")
 	    (:h1 "Open Sessions")
