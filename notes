@@ -2,36 +2,6 @@
 
 Random thoughts:
 ------------------------
-
-
-We want styling that looks like:
-(rule (selector (class "emphasis"))
-      (selector (class "other"))
-      (style
-            (:font-weight :bold)
-	    (:font-size 1.5 (:unit "em")))))
-
-which would compile down to
-.emphasis, .other {
-  font-weight: bold;
-  font-size: 1.5em;
-}
-
-----------------
-
-we want HTML/hyperscript that looks like:
-(:div (:class "emphasis")
-      "This will be bold"
-      (:p "child element")
-      (:p (:width "100px")
-          "This is a child element"))
-
-That is, no distinction between attrs and children. 
-When converting back to attrs, use knowledge of existing attr names to
-figure out what is what
-
-
-----------------------------
  
 ACTION LOG:
 
