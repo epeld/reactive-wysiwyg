@@ -124,6 +124,7 @@
   (let ((selectors (first (find-children-by-tag-name 'select ml)))
 	(styles (first (find-children-by-tag-name 'style ml))))
     
+    ;; The selector block
     (if selectors
 	(loop for (selector . next) on (rest selectors)
 	   do (write-selector selector stream)
@@ -132,6 +133,7 @@
 	
 	(write-string "*" stream))
     
+    ;; The attr block
     (write-string " {
     " stream)
     
