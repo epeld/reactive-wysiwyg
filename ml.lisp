@@ -99,10 +99,15 @@
 
 
 (defun write-selector (selector stream)
-  (write-string (ecase (first selector)
-			(class (concatenate 'string "." (second selector)))
-			(id (concatenate 'string "#" (second selector))))
-		      stream))
+  (ecase (first selector)
+    (class (format stream ".~a" (second selector)))
+    (id (format stream "#~a" (second selector)))
+    (and (loop for s in (rest selector)
+	    do (write-selector s stream)))
+    (descendant (loop for (part . next) on (rest selector)
+		   do (write-selector part stream)
+		   unless (endp next)
+		   do (write-string " " stream))))))
 
 (defun write-style (style stream)
   (format stream "~(~a~): ~(~a~)~a" 
@@ -143,6 +148,8 @@
   '(rule 
     (select 
      (id "hello")
+     (descendant (class "nested") (and (class "child")
+				       (class "child2")))
      (class "emphasis")
      (class "other"))
     (style
