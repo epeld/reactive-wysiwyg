@@ -9,3 +9,7 @@ ACTION LOG:
 server maintains a log of all actions. for every nth action it consolidates the state into a "snapshot" to improve performance
 
 for general usage we just need a "latest" snapshot really
+
+-------------------------
+
+we want to allow viewing open sessions as well as modifying the data live
