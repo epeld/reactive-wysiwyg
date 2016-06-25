@@ -40,7 +40,13 @@
   (:import-from :yason :*parse-object-as* :parse :encode)
   (:import-from :peldan.list :assocdr)
   (:import-from :peldan.virtual-dom)
-  (:export :*port* :connect-ps :websockets-enabled))
+  (:export :*port* 
+	   :connect-ps
+	   :websockets-enabled
+	   :*sessions*
+	   :session-uuid
+	   :session-state
+	   :action-log))
 
 
 
