@@ -12,7 +12,7 @@
   "Determine if a node should be serialized as an attr"
   (and (consp item)
        (any-of (first item)
-	       :class :width :height :size)))
+	       :class :width :height :size :href)))
 
 
 (defun convert-to-who (ml)
