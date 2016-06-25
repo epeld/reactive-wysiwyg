@@ -106,21 +106,57 @@
 	   nconc (rest other))))
 
 
+(defun write-selector (selector stream)
+  (write-string (ecase (first selector)
+			(class (concatenate 'string "." (second selector)))
+			(id (concatenate 'string "#" (second selector))))
+		      stream))
+
+(defun write-style (style stream)
+  (format stream "~(~a~): ~(~a~)~a" 
+	  (first style)
+	  (second style)
+	  (or (second (third style)) "")))
+
+
 (defun write-css (ml &optional (stream *standard-output*))
   (assert (eq (first ml) 'rule))
-  (let ((selectors (find-children-by-tag-name 'selector ml))
-	(styles (find-children-by-tag-name 'style ml)))
-    (format stream "~s" (apply #'join styles))))
+  (let ((selectors (first (find-children-by-tag-name 'select ml)))
+	(styles (first (find-children-by-tag-name 'style ml))))
+    
+    (if selectors
+	(loop for (selector . next) on (rest selectors)
+	   do (write-selector selector stream)
+	   unless (endp next)
+	   do (write-string ", " stream))
+	
+	(write-string "*" stream))
+    
+    (write-string " {
+    " stream)
+    
+    (loop for (style . next) on (rest styles)
+       do (write-style style stream)
+       unless (endp next)
+       do (write-string ";
+    " stream))
+    
+    (write-string "
+}" stream)))
 
 
-(defvar example
+(setq example
   '(rule 
-    (selector (class "emphasis"))
-    (selector (class "other"))
+    (select 
+     (id "hello")
+     (class "emphasis")
+     (class "other"))
     (style
      (:font-weight :bold)
      (:font-size 1.5 (:unit "em")))))
 
 
-(write-css example)
+(with-output-to-string (s)
+  (write-css example s))
+
 
