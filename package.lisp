@@ -17,12 +17,8 @@
 
 (defpackage :peldan.string
   (:use :common-lisp)
-  (:import-from :alexandria :with-gensyms)
-  (:import-from :peldan.list :transpose)
   (:export :strings-bind
 	   :starts-with-p
-	   :string-bind-case
-	   :string-var-match
 	   :read-file-to-string
 	   :split-by
 	   :replace-all
@@ -31,8 +27,18 @@
 
 (defpackage :peldan.ps
   (:use :common-lisp :parenscript)
-  (:import-from :peldan.list :transpose)
   (:export :log-message :log-warning :json-stringify :json-parse))
+
+
+(defpackage :peldan.state
+  (:use :common-lisp)
+  (:export :stateful 
+	   :action
+	   :execute
+	   :current-state
+	   :app-state
+	   :execute
+	   :toggle-debug))
 
 
 (defpackage :peldan.websocket
@@ -43,19 +49,8 @@
   (:export :*port* 
 	   :connect-ps
 	   :websockets-enabled
-	   :*sessions*
-	   :session-uuid
-	   :session-state
-	   :action-log))
+	   :*sessions*))
 
-
-
-(defpackage :peldan.action
-  (:use :common-lisp :parenscript)
-  (:export :push-action 
-	   :run-action
-	   :compute-state
-	   :action))
 
 
 (defpackage :peldan.virtual-dom
@@ -66,18 +61,8 @@
 
 
 (defpackage :peldan.debugger
-  (:use :common-lisp :parenscript :peldan.action :peldan.ps)
+  (:use :common-lisp :parenscript :peldan.ps)
   (:export :debugger))
-
-
-(defpackage :peldan.editor
-  (:use :common-lisp :parenscript :peldan.action)
-  (:export :generate))
-
-
-(defpackage :peldan.import
-  (:use :common-lisp :parenscript :drakma)
-  (:import-from :cl-html-parse :parse-html))
 
 
 (defpackage :peldan.data

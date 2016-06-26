@@ -14,15 +14,16 @@
 	       #:cl-html-parse
 	       #:yason)
   :serial t
-  :components ((:file "package")
+  :components ((:file "package") 	;TODO this is a mess. fix
 	       (:file "dispatch")
 	       (:file "component")
-	       (:file "list")
-	       (:file "symbol")
-	       (:file "websocket" :depends-on ("resource"))
-	       (:file "resource" :depends-on ("symbol"))
-	       (:file "string" :depends-on ("list"))
-	       (:file "ps" :depends-on ("list"))
-	       (:file "psx" :depends-on ("list"))
-	       (:file "simple" :depends-on ("ps" "component"))))
+	       (:file "stateful")
+	       (:file "app-state" :depends-on ("stateful"))
+	       (:file "messages")
+	       (:file "session")
+	       (:file "websocket" :depends-on ("messages" "session"))
+	       (:file "string")
+	       (:file "ps")
+	       (:file "virtual-dom" :depends-on ("ps" "string"))
+	       (:file "ml" :depends-on ("virtual-dom"))))
 
