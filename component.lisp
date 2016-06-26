@@ -57,6 +57,7 @@
 (defun test-it (req)
   (generate-component-html `(:b "Hello, " (state name)
 				(:div "This is a child div, " (state name) ", but you knew that already"))
-			   :state '(:name "Erik" :data (:items nil))))
+			   :state '(:name "Erik" :data (:items nil))
+			   :uuid "12345"))
 
 
