@@ -122,4 +122,13 @@ is replaced with replacement."
 
 
 (defun generate-uuid ()
-  "123")
+  "Generates a uuid of the form 6ABE-CCF6-9A26-1DBC"
+  (with-output-to-string (s)
+    (let ((parts 4))
+      (loop for i from 1 upto parts do
+	   (loop for j from 1 upto 4 collect
+		(write (random 16)
+		       :base 16
+		       :stream s))
+	 when (/= i parts)
+	 do (write-string "-" s)))))
