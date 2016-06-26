@@ -12,10 +12,16 @@
 (defclass hunchensocket-client (websocket-client)
   ())
 
+(defclass identifiable ()
+  ((uuid :initarg :uuid :initform (error "UUID required") :reader uuid))
+  (:documentation "Supports being identified by a uuid"))
 
-(defclass hunchensocket-session (hunchensocket:websocket-resource)
-  ((uuid :initarg :uuid :initform (error "UUID required") :reader session-uuid)
-   (state :initarg :state :initform '(:debug t) :reader session-state)
+;; TODO extract out the uuid part
+;; TODO define generic methods (current-state session) (run-action session action)
+;; TODO how to instantiate new actions from string? find-symbol?
+;; maybe let that be another generic method TODO
+(defclass hunchensocket-session (hunchensocket:websocket-resource identifiable)
+  ((state :initarg :state :initform '(:debug t) :reader session-state)
    (action-log :initform nil :reader action-log))
   (:default-initargs :client-class 'hunchensocket-client))
 
@@ -166,6 +172,11 @@
   (concatenate 'string (format nil "ws://localhost:~s/" *port*) uuid)) ;TODO give different uuids
 
 
+;; TODO split up session creation from PS generation
+;; TODO consider NOT creating a session here ever. 
+;; instead, demand that session was created before-hand
+;; have a mechanism for automatic clean-up of expired sessions
+;; TODO make use client IP to generate a session UUID? same client gets same session
 (defun connect-ps (initial-state set-state uuid)
   "Produce PS code for connecting to this websocket server"
   ;; Ensure session exists with state

@@ -25,7 +25,8 @@
 
 
 (defclass stateful ()
-  ((initial-state :initarg :initial-state)
+  ((state :initarg :initform) 		;TODO how to initialize to initial-state?
+   (initial-state :initarg :initial-state)
    (action-log :initform nil :reader action-log))
   (:documentation "Represents something that has state"))
 
