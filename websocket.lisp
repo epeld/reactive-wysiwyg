@@ -15,13 +15,15 @@
   (let ((uuid (subseq (script-name request) 
 		      1)))
     (format t "~&Got WS request for ~a" uuid)
-    (session-with-uuid uuid)))
+    (find uuid *sessions* 
+	  :key #'uuid
+	  :test #'string-equal)))
 
 
-(defun broadcast (instance message)
+(defun broadcast (session message)
   "Broadcast a message to all a session's clients"
-  (loop for client in (clients instance)
-       do (send-text-message client message)))
+  (loop for client in (clients session)
+       do (send-message client message)))
 
 
 (defun send-message (client message)

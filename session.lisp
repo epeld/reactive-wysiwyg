@@ -20,8 +20,27 @@
   ((actions :initarg :actions
 	    :reader actions
 	    :type list
-	    :documentation "an alist of (string . symbol) mapping strings to actions")))
+	    :documentation "an alist of (string . symbol) mapping strings to actions"))
   (:default-initargs :client-class 'hunchensocket-client))
+
+
+;; After every action, broadcast state to clients
+(defmethod peldan.state:execute :after (action (s session))
+  (broadcast s (state-message (current-state s))))
+
+
+(defclass app-session (session app-state)
+  ()
+  (:documentation "A standard app session"))
+
+
+;; TODO make this contain a list of all normal sessions!
+(defclass meta-session (session)
+  () 
+  (:documentation "A session about sessions"))
+
+
+
 
 
 (defun print-stacktrace (c)

@@ -27,8 +27,9 @@
     (push (slot-value stateful 'action-log)
 	  action)))
 
-(defmethod execute ((a action) (s app-state))
-  (run-action a s))
+
+(defmethod execute (action (s app-state))
+  (run-action action s))
 
 
 (defun toggle-debug (state)
