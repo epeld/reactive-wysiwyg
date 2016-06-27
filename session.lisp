@@ -2,7 +2,7 @@
 (in-package :peldan.websocket)
 
 (defparameter *message-handlers* 
-  `(("ping" . pong)
+  '(("ping" . pong)
     ("action" . run-action))
   "Handlers for websocket message types")
 
@@ -20,7 +20,6 @@
 
 (defclass session (hunchensocket:websocket-resource identifiable)
   ((actions :initarg :actions
-	    :initform '(("debug" . peldan.state:toggle-debug))
 	    :reader actions
 	    :type list
 	    :documentation "an alist of (string . symbol) mapping strings to actions"))
@@ -35,17 +34,14 @@
 
 (defclass app-session (peldan.state:app-state session)
   ()
-  (:documentation "A standard app session"))
-
-
-;; TODO make this contain a list of all normal sessions!
-(defclass meta-session (session)
-  () 
-  (:documentation "A session about sessions"))
+  (:documentation "A standard app session")
+  (:default-initargs :actions '(("debug" . peldan.state:toggle-debug))))
 
 
 
-
+;; 
+;; Helpers
+;;  
 
 (defun print-stacktrace (c)
   (format *standard-output* "Error: ~a~%~%~%" c)

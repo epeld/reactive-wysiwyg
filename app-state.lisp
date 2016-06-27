@@ -2,8 +2,7 @@
 
 
 (defclass app-state (stateful)
-  ((action-log :initform nil :reader action-log)
-   (initial-state :reader initial-state)
+  ((initial-state :reader initial-state)
    (state :initarg :state :reader current-state))
   (:documentation "More concrete example of having state"))
 
@@ -24,20 +23,14 @@
 
 
 
-(defun run-action (action stateful)
-  "Execute an action on the given stateful"
-  (the stateful stateful)
+(defmethod execute (action (s app-state))
   (the action action)
   (let ((fn (if (= 1 (length action))
 		(symbol-function (first action))
 		(eval action))))
     
-    (update-state (the function fn) stateful)
-    (push action (slot-value stateful 'action-log))))
-
-
-(defmethod execute (action (s app-state))
-  (run-action action s))
+    (update-state (the function fn) s)
+    (call-next-method)))
 
 
 (defun toggle-debug (state)

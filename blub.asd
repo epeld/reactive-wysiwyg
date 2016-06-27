@@ -17,9 +17,10 @@
   :components ((:file "package") 	;TODO this is a mess. fix
 	       (:file "dispatch")
 	       (:file "component")
-	       (:file "stateful")
+	       (:file "stateful")	       
+	       (:file "meta" :depends-on ("session"))
 	       (:file "app-state" :depends-on ("stateful"))
-	       (:file "websocket" :depends-on ("session"))
+	       (:file "websocket" :depends-on ("session" "meta"))
 	       (:file "messages")
 	       (:file "session" :depends-on ("messages" "stateful" "app-state"))
 	       (:file "string")

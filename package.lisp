@@ -12,7 +12,8 @@
 		:with-html-output
 		:with-html-output-to-string)
   (:import-from :peldan.string :generate-uuid)
-  (:export :generate-component-html :state))
+  (:export :generate-component-html 
+	   :state))
 
 
 (defpackage :peldan.string
@@ -50,7 +51,10 @@
 	   :websockets-enabled
 	   :*sessions*
 	   :app-session
-	   :meta-session))
+	   :meta-session
+	   :add-session
+	   :clear-sessions
+	   :*meta*))
 
 
 

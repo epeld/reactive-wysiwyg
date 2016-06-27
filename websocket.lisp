@@ -9,16 +9,20 @@
 
 (defparameter *sessions* nil)
 
+(defparameter *meta*
+  (make-instance 'meta-session
+		 :uuid "meta")
+  "The session of sessions")
+
+
 
 
 (defun request-handler (request)
   "Hunchensocket request dispatch function"
   (let ((uuid (subseq (script-name request) 
 		      1)))
-    (format t "~&Got WS request for ~a" uuid)
-    (find uuid *sessions* 
-	  :key #'uuid
-	  :test #'string-equal)))
+    (format t "~&Got WS request for ~a~%" uuid)
+    (find-session uuid *meta*)))
 
 
 (defun broadcast (session message)

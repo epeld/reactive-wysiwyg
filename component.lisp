@@ -53,10 +53,13 @@
 
 
 ;; Test code
-(push (make-instance 'peldan.websocket:app-session 
-		     :state '(:name "Esbjorn")
-		     :uuid "12345")
-      peldan.websocket:*sessions*)
+
+(peldan.websocket:add-session (make-instance 'peldan.websocket:app-session 
+					     :state '(:name "Esbjorn")
+					     :uuid "12345")
+			      peldan.websocket:*meta*)
+
+(peldan.websocket:clear-sessions peldan.websocket:*meta*)
 
 
 (defun test-it (req)
