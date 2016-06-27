@@ -26,7 +26,7 @@
 	    :documentation "an alist of (string . symbol) mapping strings to actions"))
   (:default-initargs :client-class 'hunchensocket-client))
 
-; (remove-method #'initialize-instance (find-method #'initialize-instance '(:after) '(stateful)))
+
 
 ;; After every action, broadcast state to clients
 (defmethod peldan.state:execute :after (action (s session))
