@@ -28,7 +28,7 @@
 				(peldan.ml:h ,h))))))))
 
 
-(defun generate-component-html (h &key state (uuid (generate-uuid)))
+(defun generate-component-html (h &key (session-uuid (generate-uuid)))
   (generate-html
    
    ;; Define the component module
@@ -36,11 +36,10 @@
       (make-module ,(generate-component-renderer h)))
    
    ;; Web socket support
-   (if (and uuid (peldan.websocket:websockets-enabled))
+   (if (and session-uuid (peldan.websocket:websockets-enabled))
        `(progn (setf (@ component ws)
-		     ,(peldan.websocket:connect-ps state 
-						   `(@ component set-state)
-						   uuid))
+		     ,(peldan.websocket:connect-ps `(@ component set-state)
+						   session-uuid))
 	       (defun send-message (obj)
 		 (peldan.ps:log-message "Sending" obj)
 		 ((@ component ws send) (peldan.ps:json-stringify obj))))
@@ -54,10 +53,15 @@
 
 
 ;; Test code
+(push (make-instance 'peldan.websocket:app-session 
+		     :state '(:name "Esbjorn")
+		     :uuid "12345")
+      peldan.websocket:*sessions*)
+
+
 (defun test-it (req)
   (generate-component-html `(:b "Hello, " (state name)
 				(:div "This is a child div, " (state name) ", but you knew that already"))
-			   :state '(:name "Erik" :data (:items nil))
-			   :uuid "12345"))
+			   :session-uuid "12345"))
 
 

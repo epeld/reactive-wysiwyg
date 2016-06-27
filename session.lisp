@@ -1,9 +1,9 @@
 
 (in-package :peldan.websocket)
 
-(defvar *message-handlers* 
-  '(("ping" . #'pong)
-    ("action" . #'run-action))
+(defparameter *message-handlers* 
+  `(("ping" . pong)
+    ("action" . run-action))
   "Handlers for websocket message types")
 
 
@@ -12,24 +12,28 @@
 
 
 (defclass identifiable ()
-  ((uuid :initarg :uuid :initform (error "UUID required") :reader uuid))
+  ((uuid :initarg :uuid 
+	 :initform (error "UUID required") 
+	 :reader uuid))
   (:documentation "Supports being identified by a uuid"))
 
 
 (defclass session (hunchensocket:websocket-resource identifiable)
   ((actions :initarg :actions
+	    :initform '(("debug" . peldan.state:toggle-debug))
 	    :reader actions
 	    :type list
 	    :documentation "an alist of (string . symbol) mapping strings to actions"))
   (:default-initargs :client-class 'hunchensocket-client))
 
+; (remove-method #'initialize-instance (find-method #'initialize-instance '(:after) '(stateful)))
 
 ;; After every action, broadcast state to clients
 (defmethod peldan.state:execute :after (action (s session))
-  (broadcast s (state-message (current-state s))))
+  (broadcast s (state-message (peldan.state:current-state s))))
 
 
-(defclass app-session (session app-state)
+(defclass app-session (peldan.state:app-state session)
   ()
   (:documentation "A standard app session"))
 
@@ -44,15 +48,16 @@
 
 
 (defun print-stacktrace (c)
-  (format t "Error: ~a" c)
+  (format *standard-output* "Error: ~a~%~%~%" c)
   (sb-debug:print-backtrace :stream *standard-output*
-			    :from :interrupted-frame))
+			    :count 15))
 
 
 (defun find-handler (type &optional (handlers *message-handlers*))
   "Find an appropriate handler based on a message type"
-  (or (cdr (assoc type handlers :test #'string-equal))
-      #'unknown-message))
+  (the (or symbol function)
+       (or (cdr (assoc type handlers :test #'string-equal))
+	   #'unknown-message)))
 
 
 (defun handle-client-message (instance client message)
@@ -66,7 +71,7 @@
 (defmethod client-connected ((instance session) client)
   (format t "Client connected to ~a!~%" (uuid instance))
   (send-message client (hello-message))
-  (send-message client (state-message (current-state instance))))
+  (send-message client (state-message (peldan.state:current-state instance))))
 
 
 (defmethod client-disconnected ((instance session) client)
@@ -75,7 +80,8 @@
 
 
 (defmethod text-message-received ((instance session) client message)
-  (handler-bind ((error #'print-stacktrace))
+  (handler-bind ((warning #'print-stacktrace)
+		 (error #'print-stacktrace))
     (let ((message (parse message :object-as :plist :object-key-fn #'peldan.data:find-keyword)))
       (format t "Message from client: ~s~%" message)
       (handle-client-message instance client message))))

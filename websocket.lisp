@@ -10,6 +10,7 @@
 (defparameter *sessions* nil)
 
 
+
 (defun request-handler (request)
   "Hunchensocket request dispatch function"
   (let ((uuid (subseq (script-name request) 
@@ -43,18 +44,11 @@
 
 
 (defun generate-uri (uuid)
-  (concatenate 'string (format nil "ws://localhost:~s/" *port*) uuid)) ;TODO give different uuids
+  (concatenate 'string (format nil "ws://localhost:~s/" *port*) uuid))
 
 
-;; TODO split up session creation from PS generation
-;; TODO consider NOT creating a session here ever. 
-;; instead, demand that session was created before-hand
-;; have a mechanism for automatic clean-up of expired sessions
-;; TODO make use client IP to generate a session UUID? same client gets same session
-(defun connect-ps (initial-state set-state uuid)
+(defun connect-ps (set-state uuid)
   "Produce PS code for connecting to this websocket server"
-  ;; Ensure session exists with state
-  (session-with-uuid uuid initial-state)
   `(let (interval (ws (ps:new (-web-socket ,(generate-uri uuid)))))
      (with-slots (onclose onopen onmessage) ws
        

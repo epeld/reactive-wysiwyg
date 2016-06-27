@@ -36,7 +36,7 @@
 ;; Helpers
 ;; 
 
-(defun resolve-symbol (name alist)
+(defun resolve-symbol (alist name)
   "Given a list of (string . symbol) pairs, lookup name"
   (let ((fn (cdr (assoc name alist :test #'string-equal))))
   

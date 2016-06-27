@@ -44,12 +44,13 @@
 (defpackage :peldan.websocket
   (:use :common-lisp :hunchensocket :hunchentoot)
   (:import-from :yason :*parse-object-as* :parse :encode)
-  (:import-from :peldan.list :assocdr)
   (:import-from :peldan.virtual-dom)
   (:export :*port* 
 	   :connect-ps
 	   :websockets-enabled
-	   :*sessions*))
+	   :*sessions*
+	   :app-session
+	   :meta-session))
 
 
 
@@ -76,3 +77,4 @@
 (defpackage :peldan.ml
   (:use :common-lisp)
   (:export :generate-hyperscript :h))
+
