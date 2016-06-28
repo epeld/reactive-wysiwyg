@@ -1,10 +1,12 @@
 
 (in-package :peldan.websocket)
 
+
+
 ;; 
 ;; Meta
 ;; 
-(defun find-session (uuid meta)
+(defun find-session (uuid &optional (meta *meta*))
   "Find a session within the meta session"
   (if (string-equal uuid (uuid meta))
     meta
@@ -30,16 +32,18 @@
   (setf (slot-value meta 'peldan.state:action-log) nil)
   (clear-sessions meta))
 
-(defclass meta-session (peldan.state:stateful session)
-  ((sessions :type list
-	     :reader sessions
+(defclass meta-session (base-session peldan.state:stateful)
+  ((se2ssions :type list
+	     :reader session3s
 	     :initform nil)
    (app-session-class :type class
 		      :initform 'app-session)) 
   (:documentation "A session about sessions")
-  (:default-initargs :actions '(("add" . add-session)
-				("clear" . clear-sessions)
-				("reset" . reset))))
+  (:default-initargs 
+      :actions '(("add" . add-session)
+		 ("clear" . clear-sessions)
+		 ("reset" . reset))
+    :client-class 'hunchensocket-client))
 
 
 (defmethod yason:encode ((s meta-session) &optional (stream *standard-output*))
@@ -57,8 +61,7 @@
   (funcall fn s))
 
 
-(peldan.state:execute '(add-session (:name "Abraham") "123453") *meta*)
+;(peldan.state:execute '(add-session (:name "Abraham") "123453") *meta*)
 ;(peldan.state:execute '(clear-sessions) *meta*)
-(broadcast-state *meta*)
-
+;(broadcast-state *meta*)
 

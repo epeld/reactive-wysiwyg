@@ -11,15 +11,13 @@
 
   ;; Go through the list of handlers until one handles the request
   (loop for fn in *handlers*
-       
-     do (let ((reply (funcall fn request)))
-	  (when reply
-	    (return-from central-dispatch reply)))))
+     for reply = (funcall fn request)
+     until reply
+     finally (return (or reply "404"))))
 
 
 
 (define-easy-handler (central-handler :uri (constantly t)) ()
-  
   (central-dispatch *request*))
 
 

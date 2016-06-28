@@ -52,19 +52,6 @@
 	       ((@ component set-state) (peldan.ps:json-parse "{}"))))))
 
 
-;; Test code
 
-(peldan.websocket:add-session (make-instance 'peldan.websocket:app-session 
-					     :state '(:name "Esbjorn")
-					     :uuid "12345")
-			      peldan.websocket:*meta*)
-
-(peldan.websocket:clear-sessions peldan.websocket:*meta*)
-
-
-(defun test-it (req)
-  (generate-component-html `(:b "Hello, " (state name)
-				(:div "This is a child div, " (state name) ", but you knew that already"))
-			   :session-uuid "12345"))
 
 

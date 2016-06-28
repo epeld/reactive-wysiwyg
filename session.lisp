@@ -18,7 +18,7 @@
   (:documentation "Supports being identified by a uuid"))
 
 
-(defclass session (hunchensocket:websocket-resource identifiable)
+(defclass base-session (hunchensocket:websocket-resource identifiable)
   ((actions :initarg :actions
 	    :reader actions
 	    :type list
@@ -26,13 +26,13 @@
   (:default-initargs :client-class 'hunchensocket-client))
 
 
-(defclass app-session (peldan.state:app-state session)
+(defclass app-session (peldan.state:app-state base-session)
   ()
   (:documentation "A standard app session")
   (:default-initargs :actions '(("debug" . peldan.state:toggle-debug))))
 
 
-(defmethod yason:encode ((s session) &optional (stream *standard-output*))
+(defmethod yason:encode ((s base-session) &optional (stream *standard-output*))
   (yason:with-output (stream)
     (yason:with-object ()
       (yason:encode-object-element "uuid" (uuid s)))))
@@ -47,7 +47,7 @@
 	(peldan.data:encode-nested-plist (slot-value s 'peldan.state:state))))))
 
 
-(yason:encode-object-element "data" (slot-value s 'peldan.state:app-state))
+;(yason:encode-object-element "data" (slot-value s 'peldan.state:app-state))
 
 
 

@@ -38,6 +38,7 @@
 	 ((ps:@ document body append-child) element)
 	
 	 (lambda (new-state)
+	   (peldan.ps:log-message "state:" new-state)
 	   (setf ,state new-state)
 	   (let* ((new-tree (,render new-state))
 		  (patches (diff-tree tree new-tree)))

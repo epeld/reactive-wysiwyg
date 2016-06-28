@@ -107,7 +107,7 @@
     (descendant (loop for (part . next) on (rest selector)
 		   do (write-selector part stream)
 		   unless (endp next)
-		   do (write-string " " stream))))))
+		   do (write-string " " stream)))))
 
 (defun write-style (style stream)
   (format stream "~(~a~): ~(~a~)~a" 
@@ -143,21 +143,5 @@
     (write-string "
 }" stream)))
 
-
-(setq example
-  '(rule 
-    (select 
-     (id "hello")
-     (descendant (class "nested") (and (class "child")
-				       (class "child2")))
-     (class "emphasis")
-     (class "other"))
-    (style
-     (:font-weight :bold)
-     (:font-size 1.5 (:unit "em")))))
-
-
-(with-output-to-string (s)
-  (write-css example s))
 
 
