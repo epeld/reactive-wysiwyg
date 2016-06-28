@@ -77,6 +77,9 @@
 	       (let ((content (peldan.ps:json-parse (ps:@ msg data))))
 		 (with-slots (type value) content
 		   (case type
+		     (:error
+		      (peldan.ps:log-warning "Server Error:" (ps:@ content error)))
+
 		     (:state
 		      (,set-state value))
 		      
