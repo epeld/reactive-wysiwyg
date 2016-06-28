@@ -11,6 +11,10 @@
   (:documentation "Return the current state"))
 
 
+(defgeneric update-state (fn stateful)
+  (:documentation "apply a function over a stateful's state. Returning the new state"))
+
+
 (defun callp (list)
   (symbolp (first list)))
 
@@ -19,15 +23,18 @@
        (satisfies callp)))
 
 
-(defgeneric execute (action stateful)
-  (:documentation "Execute an action on the stateful"))
+(defun action-to-state-lambda (action)
+  "Converts an action into a state 'endolambda'"
+  (the action action)
+  (assert (symbol-function (first action)))
+  (lambda (state)
+    (apply (first action) state (rest action))))
 
 
-(defmethod execute (action (s stateful))
-  (push action (slot-value s 'action-log))
-  (current-state s))
-
-
+(defun execute (action stateful)
+  "Execute an action on a stateful"
+  (update-state (action-to-state-lambda action) stateful)
+  (push action (slot-value stateful 'action-log)))
 
 
 

@@ -39,7 +39,8 @@
 	   :current-state
 	   :app-state
 	   :execute
-	   :toggle-debug))
+	   :toggle-debug
+	   :update-state))
 
 
 (defpackage :peldan.websocket

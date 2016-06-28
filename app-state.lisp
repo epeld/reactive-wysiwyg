@@ -16,21 +16,11 @@
 (defmethod current-state ((instance app-state))
   (slot-value instance 'state))
 
-(defun update-state (fn stateful)
+
+(defmethod update-state (fn (stateful app-state))
   "Apply fn to state"
   (setf (slot-value stateful 'state)
 	(funcall fn (slot-value stateful 'state))))
-
-
-
-(defmethod execute (action (s app-state))
-  (the action action)
-  (let ((fn (if (= 1 (length action))
-		(symbol-function (first action))
-		(eval action))))
-    
-    (update-state (the function fn) s)
-    (call-next-method)))
 
 
 (defun toggle-debug (state)
