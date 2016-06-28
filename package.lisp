@@ -55,7 +55,8 @@
 	   :meta-session
 	   :add-session
 	   :clear-sessions
-	   :*meta*))
+	   :*meta*
+	   :uuid))
 
 
 
