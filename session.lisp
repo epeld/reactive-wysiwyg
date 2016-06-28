@@ -43,10 +43,9 @@
 ;; Helpers
 ;;  
 
-(defun print-stacktrace (c)
-  (format *standard-output* "Error: ~a~%~%~%" c)
-  (sb-debug:print-backtrace :stream *standard-output*
-			    :count 15))
+(defun print-stacktrace (c &optional (stream *standard-output*))
+  (format stream "Error: ~a~%~%~%" c)
+  (sb-debug:print-backtrace :stream stream :count 15))
 
 
 (defun find-handler (type &optional (handlers *message-handlers*))
@@ -76,8 +75,16 @@
 
 
 (defmethod text-message-received ((instance session) client message)
+  
   (handler-bind ((warning #'print-stacktrace)
-		 (error #'print-stacktrace))
+		 (error 
+		  (lambda (err)
+		    (let ((msg (make-message :type :error
+					     :error (with-output-to-string (s)
+						      (print-stacktrace err s)))))
+		      (send-message client msg))
+		    (return-from text-message-received))))
+    
     (let ((message (parse message :object-as :plist :object-key-fn #'peldan.data:find-keyword)))
       (format t "Message from client: ~s~%" message)
       (handle-client-message instance client message))))
