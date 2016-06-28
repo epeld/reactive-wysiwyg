@@ -5,10 +5,12 @@
 ;; Meta
 ;; 
 (defun find-session (uuid meta)
-  "Find a session withing the meta session"
-  (find uuid (slot-value meta 'sessions) 
-	:key #'uuid
-	:test #'string-equal))
+  "Find a session within the meta session"
+  (if (string-equal uuid (uuid meta))
+    meta
+    (find uuid (slot-value meta 'sessions) 
+	  :key #'uuid
+	  :test #'string-equal)))
 
 
 (defun add-session (meta state uuid)
@@ -36,8 +38,11 @@
 
 
 (defmethod peldan.state:current-state ((s meta-session))
-  (loop for session in (slot-value s 'sessions) collect
-       `(:data ,(peldan.state:current-state session) :uuid ,(uuid session))))
+  `(:data
+    ,(loop for session in (slot-value s 'sessions) collect
+	 `(:data ,(peldan.state:current-state session) :uuid ,(uuid session)))
+    
+    :uuid ,(uuid s)))
 
 
 (defmethod peldan.state:update-state (fn (s meta-session))
