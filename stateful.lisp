@@ -7,10 +7,6 @@
   (:documentation "An abstract conept of having state"))
 
 
-(defgeneric current-state (stateful)
-  (:documentation "Return the current state"))
-
-
 (defgeneric update-state (fn stateful)
   (:documentation "apply a function over a stateful's state. Returning the new state"))
 

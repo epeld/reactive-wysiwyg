@@ -26,16 +26,31 @@
   (:default-initargs :client-class 'hunchensocket-client))
 
 
-
-;; After every action, broadcast state to clients
-(defmethod peldan.state:execute :after (action (s session))
-  (broadcast s (state-message (peldan.state:current-state s))))
-
-
 (defclass app-session (peldan.state:app-state session)
   ()
   (:documentation "A standard app session")
   (:default-initargs :actions '(("debug" . peldan.state:toggle-debug))))
+
+
+(defmethod yason:encode ((s session) &optional (stream *standard-output*))
+  (yason:with-output (stream)
+    (yason:with-object ()
+      (yason:encode-object-element "uuid" (uuid s)))))
+
+
+(defmethod yason:encode ((s app-session) &optional (stream *standard-output*))
+  (yason:with-output (stream)
+    (yason:with-object ()
+      (yason:encode-object-element "uuid" (uuid s))
+      (yason:encode-object-element "log" (slot-value s 'peldan.state:action-log))
+      (yason:with-object-element ("data")
+	(peldan.data:encode-nested-plist (slot-value s 'peldan.state:state))))))
+
+
+(yason:encode-object-element "data" (slot-value s 'peldan.state:app-state))
+
+
+
 
 
 
@@ -66,7 +81,7 @@
 (defmethod client-connected ((instance session) client)
   (format t "Client connected to ~a!~%" (uuid instance))
   (send-message client (hello-message))
-  (send-message client (state-message (peldan.state:current-state instance))))
+  (send-message client (state-message instance)))
 
 
 (defmethod client-disconnected ((instance session) client)

@@ -38,6 +38,8 @@
 	   :execute
 	   :current-state
 	   :app-state
+	   :state
+	   :action-log
 	   :execute
 	   :toggle-debug
 	   :update-state))

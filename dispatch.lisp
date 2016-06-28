@@ -32,3 +32,7 @@
 
 (defun stop-server ()
   (stop server))
+
+
+(defun install-handler (handler)
+  (push handler *handlers*))

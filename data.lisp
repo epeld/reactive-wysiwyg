@@ -35,12 +35,13 @@
        do (progn
 	    (push key keys)
 	    (if (and (consp value) 
-			(keywordp (car value)))
+		     (keywordp (car value)))
 		
-		  (yason:with-object-element (key)
-		     (encode-nested-plist value stream))
-		  
-		  (yason:encode-object-element key value))))))
+		(yason:with-object-element (key)
+		  (encode-nested-plist value stream))
+		
+		(yason:encode-object-element key value))))))
+
 
 (defun find-keyword (key)
   "Finds the keyword with name equal to the upcased string key"

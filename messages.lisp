@@ -53,6 +53,8 @@
        ,@(getf message :args))))
 
 
+(defun broadcast-state (instance)
+  (broadcast instance (state-message instance)))
 ;; 
 ;; Message handlers
 ;; 
@@ -75,4 +77,5 @@
   (declare (ignore client))
   (the session instance)
   (peldan.state:execute (get-action instance message) 
-			instance))
+			instance)
+  (broadcast-state instance))
