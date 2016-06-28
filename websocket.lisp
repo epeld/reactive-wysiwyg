@@ -7,15 +7,11 @@
 
 (defparameter *ping-interval* 10000)
 
-(defparameter *sessions* nil)
 
 (defparameter *meta*
   (make-instance 'meta-session
 		 :uuid "meta")
   "The session of sessions")
-
-
-
 
 (defun request-handler (request)
   "Hunchensocket request dispatch function"
