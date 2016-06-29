@@ -3,14 +3,13 @@
 Random thoughts:
 ------------------------
  
-ACTION LOG:
+A good next step is to support RMI calls in generated PS.
+I.e define a PS macro (rmi my-action arg1) that automatically
+inserts a stub in the PS that sends a message serverside
 
 
-server maintains a log of all actions. for every nth action it consolidates the state into a "snapshot" to improve performance
+Also figure out how we can reference various resources easily in the GUI,
+i.e how we can dynamically figure out their URLs from, say a uuid.
 
-for general usage we just need a "latest" snapshot really
-
--------------------------
-
-make new endpoints!
-we want to allow viewing open sessions as well as modifying the data live
+Do we need to replicate the same function in PS and lisp for generating
+the URLs?
