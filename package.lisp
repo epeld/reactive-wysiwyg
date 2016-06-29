@@ -78,6 +78,7 @@
 
 
 (defpackage :peldan.state
+  (:nicknames :state)
   (:use :common-lisp)
   (:export :stateful 
 	   :action

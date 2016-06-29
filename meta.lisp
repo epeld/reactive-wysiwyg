@@ -6,7 +6,7 @@
 ;; 
 ;; Meta
 ;; 
-(defun find-session (uuid &optional (meta *meta*))
+(defun find-session (uuid &optional (meta websocket:*meta*))
   "Find a session within the meta session"
   (if (string-equal uuid (uuid meta))
     meta

@@ -42,7 +42,10 @@
   (yason:with-output (stream)
     (yason:with-object ()
       (yason:encode-object-element "uuid" (uuid s))
-      (yason:encode-object-element "log" (slot-value s 'peldan.state:action-log))
+      (yason:with-object-element ("log")
+	(yason:with-array ()
+	  (loop for element in (slot-value s 'peldan.state:action-log) do
+	       (yason:encode-array-element element))))
       (yason:with-object-element ("data")
 	(peldan.data:encode-nested-plist (slot-value s 'peldan.state:state))))))
 
