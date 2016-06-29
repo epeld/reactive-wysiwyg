@@ -6,12 +6,12 @@
 (defun generate-html (&rest ps)
   "Generates a standard HTML 'frame' containing the passed in PS code"
   (cl-who:with-html-output-to-string (s)
-    (:div (:small "Generated using component package")
-	  (:script :type "text/javascript" (peldan.virtual-dom:library-js s))
+    (:div (:script :type "text/javascript" (peldan.virtual-dom:library-js s))
 		    
 	  (:script :type "text/javascript" 
 		   (let ((*parenscript-stream* s))
-		     (apply #'ps* ps))))))
+		     (apply #'ps* ps)))
+	  (:small "Generated using component package"))))
 
 
 (defun generate-component-renderer (h)
