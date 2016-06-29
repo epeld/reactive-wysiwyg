@@ -76,7 +76,7 @@
 (defun run-action (instance client message)
   "Execute an action on the given session"
   (declare (ignore client))
-  (the session instance)
+  (the base-session instance)
   (peldan.state:execute (get-action instance message) 
 			instance)
   (broadcast-state instance))
