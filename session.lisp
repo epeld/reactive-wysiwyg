@@ -1,9 +1,9 @@
 
-(in-package :peldan.websocket)
+(in-package :peldan.session)
 
 (defparameter *message-handlers* 
-  '(("ping" . pong)
-    ("action" . run-action))
+  '(("ping" . message:pong)
+    ("action" . message:run-action))
   "Handlers for websocket message types")
 
 
@@ -70,6 +70,7 @@
 
 (defun handle-client-message (instance client message)
   (let ((handler (find-handler (getf message :type))))
+    (the (or symbol function) handler)
     (funcall handler instance client message)))
 
 
@@ -100,9 +101,9 @@
 		    (let ((msg (make-message :type :error
 					     :error (with-output-to-string (s)
 						      (print-stacktrace err s)))))
-		      (send-message client msg))
+		      (message:send-message client msg))
 		    (return-from hunchensocket:text-message-received))))
     
-    (let ((message (parse message :object-as :plist :object-key-fn #'peldan.data:find-keyword)))
+    (let ((message (yason:parse message :object-as :plist :object-key-fn #'peldan.data:find-keyword)))
       (format t "Message from client: ~s~%" message)
       (handle-client-message instance client message))))

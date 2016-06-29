@@ -24,9 +24,11 @@
 (defvar server (make-instance 'easy-acceptor :port 4243))
 
 
-(defun start-server ()
+(defun start-server (&optional (websocket t))
   (setf *show-lisp-errors-p* t)
-  (start server))
+  (start server)
+  (when websocket
+    (websocket:start-server)))
 
 (defun stop-server ()
   (stop server))

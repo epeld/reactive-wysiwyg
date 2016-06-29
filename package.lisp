@@ -26,23 +26,45 @@
   (:import-from :peldan.string :read-file-to-string :read-file-to-stream)
   (:export :library-js :action :create-element))
 
+(defpackage   :peldan.message
+  (:nicknames :message)
+  (:use       :cl)
+  (:export :unknown-message
+	   :hello-message
+	   :state-message
+	   :send-message
+	   :make-message
+	   :broadcast
+	   :pong
+	   :run-action)
+  (:documentation "Utils for creating websocket messages"))
+
+(defpackage   :peldan.session
+  (:nicknames :session)
+  (:use       :cl :message)
+  (:export :uuid
+	   :actions
+	   :app-session
+	   :meta-session
+	   :add-session
+	   :find-session
+	   :clear-sessions)
+  (:documentation "Different kinds of data sessions"))
 
 (defpackage :peldan.websocket
+  (:nicknames :websocket)
   (:use :common-lisp)
   (:import-from :yason :*parse-object-as* :parse :encode)
   (:import-from :peldan.virtual-dom)
   (:export :*port* 
 	   :connect-ps
+	   :start-server
+	   :stop-server
 	   :websockets-enabled
 	   :*sessions*
-	   :app-session
-	   :meta-session
-	   :add-session
-	   :clear-sessions
 	   :find-session
-	   :*meta*
-	   :uuid
-	   :actions))
+	   :*meta*))
+
 
 (defpackage :peldan.component
   (:use :common-lisp :parenscript)

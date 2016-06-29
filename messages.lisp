@@ -1,7 +1,16 @@
 
-(in-package :peldan.websocket)
+(in-package :peldan.message)
 
 
+(defun broadcast (session message)
+  "Broadcast a message to all a session's clients"
+  (loop for client in (Hunchensocket:clients session)
+       do (send-message client message)))
+
+
+(defun send-message (client message)
+  (format t "Sending message ~a~%" message)
+  (hunchensocket:send-text-message client message))
 
 ;; 
 ;; Messages
@@ -49,7 +58,7 @@
     (the symbol fn)))
 
 (defun get-action (instance message)
-  (let ((actions (slot-value instance 'actions)))
+  (let ((actions (slot-value instance 'session:actions)))
     `(,(resolve-symbol actions (getf message :name))
        ,@(getf message :args))))
 
@@ -62,21 +71,20 @@
 (defun unknown-message (instance client message)
   "Send 'unknown message' back to the client"
   (declare (ignore instance))
-  (send-text-message client (unknown-type-message (getf message :type))))
+  (send-message client (unknown-type-message (getf message :type))))
 
 
 (defun pong (instance client message)
   "Send a pong reply to client"
   (declare (ignore instance))
   (declare (ignore message))
-  (the websocket-client client)
+  (the Hunchensocket:websocket-client client)
   (send-message client (pong-message)))
 
 
 (defun run-action (instance client message)
   "Execute an action on the given session"
   (declare (ignore client))
-  (the base-session instance)
   (peldan.state:execute (get-action instance message) 
 			instance)
   (broadcast-state instance))

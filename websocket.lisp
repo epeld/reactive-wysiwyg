@@ -9,7 +9,7 @@
 
 
 (defparameter *meta*
-  (make-instance 'meta-session
+  (make-instance 'session:meta-session
 		 :uuid "meta")
   "The session of sessions")
 
@@ -18,19 +18,7 @@
   (let ((uuid (subseq (hunchentoot:script-name request) 
 		      1)))
     (format t "~&Got WS request for ~a~%" uuid)
-    (find-session uuid *meta*)))
-
-
-(defun broadcast (session message)
-  "Broadcast a message to all a session's clients"
-  (loop for client in (Hunchensocket:clients session)
-       do (send-message client message)))
-
-
-(defun send-message (client message)
-  (format t "Sending message ~a~%" message)
-  (hunchensocket:send-text-message client message))
-
+    (session:find-session uuid *meta*)))
 
 
 (setf hunchensocket:*websocket-dispatch-table* '(request-handler))
