@@ -2,14 +2,26 @@
 (in-package :peldan.dispatch)
 
 
+(defun session-url (uuid)
+  "This function determines the url for which the session with uuid should be available"
+  (when (string-equal uuid (peldan.websocket:uuid peldan.websocket:*meta*))
+    (return-from session-url ""))
+  (concatenate 'string "/sessions/" uuid))
+
+
 (defun index (request)
   (peldan.component:generate-component-html
-   `(:div "This is the Meta Session " (peldan.component:state name)
-	  (mapcar (lambda (session)
-		    (peldan.ml:h 
-		     (:div (ps:@ session uuid)
-			   (peldan.ps:json-stringify (ps:@ session data)))))
-		  (peldan.component:state data)))
+   `(:div (:h2 "This is the Meta Session. ") 
+	  (:div "Below you will see a list of available sessions"
+		(:ul
+		 (mapcar (lambda (session)
+			   (peldan.ml:h 
+			    (:li (peldan.ps:json-stringify (ps:@ session data))
+				 " - "
+				 (:a (:href ,(session-url "meta"))
+				     
+				     "Session #" (ps:@ session uuid)))))
+			 (peldan.component:state data)))))
    :session-uuid (peldan.websocket:uuid peldan.websocket:*meta*)))
 
 
