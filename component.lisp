@@ -29,6 +29,10 @@
 
 
 (defun generate-component-html (h &key (session-uuid (generate-uuid)))
+  (when (and session-uuid 
+	     (not (peldan.websocket:websockets-enabled)))
+    (error "Websocket server not started"))
+  
   (generate-html
    
    ;; Define the component module
@@ -36,8 +40,9 @@
       (make-module ,(generate-component-renderer h)))
    
    ;; Web socket support
-   (if (and session-uuid (peldan.websocket:websockets-enabled))
-       `(progn (setf (@ component ws)
+   (if session-uuid
+       `(progn (peldan.ps:log-message "Server session provided")
+	       (setf (@ component ws)
 		     ,(peldan.websocket:connect-ps `(@ component set-state)
 						   session-uuid))
 	       (defun send-message (obj)
@@ -45,7 +50,9 @@
 		 ((@ component ws send) (peldan.ps:json-stringify obj))))
        
        ;; Define a dummy send-message
-       `(progn (defun send-message (obj)
+       `(progn (peldan.ps:log-message "Serverless.")
+	       
+	       (defun send-message (obj)
 		 (peldan.ps:log-warning "Cannot send message" obj))
 	       
 	       ;; TODO pass state to client as JSON

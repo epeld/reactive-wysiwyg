@@ -15,7 +15,7 @@
 
 (defun request-handler (request)
   "Hunchensocket request dispatch function"
-  (let ((uuid (subseq (script-name request) 
+  (let ((uuid (subseq (hunchentoot:script-name request) 
 		      1)))
     (format t "~&Got WS request for ~a~%" uuid)
     (find-session uuid *meta*)))
@@ -23,24 +23,24 @@
 
 (defun broadcast (session message)
   "Broadcast a message to all a session's clients"
-  (loop for client in (clients session)
+  (loop for client in (Hunchensocket:clients session)
        do (send-message client message)))
 
 
 (defun send-message (client message)
   (format t "Sending message ~a" message)
-  (send-text-message client message))
+  (hunchensocket:send-text-message client message))
 
 
 
-(setf *websocket-dispatch-table* '(request-handler))
+(setf hunchensocket:*websocket-dispatch-table* '(request-handler))
 
 
-(defvar server (make-instance 'websocket-acceptor :port *port*))
+(defvar server (make-instance 'hunchensocket:websocket-acceptor :port *port*))
 
 
 (defun start-server ()
-  (start server))
+  (hunchentoot:start server))
 
 
 (defun generate-uri (uuid)

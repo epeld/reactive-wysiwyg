@@ -28,7 +28,7 @@
 
 
 (defpackage :peldan.websocket
-  (:use :common-lisp :hunchensocket :hunchentoot)
+  (:use :common-lisp)
   (:import-from :yason :*parse-object-as* :parse :encode)
   (:import-from :peldan.virtual-dom)
   (:export :*port* 

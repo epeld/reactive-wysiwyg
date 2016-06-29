@@ -7,7 +7,7 @@
   "Handlers for websocket message types")
 
 
-(defclass hunchensocket-client (websocket-client)
+(defclass hunchensocket-client (hunchensocket:websocket-client)
   ())
 
 
@@ -16,7 +16,7 @@
 	 :initform (error "UUID required") 
 	 :reader uuid))
   (:documentation "Supports being identified by a uuid"))
-
+(unuse-package :hunchentoot)
 
 (defclass base-session (hunchensocket:websocket-resource identifiable)
   ((actions :initarg :actions
@@ -47,8 +47,6 @@
 	(peldan.data:encode-nested-plist (slot-value s 'peldan.state:state))))))
 
 
-;(yason:encode-object-element "data" (slot-value s 'peldan.state:app-state))
-
 
 
 
@@ -75,22 +73,27 @@
     (funcall handler instance client message)))
 
 
+(defmethod yason:encode ((symbol symbol) &optional stream)
+  (yason:encode (string-downcase symbol)
+		stream))
+
 ;; 
 ;; Event handling
 ;; 
-(defmethod client-connected ((instance session) client)
+(defmethod hunchensocket:client-connected ((instance base-session) client)
   (format t "Client connected to ~a!~%" (uuid instance))
   (send-message client (hello-message))
+  (format t "Said hello.")
   (send-message client (state-message instance)))
 
 
-(defmethod client-disconnected ((instance session) client)
+(defmethod hunchensocket:client-disconnected ((instance base-session) client)
   (declare (ignore instance))
   (format t "Client disconnected!~%"))
 
 
-(defmethod text-message-received ((instance session) client message)
-  
+(defmethod hunchensocket:text-message-received ((instance base-session) client message)
+  (format t "Message from client~%")
   (handler-bind ((warning #'print-stacktrace)
 		 (error 
 		  (lambda (err)
@@ -98,7 +101,7 @@
 					     :error (with-output-to-string (s)
 						      (print-stacktrace err s)))))
 		      (send-message client msg))
-		    (return-from text-message-received))))
+		    (return-from hunchensocket:text-message-received))))
     
     (let ((message (parse message :object-as :plist :object-key-fn #'peldan.data:find-keyword)))
       (format t "Message from client: ~s~%" message)

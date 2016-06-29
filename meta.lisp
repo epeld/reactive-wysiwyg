@@ -32,9 +32,10 @@
   (setf (slot-value meta 'peldan.state:action-log) nil)
   (clear-sessions meta))
 
+
 (defclass meta-session (base-session peldan.state:stateful)
-  ((se2ssions :type list
-	     :reader session3s
+  ((sessions :type list
+	     :reader sessions
 	     :initform nil)
    (app-session-class :type class
 		      :initform 'app-session)) 
@@ -50,7 +51,10 @@
   (yason:with-output (stream)
     (yason:with-object ()
       (yason:encode-object-element "uuid" (uuid s))
-      (yason:encode-object-element "log" (slot-value s 'peldan.state:action-log))
+      (yason:with-object-element ("log")
+	(yason:with-array ()
+	  (loop for element in (slot-value s 'peldan.state:action-log) do
+	       (yason:encode-array-element element))))
       (yason:with-object-element ("data")
 	(yason:with-array ()
 	  (loop for element in (slot-value s 'sessions) do
@@ -60,8 +64,4 @@
 (defmethod peldan.state:update-state (fn (s meta-session))
   (funcall fn s))
 
-
-;(peldan.state:execute '(add-session (:name "Abraham") "123453") *meta*)
-;(peldan.state:execute '(clear-sessions) *meta*)
-;(broadcast-state *meta*)
 

@@ -32,6 +32,7 @@
   (make-message :type :message
 		:message "Hello!"))
 
+
 ;; 
 ;; Helpers
 ;; 
