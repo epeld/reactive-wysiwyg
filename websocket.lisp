@@ -28,7 +28,7 @@
 
 
 (defun send-message (client message)
-  (format t "Sending message ~a" message)
+  (format t "Sending message ~a~%" message)
   (hunchensocket:send-text-message client message))
 
 
