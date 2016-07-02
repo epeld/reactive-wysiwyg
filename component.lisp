@@ -54,18 +54,41 @@ that presupposes a server session"
 (defun component-session-ps (session-uuid)
   ;; Web socket support
   (if session-uuid
-      (component-session-ps session-uuid 'component)
+      (component-server-session-ps session-uuid 'component)
       (component-dummy-session 'component))
   
   ;; TODO when server-less, call set-state with snapshot of state!
   )
 
 
+(defun find-server-actions (h &key session)
+  (let (actions)
+    (data:traverse h 
+		   (lambda (sexp)
+		     (when (eq 'action (first sexp))
+		       (assert (< 1 (length sexp)))
+		       (let ((action (second sexp)))
+			 (unless session
+			   (error "Hyperscript contains missing server action: ~a" action))
+			 (session:ensure-action-exists session action)
+			 (push action actions)))))
+    actions))
 
-(defun generate-component-html (h &key (session-uuid (generate-uuid)) (include-libraries t))
-  (when (and session-uuid (not (peldan.websocket:websockets-enabled)))
-    (error "Websocket server not started"))
+;; TODO: left to do: replace (action ..) with its associated string name
+(defun generate-component-html (h &key 
+				    (session-uuid (generate-uuid))
+				    (include-libraries t)
+				    add-missing-actions)
+  ;; Session setup
+  (when session-uuid
+    (unless (peldan.websocket:websockets-enabled)
+      (error "Websocket server not started"))
+    
+    (let ((session (session:find-session session-uuid)))
+      (find-server-actions h :session (and add-missing-actions 
+					   session))))
   
+  ;; Parenscript
   (cl-who:with-html-output-to-string (s)
     (:div (when include-libraries
 	    (htm (:script :type "text/javascript" (peldan.virtual-dom:library-js s)))
@@ -75,6 +98,7 @@ that presupposes a server session"
 		   (let ((*parenscript-stream* s))
 		     (ps* (component-module-ps h)
 			  (component-session-ps session-uuid)))))))
+
 
 
 

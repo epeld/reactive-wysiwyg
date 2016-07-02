@@ -28,6 +28,6 @@
 	       (:file "component" :depends-on ("session"))
 	       (:file "virtual-dom" :depends-on ("ps" "string"))
 	       (:file "ml" :depends-on ("virtual-dom"))
-	       (:file "index")
-	       (:file "debugger")))
+	       (:file "debugger")
+	       (:file "page")))
 

@@ -35,4 +35,4 @@
 
 
 (defun install-handler (handler)
-  (push handler *handlers*))
+  (pushnew handler *handlers*))

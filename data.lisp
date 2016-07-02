@@ -49,3 +49,10 @@
 		   'keyword)
       (error "Unknown key ~a" key)))
 
+
+(defun traverse (tree fn)
+  "Call fn for every cons-cell in tree"
+  (when (consp tree)
+    (funcall fn tree)
+    (loop for child in tree
+	 do (traverse child fn))))

@@ -26,6 +26,23 @@
   (:default-initargs :client-class 'hunchensocket-client))
 
 
+(defun ensure-action-exists (session action)
+  "Add an action to the dispatch table of an action, identifying it using the string arg"
+  (the symbol action)
+  (assert (symbol-function action))
+  
+  (let (assoc)
+    
+    (setq assoc (rassoc action (slot-value session 'actions)))
+    
+    (unless assoc
+      (setq assoc (cons (peldan.string:generate-uuid)
+			action))
+      (push assoc (slot-value session 'actions)))
+    
+    (format t "Associating ~a with '~a'" action (car assoc))))
+
+
 (defclass app-session (peldan.state:app-state base-session)
   ()
   (:documentation "A standard app session")

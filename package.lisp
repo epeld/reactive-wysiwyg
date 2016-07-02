@@ -8,7 +8,10 @@
 
 (defpackage :peldan.dispatch
   (:use :common-lisp :hunchentoot)
-  (:export :*handlers* :server :start-server))
+  (:export :*handlers*
+	   :server
+	   :start-server
+	   :install-handler))
 
 
 (defpackage :peldan.string
@@ -59,7 +62,8 @@
 	   :meta-session
 	   :add-session
 	   :find-session
-	   :clear-sessions)
+	   :clear-sessions
+	   :ensure-action-exists)
   (:documentation "Different kinds of data sessions"))
 
 (defpackage :peldan.websocket
@@ -78,6 +82,7 @@
 
 
 (defpackage :peldan.component
+  (:nicknames :component)
   (:use :common-lisp :parenscript)
   (:import-from :cl-who 
 		:htm
@@ -85,7 +90,11 @@
 		:with-html-output-to-string)
   (:import-from :peldan.string :generate-uuid)
   (:export :generate-component-html 
-	   :state))
+	   :component-module-ps
+	   :component-session-ps
+	   :state
+	   :action
+	   :find-server-actions))
 
 
 (defpackage :peldan.state
@@ -109,14 +118,26 @@
 
 
 (defpackage :peldan.data
+  (:nicknames :data)
   (:use :common-lisp)
   (:export :encode-nested-plist 
 	   :map-inside
 	   :set-inside
-	   :find-keyword))
+	   :find-keyword
+	   :traverse))
 
 
 (defpackage :peldan.ml
+  (:nicknames :ml)
   (:use :common-lisp)
-  (:export :generate-hyperscript :h))
+  (:export :generate-hyperscript
+	   :h))
 
+
+(defpackage :peldan.page
+  (:nicknames :page)
+  (:use :cl :hunchentoot)
+  (:import-from :peldan.component
+		:action)
+  (:export :session-url 
+	   :session-page))
