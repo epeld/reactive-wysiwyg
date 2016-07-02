@@ -11,8 +11,7 @@
 		    
 	  (:script :type "text/javascript" 
 		   (let ((*parenscript-stream* s))
-		     (apply #'ps* ps)))
-	  (:small "Generated using component package"))))
+		     (apply #'ps* ps))))))
 
 
 (defun generate-component-renderer (h)
@@ -26,7 +25,8 @@
        (peldan.ml:h (:div (when (state)
 			    (if (state debug)
 				,(peldan.debugger:debugger)
-				(peldan.ml:h ,h))))))))
+				(peldan.ml:h ,h)))
+			  (:small "Generated using component package"))))))
 
 
 (defun generate-component-html (h &key (session-uuid (generate-uuid)))
