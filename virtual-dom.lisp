@@ -1,9 +1,12 @@
 
 (in-package :peldan.virtual-dom)
 
+(setf *default-pathname-defaults* #P"/Users/peldan/Documents/Code/blub/")
 
 (defun read-virtual-dom-js ()
-  (read-file-to-string "js/virtual-dom.js"))
+  (read-file-to-string (make-pathname :name "virtual-dom"
+				      :type "js"
+				      :directory '(:relative "js"))))
 
 (defvar *cached-virtual-dom-js*
   (read-virtual-dom-js))

@@ -20,19 +20,27 @@
 (defpsmacro json-parse (string)
   `((@ -j-s-o-n parse) ,string))
 
-;; To allow including other files a la npm et al
+
 (defpsmacro load (filename)
   (ps-compile-file filename))
 
 
 (defmacro defun+ps (name args &body body)
   "Define a function that works both in lisp and in PS"
-  `(progn #1=(defun ,name ,args ,@body)
-	  (push '#1# *user-ps-library*)
-	  (setf *user-ps-library*
-		(remove-duplicates *user-ps-library* :test #'equal))
+  `(progn (defun ,name ,args ,@body)
+	  (defps ,name ,args ,@body)
 	  #',name))
 
 
+(defmacro defps (name args &body body)
+  (let ((form `(defun ,name ,args ,@body)))
+    `(progn (push (cons ',name ',form) *user-ps-library*)
+	    (setf *user-ps-library*
+		  (remove-duplicates *user-ps-library* :key #'car)))))
 
 
+
+(defun generate-user-js (&optional (stream *standard-output*))
+  "Generate JS from the user defined functions"
+  (let ((*parenscript-stream* stream))
+    (apply #'ps* (mapcar #'cdr *user-ps-library*))))

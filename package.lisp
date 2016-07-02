@@ -1,5 +1,11 @@
 ;;;; package.lisp
 
+#+sbcl
+(progn
+  (sb-ext:lock-package :hunchensocket)
+  (sb-ext:lock-package :hunchentoot))
+
+
 (defpackage :peldan.dispatch
   (:use :common-lisp :hunchentoot)
   (:export :*handlers* :server :start-server))
@@ -17,7 +23,12 @@
 
 (defpackage :peldan.ps
   (:use :common-lisp :parenscript)
-  (:export :log-message :log-warning :json-stringify :json-parse))
+  (:export :log-message
+	   :log-warning
+	   :json-stringify
+	   :json-parse
+	   :defps
+	   :generate-user-js))
 
 
 (defpackage :peldan.virtual-dom

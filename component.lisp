@@ -7,6 +7,7 @@
   "Generates a standard HTML 'frame' containing the passed in PS code"
   (cl-who:with-html-output-to-string (s)
     (:div (:script :type "text/javascript" (peldan.virtual-dom:library-js s))
+	  (:script :type "text/javascript" (peldan.ps:generate-user-js s))
 		    
 	  (:script :type "text/javascript" 
 		   (let ((*parenscript-stream* s))

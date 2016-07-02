@@ -1,9 +1,23 @@
-
 (in-package :peldan.dispatch)
+
+
+(defconstant session-url "/session/")
+
+
+(defun session-url (uuid)
+  "This function determines the url for which the session with uuid should be available"
+  (when (string-equal uuid (peldan.session:uuid peldan.websocket:*meta*))
+    (return-from session-url "/"))
+  (concatenate 'string session-url uuid))
+
+
+(peldan.ps:defps session-url (uuid)
+  (+ (ps:lisp session-url) uuid))
 
 
 (defgeneric session-page (session)
   (:documentation "Generate a html view of the session, for e.g editing/overviewing"))
+
 
 (defmethod session-page ((meta session:meta-session))
   (peldan.component:generate-component-html
@@ -12,7 +26,7 @@
 		(:ul
 		 (mapcar (lambda (session)
 			   (peldan.ml:h 
-			    (:li (:a (:href ,(session-url "meta")) ;TODO URL is wrong here
+			    (:li (:a (:href (session-url (ps:@ session uuid)))
 				     
 				     "Session #" (ps:@ session uuid))
 				 (:pre (peldan.ps:json-stringify (ps:@ session data))))))
@@ -37,22 +51,13 @@
    :session-uuid (session:uuid session)))
 
 
-(defun session-url (uuid)
-  "This function determines the url for which the session with uuid should be available"
-  (when (string-equal uuid (peldan.session:uuid peldan.websocket:*meta*))
-    (return-from session-url "/"))
-  (concatenate 'string "/sessions/" uuid))
-
-
 (defun index (request)
   (declare (ignore request))
   (session-page websocket:*meta*))
 
 
-
-
 (defun uuid-from-script-name (request)
-  (subseq (script-name request) (length "/session/")))
+  (subseq (script-name request) (length session-url)))
 
 
 (defun main-dispatcher (req)
@@ -60,7 +65,7 @@
   (cond ((string= "/" (script-name req))
 	 (index req))
 	  
-	((string= #1="/session/" (script-name req) :end2 (length #1#))
+	((string= session-url (script-name req) :end2 (length session-url))
 	 (let ((uuid (uuid-from-script-name req)))
 	   (session-page (or (session:find-session uuid)
 			     websocket:*meta*))))))
