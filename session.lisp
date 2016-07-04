@@ -1,75 +1,34 @@
 
 (in-package :peldan.session)
 
-(defparameter *message-handlers* 
-  '(("ping" . message:pong)
-    ("action" . message:run-action))
-  "Handlers for websocket message types")
 
-
-(defclass hunchensocket-client (hunchensocket:websocket-client)
+(defclass base-client (hunchensocket:websocket-client)
   ())
 
-
-(defclass identifiable ()
+(defclass base-session (hunchensocket:websocket-resource)
   ((uuid :initarg :uuid 
 	 :initform (error "UUID required") 
-	 :reader uuid))
-  (:documentation "Supports being identified by a uuid"))
-(unuse-package :hunchentoot)
-
-(defclass base-session (hunchensocket:websocket-resource identifiable)
-  ((actions :initarg :actions
+	 :reader uuid)
+   (actions :initarg :actions
 	    :reader actions
 	    :type list
 	    :documentation "an alist of (string . symbol) mapping strings to actions"))
-  (:default-initargs :client-class 'hunchensocket-client))
+  (:default-initargs :client-class 'base-client))
 
 
-(defun ensure-action-exists (session action)
-  "Add an action to the dispatch table of an action, identifying it using the string arg"
-  (the symbol action)
-  (assert (symbol-function action))
-  
-  (let (assoc)
-    
-    (setq assoc (rassoc action (slot-value session 'actions)))
-    
-    (unless assoc
-      (setq assoc (cons (peldan.string:generate-uuid)
-			action))
-      (push assoc (slot-value session 'actions)))
-    
-    (format t "Associating ~a with '~a'" action (car assoc))))
-
-
-(defclass app-session (peldan.state:app-state base-session)
+(defclass app-session (base-session)
   ()
-  (:documentation "A standard app session")
-  (:default-initargs :actions '(("debug" . peldan.state:toggle-debug))))
+  (:documentation "A standard app session"))
+
+(defgeneric execute-action (session name &rest args)
+  (:documentation "Execute an action named 'name' on the session"))
+
+(defgeneric state-message (session)
+  (:documentation "Compose a string describing the state of the session"))
 
 
-(defmethod yason:encode ((s base-session) &optional (stream *standard-output*))
-  (yason:with-output (stream)
-    (yason:with-object ()
-      (yason:encode-object-element "uuid" (uuid s)))))
-
-
-(defmethod yason:encode ((s app-session) &optional (stream *standard-output*))
-  (yason:with-output (stream)
-    (yason:with-object ()
-      (yason:encode-object-element "uuid" (uuid s))
-      (yason:with-object-element ("log")
-	(yason:with-array ()
-	  (loop for element in (slot-value s 'peldan.state:action-log) do
-	       (yason:encode-array-element element))))
-      (yason:with-object-element ("data")
-	(peldan.data:encode-nested-plist (slot-value s 'peldan.state:state))))))
-
-
-
-
-
+(defgeneric message-received (session type message)
+  (:documentation "Process a message of type 'type', returning the reply as a string"))
 
 
 ;; 
@@ -80,23 +39,6 @@
   (format stream "Error: ~a~%~%~%" c)
   (sb-debug:print-backtrace :stream stream :count 15))
 
-
-(defun find-handler (type &optional (handlers *message-handlers*))
-  "Find an appropriate handler based on a message type"
-  (the (or symbol function)
-       (or (cdr (assoc type handlers :test #'string-equal))
-	   #'unknown-message)))
-
-
-(defun handle-client-message (instance client message)
-  (let ((handler (find-handler (getf message :type))))
-    (the (or symbol function) handler)
-    (funcall handler instance client message)))
-
-
-(defmethod yason:encode ((symbol symbol) &optional stream)
-  (yason:encode (string-downcase symbol)
-		stream))
 
 ;; 
 ;; Event handling
@@ -114,16 +56,43 @@
 
 
 (defmethod hunchensocket:text-message-received ((instance base-session) client message)
-  (format t "Message from client~%")
-  (handler-bind ((warning #'print-stacktrace)
-		 (error 
+  (format t "Message from client: ~s~%" message)
+  (setq message (yason:parse message :object-as :plist :object-key-fn #'peldan.data:find-keyword))
+  (let ((type (getf message :type)))
+    (message:send-message client (message-received instance type message))))
+
+
+(defmethod hunchensocket:text-message-received :around ((instance base-session) client message)
+  (handler-bind ((error 
 		  (lambda (err)
-		    (let ((msg (make-message :type :error
-					     :error (with-output-to-string (s)
-						      (print-stacktrace err s)))))
-		      (message:send-message client msg))
+		    (format t "Got error ~&~a~% so will not process futher" err)
+		    (message:send-message client 
+					  (message:error-message (with-output-to-string (s)
+							   (print-stacktrace err s))))
 		    (return-from hunchensocket:text-message-received))))
     
-    (let ((message (yason:parse message :object-as :plist :object-key-fn #'peldan.data:find-keyword)))
-      (format t "Message from client: ~s~%" message)
-      (handle-client-message instance client message))))
+    (call-next-method)))
+
+;; 
+;; Message handling
+;; 
+
+(defmethod message-received ((session base-session) type message)
+  (format t "Unkown message ~a! sent to ~a" type session)
+  (message:unknown-type-message type))
+
+
+(defmethod message-received ((session base-session) (type (eql :ping)) message)
+  (format t "Ping message!")
+  (message:pong-message))
+
+
+(defmethod message-received ((session base-session) (type (eql :action)) message)
+  (format t "Action message!")
+  (let ((name (getf message :name))
+	(args (getf message :args)))
+  (apply #'execute-action session name args)
+  (state-message session)))
+
+(defmethod execute-action ((session base-session) name &rest args)
+  (warn "Unknown action ~a called with args ~s" name args))
