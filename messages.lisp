@@ -27,11 +27,6 @@
 		:message (format nil "Unknown command '~a'~%" type)))
 
 
-(defun state-message (new-state)
-  "Construct a message for changing the state of a client to a new value"
-  (make-message :type :state
-		:value new-state))
-
 (defun pong-message ()
   "Construct a ping message"
   (make-message :type :pong))
@@ -41,6 +36,9 @@
   (make-message :type :message
 		:message "Hello!"))
 
+(defun error-message (text)
+  (make-message :type :error
+		:error text))
 
 ;; 
 ;; Helpers
@@ -65,21 +63,6 @@
 
 (defun broadcast-state (instance)
   (broadcast instance (state-message instance)))
-;; 
-;; Message handlers
-;; 
-(defun unknown-message (instance client message)
-  "Send 'unknown message' back to the client"
-  (declare (ignore instance))
-  (send-message client (unknown-type-message (getf message :type))))
-
-
-(defun pong (instance client message)
-  "Send a pong reply to client"
-  (declare (ignore instance))
-  (declare (ignore message))
-  (the Hunchensocket:websocket-client client)
-  (send-message client (pong-message)))
 
 
 (defun run-action (instance client message)
