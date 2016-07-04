@@ -43,13 +43,13 @@
 (defpackage   :peldan.message
   (:nicknames :message)
   (:use       :cl)
-  (:export :unknown-message
+  (:export :unknown-type-message
 	   :hello-message
-	   :state-message
 	   :send-message
+	   :error-message
 	   :make-message
 	   :broadcast
-	   :pong
+	   :pong-message
 	   :run-action)
   (:documentation "Utils for creating websocket messages"))
 
@@ -124,13 +124,15 @@
 	   :map-inside
 	   :set-inside
 	   :find-keyword
-	   :traverse))
+	   :traverse
+	   :generate-mappings))
 
 
 (defpackage :peldan.ml
   (:nicknames :ml)
   (:use :common-lisp)
   (:export :generate-hyperscript
+	   :find-actions
 	   :h))
 
 
@@ -141,3 +143,10 @@
 		:action)
   (:export :session-url 
 	   :session-page))
+
+
+(defpackage :peldan.view
+  (:nicknames :view)
+  (:use :cl)
+  (:export :encode-symbol
+	   :make-view))
