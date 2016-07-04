@@ -44,6 +44,7 @@
 	   :create-element
 	   :make-module))
 
+
 (defpackage   :peldan.message
   (:nicknames :message)
   (:use       :cl)
@@ -57,12 +58,14 @@
 	   :run-action)
   (:documentation "Utils for creating websocket messages"))
 
+
 (defpackage   :peldan.session
   (:nicknames :session)
   (:use       :cl :message)
   (:export :uuid
 	   :base-session)
   (:documentation "Different kinds of data sessions"))
+
 
 (defpackage :peldan.websocket
   (:nicknames :websocket)
@@ -77,21 +80,6 @@
 	   :*sessions*
 	   :find-session))
 
-
-(defpackage :peldan.component
-  (:nicknames :component)
-  (:use :common-lisp :parenscript)
-  (:import-from :cl-who 
-		:htm
-		:with-html-output
-		:with-html-output-to-string)
-  (:import-from :peldan.string :generate-uuid)
-  (:export :generate-component-html 
-	   :component-module-ps
-	   :component-session-ps
-	   :state
-	   :action
-	   :find-server-actions))
 
 
 (defpackage :peldan.state
@@ -133,14 +121,6 @@
 	   :h))
 
 
-(defpackage :peldan.page
-  (:nicknames :page)
-  (:use :cl :hunchentoot)
-  (:import-from :peldan.component
-		:action)
-  (:export :session-url 
-	   :session-page))
-
 
 (defpackage :peldan.view
   (:nicknames :view)
@@ -154,3 +134,7 @@
   (:import-from :hunchentoot :script-name)
   (:export :uuid-from-script-name
 	   :session-url))
+
+
+(defpackage :peldan.page
+  (:use :cl :hunchentoot))

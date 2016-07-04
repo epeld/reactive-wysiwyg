@@ -5,19 +5,14 @@
 
 (defun index (request)
   (declare (ignore request))
-  (session-page websocket:*meta*))
+  "HELOOO")
 
 
 
 (defun page-dispatcher (req)
   
   (cond ((string= "/" (script-name req))
-	 (index req))
-	  
-	((string= session-url (script-name req) :end2 (length session-url))
-	 (let ((uuid (uuid-from-script-name req)))
-	   (session-page (or (session:find-session uuid)
-			     websocket:*meta*))))))
+	 (index req))))
 
 (peldan.dispatch:install-handler 'page-dispatcher)
 

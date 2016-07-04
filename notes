@@ -7,33 +7,5 @@ A good next step is to support RMI calls in generated PS.
 I.e define a PS macro (rmi my-action arg1) that automatically
 inserts a stub in the PS that sends a message serverside
 
-
 -----------------
 
-how do we:
-
-- Connect a view with a stateful (session)?
-- Translate action strings back into symbols to execute on the stateful?
-- Allow multiple views on the same session?
-
-Must we allow being able to add new views dynamically? No. The statefuls can
-set themselves up when created. The user can then just 'deploy' the available
-views to different urls, e.g (when (requestedp "/main") (render main-view)) etc.
-
-One use case we want to support is a user developing a GUI interactively, defining
-some hyperscript, then refershing his browser to see how it looks.
-This can be done by implementing a new subclass of app-state, e.g 'app-prototype'
-with one defvared view or e.g just a defmethod that keeps getting reevaluated
-when the user edits the hyperscript.
-
-- Should sessions be able to list all their views? Or all their URLs? Would this
-help in any way? It might help to know which clients are connected to which URLs
-currently.
-
-STOP TREATING SESSIONS WITH A ONE SIZE FITS ALL FRAMEWORK. Just develop tools for
-quick development. It IS useful to be able to inspect a session's state using
-a URL, sort of a debugging view. But each session must itself decide what to
-render there, effectively choosing how to display its state.
-
-I think we are being too generic in how actions are treated. Should each session
-not just decide for itself what it means to run an action?

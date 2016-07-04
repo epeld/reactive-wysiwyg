@@ -48,7 +48,34 @@ that helps translate hyperscript to parenscript"))
 		   (:small "Generated using component package"))))))
 
 
-(defun ps-module (view)
 
-  `(defvar component
-     (virtual-dom:make-module ,(ps-renderer view))))
+
+(defun ps-view (view &key session (name 'component))
+  `(progn 
+     
+     (defvar ,name
+	    (virtual-dom:make-module ,(ps-renderer view)))
+     
+     
+     ,(if session
+	  ;; With Session
+	  (let ((uuid (session:uuid session))) 
+	    `(progn
+	       (peldan.ps:log-message "Using Server session" ,uuid)
+	    
+	       (setf (@ ,name ws)
+		     ,(peldan.websocket:connect-ps `(@ ,name set-state) uuid))
+	      
+	       (defun send-message (obj)
+		 (peldan.ps:log-message "Sending" obj)
+		 ((@ ,name ws send) (peldan.ps:json-stringify obj)))))
+	    
+
+	  ;; Without session
+	  `(progn
+	     (peldan.ps:log-message "Serverless.")
+	       
+	     (defun send-message (obj)
+	       (peldan.ps:log-warning "Cannot send message" obj))
+	       
+	     ((@ ,name set-state) (peldan.ps:json-parse "{}"))))))
