@@ -16,6 +16,7 @@
   :serial t
   :components ((:file "package") 	;TODO this is a mess. fix
 	       (:file "dispatch")
+	       (:file "url")
 	       (:file "ps")
 	       (:file "data")
 	       (:file "string")
