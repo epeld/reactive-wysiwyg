@@ -56,7 +56,7 @@
 	  
 	  (:a (:href ,(session-url (session:uuid websocket:*meta*)))
 	      "Navigate to Overview"))
-   :session-uuid (session:uuid session)
+   :session session
    :add-missing-actions t))
 
 
@@ -80,3 +80,7 @@
 
 
 (session:find-session "2")
+
+
+(defun with-standard-page (&body)
+  )

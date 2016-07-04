@@ -2,27 +2,13 @@
 (in-package peldan.component)
 
 
-(defun generate-component-renderer (h)
-  "Extracts (and wraps) the PS contained in this component for appearing on a page"
-  `(lambda (state)
-     (peldan.ps:log-message "Rendering")
-       
-     ;; Allow components to references state easily
-     (macrolet ((state (&rest args)
-		  `(@ state ,@args)))
-       (peldan.ml:h (:div (when (state)
-			    (if (state debug)
-				,(peldan.debugger:debugger)
-				(peldan.ml:h ,h)))
-			  (:small "Generated using component package"))))))
-
-
+;; TODO this should be moved into the actual page (html) generation
 (defun component-module-ps (h)
   "Generates the PS that defines a module (renderer + setState)"
 
   ;; Define the component module
   `(defvar component
-     (make-module ,(generate-component-renderer h))))
+     (virtual-dom:make-module ,(generate-component-renderer h))))
 
 
 (defun component-server-session-ps (session-uuid &optional (component 'component))
@@ -51,56 +37,24 @@ that presupposes a server session"
 	  ((@ ,component set-state) (peldan.ps:json-parse "{}"))))
 
 
-(defun component-session-ps (session-uuid)
+(defun component-session-ps (session)
   ;; Web socket support
-  (if session-uuid
-      (component-server-session-ps session-uuid 'component)
-      (component-dummy-session 'component))
+  (if session
+      (component-server-session-ps session 'component)
+      (component-dummy-session session 'component))
   
   ;; TODO when server-less, call set-state with snapshot of state!
   )
 
 
-(defun find-server-actions (h &key session)
-  (let (actions)
-    (data:traverse h 
-		   (lambda (sexp)
-		     (when (eq 'action (first sexp))
-		       (assert (< 1 (length sexp)))
-		       (let ((action (second sexp)))
-			 (unless session
-			   (error "Hyperscript contains missing server action: ~a" action))
-			 (session:ensure-action-exists session action)
-			 (push action actions)))))
-    actions))
+;; just generate the javascript
+(defun generate-component-js (hyperscript &key 
+				  session
+				  (stream *standard-output*))
 
-;; TODO: left to do: replace (action ..) with its associated string name
-(defun generate-component-html (h &key 
-				    (session-uuid (generate-uuid))
-				    (include-libraries t)
-				    add-missing-actions)
-  ;; Session setup
-  (when session-uuid
-    (unless (peldan.websocket:websockets-enabled)
-      (error "Websocket server not started"))
-    
-    (let ((session (session:find-session session-uuid)))
-      (find-server-actions h :session (and add-missing-actions 
-					   session))))
-  
   ;; Parenscript
-  (cl-who:with-html-output-to-string (s)
-    (:div (when include-libraries
-	    (htm (:script :type "text/javascript" (peldan.virtual-dom:library-js s)))
-	    (htm (:script :type "text/javascript" (peldan.ps:generate-user-js s))))
-		    
-	  (:script :type "text/javascript" 
-		   (let ((*parenscript-stream* s))
-		     (ps* (component-module-ps h)
-			  (component-session-ps session-uuid)))))))
-
-
-
-
+  (let ((*parenscript-stream* stream))
+    (ps* (component-module-ps h :sessions (session:action-mappings session))
+	 (component-session-ps session))))
 
 
