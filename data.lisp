@@ -56,3 +56,15 @@
     (funcall fn tree)
     (loop for child in tree
 	 do (traverse child fn))))
+
+
+(defun generate-mappings (symbols)
+  "Generate a random mapping from symbols to strings (and back) using an alist"
+  (pairlis (loop for symbol in symbols collect (peldan.string:generate-uuid))
+	   symbols))
+
+
+;; This allows us to use :keywords as keys in json
+(defmethod yason:encode ((symbol symbol) &optional stream)
+  (yason:encode (string-downcase symbol)
+		stream))
