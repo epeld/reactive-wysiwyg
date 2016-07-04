@@ -41,7 +41,7 @@ that presupposes a server session"
   ;; Web socket support
   (if session
       (component-server-session-ps session 'component)
-      (component-dummy-session session 'component))
+      (component-dummy-session))
   
   ;; TODO when server-less, call set-state with snapshot of state!
   )
@@ -54,7 +54,7 @@ that presupposes a server session"
 
   ;; Parenscript
   (let ((*parenscript-stream* stream))
-    (ps* (component-module-ps h :sessions (session:action-mappings session))
+    (ps* (component-module-ps hyperscript)
 	 (component-session-ps session))))
 
 

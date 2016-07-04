@@ -35,10 +35,14 @@
 
 
 (defpackage :peldan.virtual-dom
+  (:nicknames :virtual-dom)
   (:use :common-lisp :parenscript)
   (:import-from :peldan.ps :load)
   (:import-from :peldan.string :read-file-to-string :read-file-to-stream)
-  (:export :library-js :action :create-element))
+  (:export :library-js 
+	   :action
+	   :create-element
+	   :make-module))
 
 (defpackage   :peldan.message
   (:nicknames :message)
@@ -57,13 +61,7 @@
   (:nicknames :session)
   (:use       :cl :message)
   (:export :uuid
-	   :actions
-	   :app-session
-	   :meta-session
-	   :add-session
-	   :find-session
-	   :clear-sessions
-	   :ensure-action-exists)
+	   :base-session)
   (:documentation "Different kinds of data sessions"))
 
 (defpackage :peldan.websocket
@@ -77,8 +75,7 @@
 	   :stop-server
 	   :websockets-enabled
 	   :*sessions*
-	   :find-session
-	   :*meta*))
+	   :find-session))
 
 
 (defpackage :peldan.component
@@ -150,3 +147,10 @@
   (:use :cl)
   (:export :encode-symbol
 	   :make-view))
+
+(defpackage :peldan.url
+  (:nicknames :url)
+  (:use :cl)
+  (:import-from :hunchentoot :script-name)
+  (:export :uuid-from-script-name
+	   :session-url))

@@ -40,34 +40,5 @@
   (make-message :type :error
 		:error text))
 
-;; 
-;; Helpers
-;; 
-
-(defun resolve-symbol (alist name)
-  "Given a list of (string . symbol) pairs, lookup name"
-  (let ((fn (cdr (assoc name alist :test #'string-equal))))
-  
-    (unless fn
-      (error "Unknown action ~a" name))
-  
-    (assert (typep fn 'symbol))
-  
-    (the symbol fn)))
-
-(defun get-action (instance message)
-  (let ((actions (slot-value instance 'session:actions)))
-    `(,(resolve-symbol actions (getf message :name))
-       ,@(getf message :args))))
 
 
-(defun broadcast-state (instance)
-  (broadcast instance (state-message instance)))
-
-
-(defun run-action (instance client message)
-  "Execute an action on the given session"
-  (declare (ignore client))
-  (peldan.state:execute (get-action instance message) 
-			instance)
-  (broadcast-state instance))

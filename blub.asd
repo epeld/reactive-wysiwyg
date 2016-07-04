@@ -23,7 +23,6 @@
 	       (:file "messages")
 	       (:file "session")
 	       (:file "app-state")
-	       (:file "meta" :depends-on ("session"))
 	       (:file "websocket")
 	       (:file "component" :depends-on ("session"))
 	       (:file "virtual-dom" :depends-on ("ps" "string"))
