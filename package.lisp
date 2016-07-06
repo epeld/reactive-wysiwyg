@@ -127,6 +127,7 @@
   (:nicknames :view)
   (:use :cl)
   (:export :encode-symbol
+	   :view
 	   :make-view
 	   :view-name
 	   :view-actions

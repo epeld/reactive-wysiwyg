@@ -7,7 +7,11 @@
 		:reader view-hyperscript)
    (name :initarg :name
 	 :type string
-	 :reader view-name))
+	 :reader view-name)
+   (actions :initarg :actions
+	    :type list
+	    :reader view-actions
+	    :documentation "A list of all (symbols of) serverside actions referenced from the view"))
   (:documentation "A graphical view of some data"))
 
 
@@ -15,7 +19,8 @@
   "Construct a new view by supplying its hyperscript"
   (make-instance 'view
 		 :hyperscript hyperscript
-		 :name name))
+		 :name name
+		 :actions (ml:find-actions hyperscript)))
 
 
 (defun encode-symbol (name mappings)
@@ -25,11 +30,6 @@
       (error "Unknown action ~a" name))
     
     (car assoc)))
-
-
-(defun view-actions (view)
-  "Find all (the symbols of) serverside actions of a view"
-  (ml:find-actions (view-hyperscript view)))
 
 
 (defun view-renderer-ps (view)

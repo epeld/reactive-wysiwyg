@@ -47,17 +47,28 @@
 (defun deploy-page (url fn)
   "Deploy a request handler to a given url"
   (unless (eq (aref url 0) #\/)
-    (error "URL currently must start with a forward slash!"))
+    (error "URL must start with a forward slash!"))
 
+  ;; Remove obsolete page(s)
+  (setf *deployed-views* (delete url *deployed-views* :test #'string= :key #'car))
+  
   (pushnew (cons url fn)
 	   *deployed-views*))
 
 
-(defun deploy-view (url view session)
+(defun deploy-view (url view &optional session)
   "Deploy a view of the given session, with the specified URL"
-  (session:register-actions session (view:view-actions view))
-  (push (cons url (lambda (request)
-		    (declare (ignore request))
-		    (render-view view session)))
-	*deployed-views*))
+  (unless (typep view 'view:view)
+    ;; Assume we were passed hyperscript and create the view on the fly!
+    (return-from deploy-view 
+      (deploy-view url (view:make-view view) session)))
+  
+  (when session ; (and session (view:view-actions view))
+    (session:register-actions session (view:view-actions view)))
+  
+  (deploy-page url (lambda (request)
+		     (declare (ignore request))
+		     (render-view view session))))
 
+
+(deploy-view "/def" '(:div "AAA"))
