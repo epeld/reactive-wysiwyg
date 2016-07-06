@@ -31,7 +31,8 @@
 (dispatch:install-handler 'page-dispatcher)
 
 
-(defun render-view (view session)
+(defun render-view (view &optional session)
+  "Renders a full view, with all necessary JS and HTML"
   (cl-who:with-html-output-to-string (s)
     (:html
      (:head (:title (cl-who:str (view:view-name view))))
