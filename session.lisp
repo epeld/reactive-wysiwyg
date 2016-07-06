@@ -35,6 +35,18 @@
 ;; Helpers
 ;;  
 
+(defun register-actions (session new-actions &key (use-uuids t))
+  "Register a bunch of new actions, assigning them random uuids if they do not already have mappings"
+  (with-slots (actions) session
+    (let ((new-mappings (loop for action in new-actions
+			   unless (find action actions 
+					:key #'car)
+			   collect (cons (if use-uuids (peldan.string:generate-uuid) (string-downcase action))
+					 action))))
+      (setf actions 
+	    (union actions new-mappings)))))
+
+
 (defun print-stacktrace (c &optional (stream *standard-output*))
   (format stream "Error: ~a~%~%~%" c)
   (sb-debug:print-backtrace :stream stream :count 15))

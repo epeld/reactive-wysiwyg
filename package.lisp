@@ -7,6 +7,7 @@
 
 
 (defpackage :peldan.dispatch
+  (:nicknames :dispatch)
   (:use :common-lisp :hunchentoot)
   (:export :*handlers*
 	   :server
@@ -63,7 +64,8 @@
   (:nicknames :session)
   (:use       :cl :message)
   (:export :uuid
-	   :base-session)
+	   :base-session
+	   :register-actions)
   (:documentation "Different kinds of data sessions"))
 
 
@@ -121,12 +123,14 @@
 	   :h))
 
 
-
 (defpackage :peldan.view
   (:nicknames :view)
   (:use :cl)
   (:export :encode-symbol
-	   :make-view))
+	   :make-view
+	   :view-name
+	   :view-actions
+	   :view-ps))
 
 (defpackage :peldan.url
   (:nicknames :url)

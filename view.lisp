@@ -5,32 +5,34 @@
 (defclass view ()
   ((hyperscript :initarg :hyperscript
 		:reader view-hyperscript)
-   (mappings :reader view-mappings
-	     :documentation "An alist of mappings from string to symbol
-that helps translate hyperscript to parenscript"))
+   (name :initarg :name
+	 :type string
+	 :reader view-name))
   (:documentation "A graphical view of some data"))
 
 
-(defun make-view (hyperscript &optional mappings)
+(defun make-view (hyperscript &optional (name "Anonymous view"))
   "Construct a new view by supplying its hyperscript"
-  (unless mappings
-    (setq mappings (data:generate-mappings (ml:find-actions hyperscript))))
-  
   (make-instance 'view
 		 :hyperscript hyperscript
-		 :mappings mappings))
+		 :name name))
 
 
-(defun encode-symbol (view name)
-  "Use the view's mappings to translate a symbol into a string uuid"
-  (let ((assoc (rassoc name (view-mappings view))))
+(defun encode-symbol (name mappings)
+  "Use the mappings to translate a symbol into a string uuid"
+  (let ((assoc (rassoc name mappings)))
     (unless assoc
       (error "Unknown action ~a" name))
     
     (car assoc)))
 
 
-(defun ps-renderer (view)
+(defun view-actions (view)
+  "Find all (the symbols of) serverside actions of a view"
+  (ml:find-actions (view-hyperscript view)))
+
+
+(defun view-renderer-ps (view)
   "Generates a renderer for the view in PS"
   `(lambda (state)
      (peldan.ps:log-message "Rendering")
@@ -39,7 +41,7 @@ that helps translate hyperscript to parenscript"))
 		  `(ps:getprop state ,@args))
 
 		(action (name &rest args)
-		  `(,(encode-symbol view name) ,@args)))
+		  `(,(encode-symbol name (view-mappings view)) ,@args)))
        
        (ml:h (:div (when (state)
 		     (if (state 'debug)
@@ -50,11 +52,11 @@ that helps translate hyperscript to parenscript"))
 
 
 
-(defun ps-view (view &key session (name 'component))
+(defun view-ps (view &key session (name 'component))
   `(progn 
      
      (defvar ,name
-	    (virtual-dom:make-module ,(ps-renderer view)))
+	    (virtual-dom:make-module ,(view-renderer-ps view)))
      
      
      ,(if session
