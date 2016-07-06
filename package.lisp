@@ -64,6 +64,7 @@
   (:nicknames :session)
   (:use       :cl :message)
   (:export :uuid
+	   :session-actions
 	   :base-session
 	   :register-actions)
   (:documentation "Different kinds of data sessions"))
@@ -128,6 +129,7 @@
   (:use :cl)
   (:export :encode-symbol
 	   :view
+	   :action
 	   :make-view
 	   :view-name
 	   :view-actions

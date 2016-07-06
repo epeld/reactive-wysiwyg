@@ -32,7 +32,7 @@
     (car assoc)))
 
 
-(defun view-renderer-ps (view)
+(defun view-renderer-ps (view &optional mappings)
   "Generates a renderer for the view in PS"
   `(lambda (current-state)
      (peldan.ps:log-message "Rendering")
@@ -43,7 +43,7 @@
 		      'current-state))
 
 		(action (name &rest args)
-		  `(,(encode-symbol name (view-mappings view)) ,@args)))
+		  `(,(encode-symbol name (quote ,mappings)) ,@args)))
        
        (ml:h (:div (when (state)
 		     (if (state 'debug)
@@ -55,10 +55,17 @@
 
 
 (defun view-ps (view &key session (name 'component))
+  ;; TODO check that all actions are known to session!
+  (when (and (view-actions view)
+	     (or (null session)
+		 (endp (session:session-actions session))))
+    (error "Cannot encode actions ~a because unknown to session" (view-actions view)))
   `(progn 
      
      (defvar ,name
-	    (virtual-dom:make-module ,(view-renderer-ps view)))
+       (virtual-dom:make-module 
+	,(view-renderer-ps view (and session
+				     (session:session-actions session)))))
      
      
      ,(if session

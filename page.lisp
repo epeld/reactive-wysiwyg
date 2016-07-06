@@ -71,5 +71,10 @@
 		     (render-view view session))))
 
 
-;(deploy-view "/def" 
-;	     '(:div "Hello" (:b "WORLD")))
+(deploy-view "/def" 
+	     '(:div "Hello" (:b "WORLD")
+	       (:button (:onclick (lambda ()
+				    (view:action print-it))))))
+
+(defun print-it (&rest args)
+  (format t "Called with ~a" args))

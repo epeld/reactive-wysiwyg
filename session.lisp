@@ -10,7 +10,7 @@
 	 :initform (error "UUID required") 
 	 :reader uuid)
    (actions :initarg :actions
-	    :reader actions
+	    :reader session-actions
 	    :type list
 	    :documentation "an alist of (string . symbol) mapping strings to actions"))
   (:default-initargs :client-class 'base-client))
