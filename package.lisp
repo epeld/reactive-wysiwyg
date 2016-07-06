@@ -63,10 +63,14 @@
 (defpackage   :peldan.session
   (:nicknames :session)
   (:use       :cl :message)
-  (:export :uuid
+  (:export :app-session
+	   :uuid
 	   :session-actions
 	   :base-session
-	   :register-actions)
+	   :register-actions
+	   :execute-action
+	   :message-received
+	   :state-message)
   (:documentation "Different kinds of data sessions"))
 
 
@@ -133,7 +137,8 @@
 	   :make-view
 	   :view-name
 	   :view-actions
-	   :view-ps))
+	   :view-ps
+	   :*default-session*))
 
 (defpackage :peldan.url
   (:nicknames :url)
