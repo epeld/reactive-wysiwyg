@@ -1,6 +1,8 @@
 
 (in-package :peldan.view)
 
+(defparameter *default-session* nil
+  "The fallback session when you are lazy and don't care to create a new session")
 
 (defclass view ()
   ((hyperscript :initarg :hyperscript
@@ -54,8 +56,8 @@
 
 
 
-(defun view-ps (view &key session (name 'component))
-
+(defun view-ps (view &key (session *default-session*) (name 'component))
+  
   (let ((actions (view-actions view))
 	mappings)
     
@@ -85,9 +87,9 @@
 	    ;; With Session
 	    (let ((uuid (session:uuid session))) 
 	      `(progn
-		 (peldan.ps:log-message "Using Server session" ,uuid)
+		 (peldan.ps:log-message "Using Server session" ,(format nil "~a" (type-of session)) ,uuid)
 	    
-		 (setf (@ ,name ws)
+		 (setf (ps:@ ,name ws)
 		       ,(peldan.websocket:connect-ps `(ps:@ ,name set-state) uuid))
 	      
 		 (defun send-message (obj)

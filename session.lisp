@@ -7,9 +7,10 @@
 
 (defclass base-session (hunchensocket:websocket-resource)
   ((uuid :initarg :uuid 
-	 :initform (error "UUID required") 
+	 :initform (peldan.string:generate-uuid) 
 	 :reader uuid)
    (actions :initarg :actions
+	    :initform nil
 	    :reader session-actions
 	    :type list
 	    :documentation "an alist of (string . symbol) mapping strings to actions"))

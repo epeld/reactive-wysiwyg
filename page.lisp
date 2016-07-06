@@ -27,9 +27,6 @@
       (t
        "Unkown page"))))
 
-;; This installs the dispatch function for this entire package
-(dispatch:install-handler 'page-dispatcher)
-
 
 (defun render-view (view &optional session)
   "Renders a full view, with all necessary JS and HTML"
@@ -56,19 +53,20 @@
 	   *deployed-views*))
 
 
-(defun deploy-view (url view &optional session)
+(defun deploy-view (url view &optional (session view:*default-session*))
   "Deploy a view of the given session, with the specified URL"
   (unless (typep view 'view:view)
     ;; Assume we were passed hyperscript and create the view on the fly!
     (return-from deploy-view 
-      (deploy-view url (view:make-view view) session)))
+      (deploy-view url (view:make-view (the list view)) session)))
   
-  (when session ; (and session (view:view-actions view))
+  (when session
     (session:register-actions session (view:view-actions view)))
   
   (deploy-page url (lambda (request)
 		     (declare (ignore request))
 		     (render-view view session))))
+
 
 
 (deploy-view "/def" 
@@ -78,3 +76,23 @@
 
 (defun print-it (&rest args)
   (format t "Called with ~a" args))
+
+
+
+;; This installs the dispatch function for this entire package
+(dispatch:install-handler 'page-dispatcher)
+
+
+(defclass simple-session (session:app-session)
+  ()
+  (:documentation "Dummy session just to have something to fall back on"))
+
+
+(defmethod session:state-message (session)
+  "{}")
+
+
+
+
+(setf view:*default-session*
+      (make-instance 'simple-session))
