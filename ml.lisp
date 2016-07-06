@@ -75,9 +75,11 @@
 					(ps:create
 					 ;; items
 					 ,@(loop for (item . rest) on contents
-					      until (not (attrp item))
+					      if (attrp item)
 					      nconc item
-					      finally (setf children (cons item rest))))
+					      else
+					      do (setf children (cons item rest))
+					      until children))
 			 
 			 
        
