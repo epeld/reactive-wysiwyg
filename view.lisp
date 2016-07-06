@@ -45,7 +45,9 @@
 		      'current-state))
 
 		(action (name &rest args)
-		  `(,(encode-symbol name (quote ,mappings)) ,@args)))
+		  `(send-message (ps:create :type :action
+					    :name ,(encode-symbol name (quote ,mappings))
+					    :args ,@args))))
        
        (ml:h (:div (when (state)
 		     (if (state 'debug)

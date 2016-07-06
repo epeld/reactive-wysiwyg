@@ -71,7 +71,7 @@
 (defmethod hunchensocket:text-message-received ((instance base-session) client message)
   (format t "Message from client: ~s~%" message)
   (setq message (yason:parse message :object-as :plist :object-key-fn #'peldan.data:find-keyword))
-  (let ((type (getf message :type)))
+  (let ((type (peldan.data:find-keyword (getf message :type))))
     (message:send-message client (message-received instance type message))))
 
 
@@ -91,7 +91,7 @@
 ;; 
 
 (defmethod message-received ((session base-session) type message)
-  (format t "Unkown message ~a! sent to ~a" type session)
+  (format t "Unkown message ~s! sent to ~a" type session)
   (message:unknown-type-message type))
 
 

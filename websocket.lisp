@@ -7,17 +7,14 @@
 
 (defparameter *ping-interval* 10000)
 
-(defparameter *handlers* nil
-  "List of functions accepting a url and returning a session or nil")
+(defparameter *resources* nil
+  "List of resources and their script name (name . resource)")
 
 (defun request-handler (request)
   "Looks for a dispatcher willing to "
-  (let ((script-name (hunchentoot:script-name request)))
+  (let ((script-name (subseq (hunchentoot:script-name request) 1)))
     (format t "~&Got WS request for ~a~%" script-name)
-    (loop for handler in *handlers*
-	 for session = (funcall handler script-name)
-	 until session
-	 finally (return session))))
+    (find script-name *resources* :test #'string= :key #'session:uuid)))
 
 
 (setf hunchensocket:*websocket-dispatch-table* '(request-handler))
@@ -30,10 +27,10 @@
   (hunchentoot:start server))
 
 
-(defun install-handler (handler)
-  "Install a new handler"
-  (the symbol handler)
-  (pushnew handler *handlers*))
+(defun install-resource (resource)
+  "Install a new resource"
+  (the hunchensocket:websocket-resource resource)
+  (pushnew resource *resources*))
 
 
 (defun generate-uri (uuid)

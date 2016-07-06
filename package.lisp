@@ -81,6 +81,7 @@
   (:import-from :peldan.virtual-dom)
   (:export :*port* 
 	   :connect-ps
+	   :install-resource
 	   :start-server
 	   :stop-server
 	   :websockets-enabled

@@ -49,8 +49,8 @@
   ;; Remove obsolete page(s)
   (setf *deployed-views* (delete url *deployed-views* :test #'string= :key #'car))
   
-  (pushnew (cons url fn)
-	   *deployed-views*))
+  (push (cons url fn)
+	*deployed-views*))
 
 
 (defun deploy-view (url view &optional (session view:*default-session*))
@@ -72,10 +72,11 @@
 (deploy-view "/def" 
 	     '(:div "Hello" (:b "WORLD")
 	       (:button (:onclick (lambda ()
-				    (view:action print-it))))))
+				    (view:action print-it)))
+		"CLICK ME")))
 
 (defun print-it (&rest args)
-  (format t "Called with ~a" args))
+  (format t "PRINTINNG ~a" args))
 
 
 
@@ -89,10 +90,11 @@
 
 
 (defmethod session:state-message (session)
-  "{}")
+  (message:make-message :type :state :value '(:debug nil)))
 
 
 
 
 (setf view:*default-session*
       (make-instance 'simple-session))
+(websocket:install-resource view:*default-session*)

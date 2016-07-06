@@ -7,7 +7,7 @@
   `(ml:h (:div (:h2 "Debugger")
 	       (:pre ((@ -j-s-o-n stringify) (component:state) nil "    "))
 	       (:button (:onclick (lambda () 
-				    (peldan.virtual-dom:action "debug")))
+				    (+ 1 2)))
 			"Back"))))
 
 
