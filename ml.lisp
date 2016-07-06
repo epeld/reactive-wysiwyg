@@ -148,13 +148,13 @@
 (defun find-actions (hyperscript)
   "Find all referenced actions of the hyperscript"
   (eval `(let (actions)
-	   (ps:ps (macrolet ((action (name &rest args)
+	   (ps:ps (macrolet ((view:action (name &rest args)
 			       (declare (ignore args))
 			       `(ps:lisp (progn (assert (symbol-function ',name))
 						(push ',name actions)
 						"<Removed>"))))
 		    (ml:h ,hyperscript)))
-	   actions)))
+	   (remove-duplicates actions))))
 
 
 
