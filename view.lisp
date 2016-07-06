@@ -55,38 +55,51 @@
 
 
 (defun view-ps (view &key session (name 'component))
-  ;; TODO check that all actions are known to session!
-  (when (and (view-actions view)
-	     (or (null session)
-		 (endp (session:session-actions session))))
-    (error "Cannot encode actions ~a because unknown to session" (view-actions view)))
-  `(progn 
+
+  (let ((actions (view-actions view))
+	mappings)
+    
+    ;; Some sanity checks
+    (when actions
+      
+      ;; No backend?
+      (unless session
+	(error "View contains serverside actions ~a, but no session specified" actions))
+      
+      (setq mappings (session:session-actions session))
+    
+      ;; Make sure the session knows about all our actions
+      (let ((diff (set-difference actions (mapcar #'cdr mappings))))
+	(when diff
+	  (error "Cannot encode actions ~a because unknown to session" diff))))
+    
+    `(progn 
      
-     (defvar ,name
-       (virtual-dom:make-module 
-	,(view-renderer-ps view (and session
-				     (session:session-actions session)))))
+       (defvar ,name
+	 (virtual-dom:make-module 
+	  ,(view-renderer-ps view (and session
+				       (session:session-actions session)))))
      
      
-     ,(if session
-	  ;; With Session
-	  (let ((uuid (session:uuid session))) 
-	    `(progn
-	       (peldan.ps:log-message "Using Server session" ,uuid)
+       ,(if session
+	    ;; With Session
+	    (let ((uuid (session:uuid session))) 
+	      `(progn
+		 (peldan.ps:log-message "Using Server session" ,uuid)
 	    
-	       (setf (@ ,name ws)
-		     ,(peldan.websocket:connect-ps `(ps:@ ,name set-state) uuid))
+		 (setf (@ ,name ws)
+		       ,(peldan.websocket:connect-ps `(ps:@ ,name set-state) uuid))
 	      
-	       (defun send-message (obj)
-		 (peldan.ps:log-message "Sending" obj)
-		 ((ps:@ ,name ws send) (peldan.ps:json-stringify obj)))))
+		 (defun send-message (obj)
+		   (peldan.ps:log-message "Sending" obj)
+		   ((ps:@ ,name ws send) (peldan.ps:json-stringify obj)))))
 	    
 
-	  ;; Without session
-	  `(progn
-	     (peldan.ps:log-message "Serverless.")
+	    ;; Without session
+	    `(progn
+	       (peldan.ps:log-message "Serverless.")
 	       
-	     (defun send-message (obj)
-	       (peldan.ps:log-warning "Cannot send message" obj))
+	       (defun send-message (obj)
+		 (peldan.ps:log-warning "Cannot send message" obj))
 	       
-	     ((ps:@ ,name set-state) (peldan.ps:json-parse "{}"))))))
+	       ((ps:@ ,name set-state) (peldan.ps:json-parse "{}")))))))
