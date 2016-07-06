@@ -2,10 +2,5 @@
 
 Random thoughts:
 ------------------------
- 
-A good next step is to support RMI calls in generated PS.
-I.e define a PS macro (rmi my-action arg1) that automatically
-inserts a stub in the PS that sends a message serverside
 
------------------
-
+We should pre-install websocket handlers, just like we do URL handlers!
