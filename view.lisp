@@ -34,11 +34,13 @@
 
 (defun view-renderer-ps (view)
   "Generates a renderer for the view in PS"
-  `(lambda (state)
+  `(lambda (current-state)
      (peldan.ps:log-message "Rendering")
      
      (macrolet ((state (&rest args)
-		  `(ps:getprop state ,@args))
+		  (if args
+		      `(ps:getprop current-state ,@args)
+		      'current-state))
 
 		(action (name &rest args)
 		  `(,(encode-symbol name (view-mappings view)) ,@args)))
@@ -66,11 +68,11 @@
 	       (peldan.ps:log-message "Using Server session" ,uuid)
 	    
 	       (setf (@ ,name ws)
-		     ,(peldan.websocket:connect-ps `(@ ,name set-state) uuid))
+		     ,(peldan.websocket:connect-ps `(ps:@ ,name set-state) uuid))
 	      
 	       (defun send-message (obj)
 		 (peldan.ps:log-message "Sending" obj)
-		 ((@ ,name ws send) (peldan.ps:json-stringify obj)))))
+		 ((ps:@ ,name ws send) (peldan.ps:json-stringify obj)))))
 	    
 
 	  ;; Without session
@@ -80,4 +82,4 @@
 	     (defun send-message (obj)
 	       (peldan.ps:log-warning "Cannot send message" obj))
 	       
-	     ((@ ,name set-state) (peldan.ps:json-parse "{}"))))))
+	     ((ps:@ ,name set-state) (peldan.ps:json-parse "{}"))))))

@@ -39,9 +39,9 @@
      (:body (:script :type "text/javascript" (virtual-dom:library-js s))
 	    (:script :type "text/javascript" (peldan.ps:generate-user-js s))
 	    (:script :type "text/javascript" (let ((ps:*parenscript-stream* s))
-					       (view:view-ps view 
-							     :session session
-							     :name 'component)))))))
+					       (ps:ps* (view:view-ps view 
+								     :session session
+								     :name 'component))))))))
 
 
 (defun deploy-page (url fn)
@@ -71,4 +71,5 @@
 		     (render-view view session))))
 
 
-(deploy-view "/def" '(:div "AAA"))
+;(deploy-view "/def" 
+;	     '(:div "Hello" (:b "WORLD")))
