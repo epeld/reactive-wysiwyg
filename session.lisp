@@ -28,7 +28,7 @@
   (:documentation "Compose a string describing the state of the session"))
 
 
-(defgeneric message-received (session type message)
+(defgeneric message-received (session client type message)
   (:documentation "Process a message of type 'type', returning the reply as a string"))
 
 
@@ -72,7 +72,7 @@
   (format t "Message from client: ~s~%" message)
   (setq message (yason:parse message :object-as :plist :object-key-fn #'peldan.data:find-keyword))
   (let ((type (peldan.data:find-keyword (getf message :type))))
-    (message:send-message client (message-received instance type message))))
+    (message:send-message client (message-received instance client type message))))
 
 
 (defmethod hunchensocket:text-message-received :around ((instance base-session) client message)
@@ -90,17 +90,17 @@
 ;; Message handling
 ;; 
 
-(defmethod message-received ((session base-session) type message)
+(defmethod message-received ((session base-session) client type message)
   (format t "Unkown message ~s! sent to ~a" type session)
   (message:unknown-type-message type))
 
 
-(defmethod message-received ((session base-session) (type (eql :ping)) message)
+(defmethod message-received ((session base-session) client (type (eql :ping)) message)
   (format t "Ping message!")
   (message:pong-message))
 
 
-(defmethod message-received ((session base-session) (type (eql :action)) message)
+(defmethod message-received ((session base-session) client (type (eql :action)) message)
   (format t "Action message!")
   (let ((name (getf message :name))
 	(args (getf message :args)))

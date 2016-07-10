@@ -13,8 +13,7 @@
 
 (defun session-url (uuid)
   "This function determines the url for which the session with uuid should be available"
-  (when (string-equal uuid (peldan.session:uuid peldan.websocket:*meta*))
-    (return-from session-url "/"))
+  
   (concatenate 'string session-url uuid))
 
 

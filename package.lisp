@@ -134,6 +134,7 @@
   (:use :cl)
   (:export :encode-symbol
 	   :view
+	   :state
 	   :action
 	   :make-view
 	   :view-name

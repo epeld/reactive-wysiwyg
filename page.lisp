@@ -93,7 +93,8 @@
   (message:make-message :type :state :value '(:debug nil)))
 
 
-
+(defun print-it (&rest args)
+  (format t "yep ~a" args))
 
 (setf view:*default-session*
       (make-instance 'simple-session))
