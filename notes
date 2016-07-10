@@ -3,4 +3,10 @@
 Random thoughts:
 ------------------------
 
-We should pre-install websocket handlers, just like we do URL handlers!
+- We could really use some string interpolation macro for parenscript!
+
+- Maybe we should limit us to a subset of PS that we can typecheck?
+
+- Generate CSS to string
+
+- 
