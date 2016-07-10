@@ -27,10 +27,12 @@
   (hunchentoot:start server))
 
 
-(defun install-resource (resource)
+(defun install-resource (resource &optional remove-others)
   "Install a new resource"
   (the hunchensocket:websocket-resource resource)
-  (pushnew resource *resources*))
+  (if remove-others
+      (setf *resources* nil)
+      (pushnew resource *resources*)))
 
 
 (defun generate-uri (uuid)

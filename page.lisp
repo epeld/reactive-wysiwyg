@@ -69,14 +69,35 @@
 
 
 
-(defun print-it (&rest args)
-  (format t "PRINTINNG ~a" args))
+(defun print-it (session client &rest args)
+  (declare (ignore client))
+  (declare (ignore args))
+  (format t "Assigning random id as name")
+  (setf (slot-value session 'name) 
+	(peldan.string:generate-uuid)))
+
+(defun toggle-background (session client)
+  (declare (ignore client))
+  (with-slots (style) session
+    (setf style (cadr (or (member style #1='("red" "pink" "orange" "magenta" "red") :test #'string=)
+			  #1#)))))
 
 (deploy-view "/def" 
-	     '(:div "Hello" (:b "WORLD")
+	     '(:div (:style (+ "background: " (view:state 'style))) ;this is a style attribute
+	       "Hello"
+	       (:style (+ "
+
+div {margin-bottom: 3em }
+
+b { background: black; color: " (view:state 'style) "}")) ; this is a style element
+	       (:b "WORLD")
+	       (:div (:i "Name: " (view:state 'name)))
 	       (:button (:onclick (lambda ()
 				    (view:action print-it)))
-		"CLICK ME")))
+		"CLICK ME")
+	       (:button (:onclick (lambda ()
+				    (view:action toggle-background)))
+		"Change background?")))
 
 
 
@@ -85,21 +106,15 @@
 
 
 (defclass simple-session (session:app-session)
-  ()
+  ((name :initform "Erik" :initarg :name :accessor test-name)
+   (style :initform "background: red" :initarg :style :accessor test-style))
   (:documentation "Dummy session just to have something to fall back on"))
 
 
 (defmethod session:state-message (session)
-  (message:make-message :type :state :value '(:debug nil)))
+  (message:make-message :type :state :value `(:debug nil :name ,(test-name session)
+						     :style ,(test-style session))))
 
-
-
-(defclass test-session (view:view)
-  ()
-  (:documentation "A session for testing out the action translation!"))
-
-(defun print-it (session client &rest args)
-  (format t "~&Print it action called with args ~a" args))
 
 (defun setup-default-session ()
   (setf view:*default-session*
