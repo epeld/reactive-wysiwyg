@@ -47,7 +47,7 @@
 		(action (name &rest args)
 		  `(send-message (ps:create :type :action
 					    :name ,(encode-symbol name (quote ,mappings))
-					    :args ,@args))))
+					    :args (list ,@args)))))
        
        (ml:h (:div (when (state)
 		     (if (state 'debug)
