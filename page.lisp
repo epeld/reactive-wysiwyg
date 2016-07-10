@@ -69,14 +69,14 @@
 
 
 
+(defun print-it (&rest args)
+  (format t "PRINTINNG ~a" args))
+
 (deploy-view "/def" 
 	     '(:div "Hello" (:b "WORLD")
 	       (:button (:onclick (lambda ()
 				    (view:action print-it)))
 		"CLICK ME")))
-
-(defun print-it (&rest args)
-  (format t "PRINTINNG ~a" args))
 
 
 

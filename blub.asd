@@ -28,5 +28,6 @@
 	       (:file "virtual-dom" :depends-on ("ps" "string"))
 	       (:file "ml" :depends-on ("virtual-dom"))
 	       (:file "debugger")
-	       (:file "page")))
+	       (:file "view")
+	       (:file "page" :depends-on ("view"))))
 

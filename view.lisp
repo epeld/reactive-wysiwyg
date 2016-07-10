@@ -1,7 +1,7 @@
 
 (in-package :peldan.view)
 
-(defparameter *default-session* nil
+(defvar *default-session* nil
   "The fallback session when you are lazy and don't care to create a new session")
 
 (defclass view ()
