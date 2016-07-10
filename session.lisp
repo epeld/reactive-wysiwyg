@@ -21,7 +21,7 @@
   ()
   (:documentation "A standard app session"))
 
-(defgeneric execute-action (session name &rest args)
+(defgeneric execute-action (session client name &rest args)
   (:documentation "Execute an action named 'name' on the session"))
 
 (defgeneric state-message (session)
@@ -96,7 +96,7 @@
 
 
 (defmethod message-received ((session base-session) client (type (eql :ping)) message)
-  (format t "Ping message!")
+  ;(format t "Ping message!")
   (message:pong-message))
 
 
@@ -104,8 +104,15 @@
   (format t "Action message!")
   (let ((name (getf message :name))
 	(args (getf message :args)))
-  (apply #'execute-action session name args)
+  (apply #'execute-action session client name args)
   (state-message session)))
 
-(defmethod execute-action ((session base-session) name &rest args)
-  (warn "Unknown action ~a called with args ~s" name args))
+
+(defmethod execute-action ((session base-session) client name &rest args)
+  (with-slots (actions) session
+    (let ((assoc (assoc name actions :test #'string=)))
+      (if assoc
+	  (progn (format t "~&Found action to execute ~s~%" (cdr assoc))
+		 (apply (cdr assoc)
+			session client args))
+	  (warn "Unknown action ~a" (cons name args))))))

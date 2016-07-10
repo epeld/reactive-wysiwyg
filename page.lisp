@@ -93,9 +93,16 @@
   (message:make-message :type :state :value '(:debug nil)))
 
 
-(defun print-it (&rest args)
-  (format t "yep ~a" args))
 
-(setf view:*default-session*
-      (make-instance 'simple-session))
-(websocket:install-resource view:*default-session*)
+(defclass test-session (view:view)
+  ()
+  (:documentation "A session for testing out the action translation!"))
+
+(defun print-it (session client &rest args)
+  (format t "~&Print it action called with args ~a" args))
+
+(defun setup-default-session ()
+  (setf view:*default-session*
+	(make-instance 'simple-session))
+  
+  (websocket:install-resource view:*default-session*))
