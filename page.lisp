@@ -82,6 +82,13 @@
     (setf style (cadr (or (member style #1='("red" "pink" "orange" "magenta" "red") :test #'string=)
 			  #1#)))))
 
+(defun change-row (session client ix)
+   (declare (ignore client))
+   (with-slots (items) session
+     (let ((item (nth ix items)))
+       (setf (gethash :value item)
+	     (+ 10 (gethash :value item))))))
+
 (deploy-view "/def" 
 	     '(:div (:style (+ "background: " (view:state 'style))) ;this is a style attribute
 	       "Hello"
@@ -92,6 +99,18 @@ div {margin-bottom: 3em }
 b { background: black; color: " (view:state 'style) "}")) ; this is a style element
 	       (:b "WORLD")
 	       (:div (:i "Name: " (view:state 'name)))
+	       (:div (:style "border: solid 1px black")
+		"Commence the big row data generation: "
+		(:table 
+		 (:thead (:tr (:th "Name") (:th "Value") (:th "Calculated") (:th "Noise")))
+		 (:tbody (imapcar (lambda (ix item)
+				   (ml:h (:tr (:onclick (lambda ()
+							  (view:action change-row ix)))
+					      (:td (ps:getprop item 'name))
+					      (:td (ps:getprop item 'value))
+					      (:td (* 2 (ps:getprop item 'value)))
+					      (:td (* 33 (ps:getprop item 'value))))))
+				 (or (view:state 'items) (list))))))
 	       (:button (:onclick (lambda ()
 				    (view:action print-it)))
 		"CLICK ME")
@@ -99,7 +118,7 @@ b { background: black; color: " (view:state 'style) "}")) ; this is a style elem
 				    (view:action toggle-background)))
 		"Change background?")))
 
-
+(session:state-message view:*default-session*)
 
 ;; This installs the dispatch function for this entire package
 (dispatch:install-handler 'page-dispatcher)
@@ -107,17 +126,38 @@ b { background: black; color: " (view:state 'style) "}")) ; this is a style elem
 
 (defclass simple-session (session:app-session)
   ((name :initform "Erik" :initarg :name :accessor test-name)
-   (style :initform "background: red" :initarg :style :accessor test-style))
+   (style :initform "background: red" :initarg :style :accessor test-style)
+   (items :initarg :items :initform nil :accessor test-items))
   (:documentation "Dummy session just to have something to fall back on"))
 
 
 (defmethod session:state-message (session)
-  (message:make-message :type :state :value `(:debug nil :name ,(test-name session)
-						     :style ,(test-style session))))
+  (with-output-to-string (s)
+    (yason:with-output (s)
+      (yason:with-object ()
+	(yason:encode-object-element "type" "state")
+	(yason:with-object-element ("value") 
+	  (yason:with-object ()
+	    (yason:encode-object-element "style" (test-style session))
+	    (yason:encode-object-element "name" (test-name session))
+	    (yason:encode-object-element "debug" nil)
+	    (yason:with-object-element ("items")
+	      (yason:with-array ()
+		(loop for item in (test-items session)
+		   do (yason:encode-array-element item))))))))))
 
+(session:state-message view:*default-session*)
 
 (defun setup-default-session ()
   (setf view:*default-session*
 	(make-instance 'simple-session))
   
   (websocket:install-resource view:*default-session*))
+
+(setf (slot-value view:*default-session* 'items) 
+      (loop for i from 1 upto 10 collect (let ((h (make-hash-table)))
+				    (setf (gethash :name h)
+					  (concatenate 'string "row-" (write-to-string i)))
+				    (setf (gethash :value h)
+					  i)
+				    h)))
