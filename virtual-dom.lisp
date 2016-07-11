@@ -15,10 +15,18 @@
 (defvar *cached-ps-library*
   (ps* *ps-lisp-library*))
 
+(defun convert-attr (attr)
+  (cond ((eq :class attr)
+	 "className")
+	
+	((eq :class-name attr)
+	 "className")
+	
+	(t attr)))
 
 ;; Macros to try and hide which virtual dom library we are using
 (ps:defpsmacro create-element (name attrs &rest children)
-  `((ps:@ virtual-dom h) ,name ,attrs (list ,@children)))
+  `((ps:@ virtual-dom h) ,name ,(mapcar #'convert-attr attrs) (list ,@children)))
 
 (ps:defpsmacro reify (arg)
   `((ps:@ virtual-dom create) ,arg))
@@ -30,8 +38,9 @@
   `((ps:@ virtual-dom patch) ,element ,patches))
 
 
-(defun render-ps (render-fn state)
-  "Defines a PS block that will render and attach a new element to BODY"
+(defun render-ps (render-fn state temp-state)
+  "Defines a PS block that will render and attach a new element to BODY.
+You pass in the symbols for the rendering function, state and temporary state (resp)"
   (with-ps-gensyms (render)
     `(let ((,render ,render-fn))
     
@@ -40,10 +49,11 @@
 	    
 	 ((ps:@ document body append-child) element)
 	
-	 (lambda (new-state)
+	 (lambda (new-state new-temp)
 	   (peldan.ps:log-message "state:" new-state)
 	   (setf ,state new-state)
-	   (let* ((new-tree (,render new-state))
+	   (setf ,temp-state new-temp)
+	   (let* ((new-tree (,render new-state new-temp))
 		  (patches (diff-tree tree new-tree)))
 	     (setf tree new-tree)
 	     (apply-patch element patches)))))))
@@ -56,11 +66,14 @@
   (write-string (ps* `(defun make-module (renderer)
 			(let ((module (create)))
              
-			  ;; This is typically set when WS connection is established
+			  ;; State is typically set when WS connection is established
 			  (setf (@ module state) nil)
+			  (setf (@ module temp) nil)
        
 			  (setf (@ module set-state)
-				,(render-ps 'renderer `(@ module state)))
+				,(render-ps 'renderer 
+					    `(@ module state)
+					    `(@ module temp)))
        
 			  module))
 		     
