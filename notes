@@ -9,4 +9,6 @@ Random thoughts:
 
 - Generate CSS to string
 
-- 
+- Client-local state (temporary state!)
+
+- Higher level components
