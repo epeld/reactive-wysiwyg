@@ -7,7 +7,7 @@
 
 (defparameter *ping-interval* 10000)
 
-(defparameter *resources* nil
+(defvar *resources* nil
   "List of resources and their script name (name . resource)")
 
 (defun request-handler (request)
