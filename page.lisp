@@ -76,6 +76,18 @@
   (setf (slot-value session 'name) 
 	(peldan.string:generate-uuid)))
 
+(defun generate-rows (session client &rest args)
+  (declare (ignore client))
+  (declare (ignore args))
+  (format t "Assigning random id as name")
+  (setf (slot-value session 'items) 
+	(loop for i from 1 upto 30 collect (let ((h (make-hash-table)))
+					     (setf (gethash :name h)
+						   (concatenate 'string "row-" (write-to-string i)))
+					     (setf (gethash :value h)
+						   i)
+					     h))))
+
 (defun toggle-background (session client)
   (declare (ignore client))
   (with-slots (style) session
@@ -97,7 +109,7 @@
 div {margin-bottom: 3em }
 
 b { background: black; color: " (view:state 'style) "}")) ; this is a style element
-	       (:b "WORLD")
+	       (:b (:class-name "test") "WORLD")
 	       (:div (:i "Name: " (view:state 'name)))
 	       (:div (:style "border: solid 1px black")
 		"Commence the big row data generation: "
@@ -106,7 +118,9 @@ b { background: black; color: " (view:state 'style) "}")) ; this is a style elem
 		 (:tbody (imapcar (lambda (ix item)
 				   (ml:h (:tr (:onclick (lambda ()
 							  (view:action change-row ix)))
-					      (:td (ps:getprop item 'name))
+					      (:class "hello")
+					      
+					      (:td  (ps:getprop item 'name))
 					      (:td (ps:getprop item 'value))
 					      (:td (* 2 (ps:getprop item 'value)))
 					      (:td (* 33 (ps:getprop item 'value))))))
@@ -116,9 +130,23 @@ b { background: black; color: " (view:state 'style) "}")) ; this is a style elem
 		"CLICK ME")
 	       (:button (:onclick (lambda ()
 				    (view:action toggle-background)))
-		"Change background?")))
+		"Change background?")
+	       (:button (:onclick (lambda ()
+				    (view:action generate-rows)))
+		"Generate rows?")))
 
-(session:state-message view:*default-session*)
+
+(ps:ps* `(ml:h (:tr (:onclick (lambda ()
+			       (view:action change-row ix)))
+     
+		   (:onhover (lambda ()
+			       (alert "ffw")))
+		   (:td (ps:getprop item 'name))
+		   (:td (ps:getprop item 'value))
+		   (:td (* 2 (ps:getprop item 'value)))
+		   (:td (* 33 (ps:getprop item 'value))))))
+
+;(session:state-message view:*default-session*)
 
 ;; This installs the dispatch function for this entire package
 (dispatch:install-handler 'page-dispatcher)
@@ -146,7 +174,7 @@ b { background: black; color: " (view:state 'style) "}")) ; this is a style elem
 		(loop for item in (test-items session)
 		   do (yason:encode-array-element item))))))))))
 
-(session:state-message view:*default-session*)
+;(session:state-message view:*default-session*)
 
 (defun setup-default-session ()
   (setf view:*default-session*
@@ -154,10 +182,3 @@ b { background: black; color: " (view:state 'style) "}")) ; this is a style elem
   
   (websocket:install-resource view:*default-session*))
 
-(setf (slot-value view:*default-session* 'items) 
-      (loop for i from 1 upto 10 collect (let ((h (make-hash-table)))
-				    (setf (gethash :name h)
-					  (concatenate 'string "row-" (write-to-string i)))
-				    (setf (gethash :value h)
-					  i)
-				    h)))
