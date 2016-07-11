@@ -12,8 +12,9 @@
   "Determine if a node should be serialized as an attr"
   (and (consp item)
        (any-of (first item)
-	       :class :width :height :size :href :style
-	       :onclick :onchange)))
+	       :class :class-name
+	       :width :height :size :href :style
+	       :onclick :onchange :onmouseover :onfocus :onblur :onmouseout)))
 
 
 (defun convert-to-who (ml)
@@ -69,23 +70,24 @@
 
   (let ((name (string-downcase (first ml)))
 	(contents (rest ml))
-	children)
-	
+	attrs children)
+    
+    ;; Initially, assume no attrs
+    (setq children contents)
+
+    (loop for item in contents
+       while (attrp item)
+       do (setf attrs (append item attrs))
+       do (pop children))
+  
+
     `(peldan.virtual-dom:create-element ,name
-					(ps:create
-					 ;; items
-					 ,@(loop for (item . rest) on contents
-					      if (attrp item)
-					      nconc item
-					      else
-					      do (setf children (cons item rest))
-					      until children))
-			 
-			 
+					(ps:create ,@attrs)
        
-					,@(when children
-						(loop for child in children collect
-						     (generate-hyperscript child))))))
+					,@(loop for child in children collect
+					       (generate-hyperscript child)))))
+
+
 
 ;; h as in hyperscript
 (ps:defpsmacro h (ml)
