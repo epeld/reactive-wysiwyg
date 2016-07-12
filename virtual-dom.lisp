@@ -59,52 +59,89 @@ You pass in the symbols for the rendering function, state and temporary state (r
 	     (apply-patch element patches)))))))
 
 
+(ps-util:defps make-module (render)
+  "Returns a virtual DOM module with the given renderer.
+The renderer must be able to render the state NIL successfully for the bootstrapping to work"
+  (let ((module (create))
+	(vtree (funcall render nil nil))
+	element)
+
+    ;; The two types of states
+    (setf (@ module state) nil)
+    (setf (@ module temp) nil)
+    
+    ;; Construct the node
+    (setf element (reify vtree))
+    (setf (@ module element) element)
+    (setf (@ module render) render)
+    
+    ;; This function will describe how the component reacts to changes in data
+    (setf (@ module refresh) 
+	  (lambda ()
+	    (let* ((new-vtree (funcall render (@ module state) (@ module temp)))
+		   (patch (diff-tree vtree new-vtree)))
+	      (apply-patch element patch)
+	      (setf tree new-vtree))))
+
+    ;; set the "global" session state for this component
+    (setf (@ module set-state) 
+	  (lambda (state)
+	    (setf (@ module state) state)
+	    ((@ module refresh))))
+    
+    ;; set the local temporary state for this component
+    (setf (@ module set-temp) 
+	  (lambda (temp)
+	    (setf (@ module temp) temp)
+	    ((@ module refresh))))
+    
+    
+    ;; Call this when ready to 'activate' the component in the DOM
+    (setf (@ module add-to-dom)
+	  (lambda ()
+	    ((@ document body append-child) element)))
+    
+       
+    module))
+
+
+
+(ps-util:defps continuously (action-name interval &rest args)
+  "Continously run an action"
+  (let ((interval (or interval 300)))
+    (set-interval (lambda ()
+		    (apply #'action action-name args))
+		  (or interval 300))
+    interval))
+		     
+
+
+(ps-util:defps action (action &rest args)
+  "Execute a serverside action"
+  (lisp 
+   (if (peldan.websocket:websockets-enabled)
+       `(send-message (create :type :action
+			      :name action
+			      :args args))
+       
+       ;; TODO work on this..
+       `(apply (chain component actions run)
+	       ((chain action to-lower-case))
+	       args))))
+		     
+
+(ps-util:defps imapcar (fn &rest args)
+  "Like mapcar but adds an index as the first argument"
+  (let ((is (list)))
+    (dotimes (i (length (@ args 0)))
+      ((@ is push) i))
+    (apply #'mapcar fn is args)))
+
+
 (defun library-js (stream)
   "Generate a string containing all the javascript needed to render components"
   (write-string *cached-virtual-dom-js* stream)
-  (write-string *cached-ps-library* stream)
-  (write-string (ps* `(defun make-module (renderer)
-			(let ((module (create)))
-             
-			  ;; State is typically set when WS connection is established
-			  (setf (@ module state) nil)
-			  (setf (@ module temp) nil)
-       
-			  (setf (@ module set-state)
-				,(render-ps 'renderer 
-					    `(@ module state)
-					    `(@ module temp)))
-       
-			  module))
-		     
-		     ;; Helper function for periodically executing an action (to be moved)
-		     `(defun continuously (action-name interval &rest args)
-			(let ((interval (or interval 300)))
-			  (set-interval (lambda ()
-					  (apply #'action action-name args))
-					(or interval 300))
-			  interval))
-		     
-		     
-		     ;; Execute an action (helper)
-		     `(defun action (action &rest args)
-			(lisp 
-			 (if (peldan.websocket:websockets-enabled)
-			     `(send-message (create :type :action
-						    :name action
-						    :args args))
-			     `(apply (chain component actions run)
-				     ((chain action to-lower-case))
-				     args))))
-		     
-		     ;; Helper
-		     `(defun imapcar (fn &rest args)
-			"Like mapcar but adds an index as the first argument"
-			(let ((is (list)))
-			  (dotimes (i (length (@ args 0)))
-			    ((@ is push) i))
-			  (apply #'mapcar fn is args))))
-		stream))
+  (write-string *cached-ps-library* stream))
 
 
 

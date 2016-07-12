@@ -39,9 +39,10 @@
   (concatenate 'string (format nil "ws://localhost:~s/" *port*) uuid))
 
 
-(defun connect-ps (set-state uuid)
+(defun connect-ps (uuid)
   "Produce PS code for connecting to this websocket server"
-  `(let (interval (ws (ps:new (-web-socket ,(generate-uri uuid)))))
+  `(let (interval 
+	 (ws (ps:new (-web-socket ,(generate-uri uuid)))))
      (with-slots (onclose onopen onmessage) ws
        
        ;; Setup a keep-alive timer
@@ -68,7 +69,9 @@
 		      (peldan.ps:log-warning "Server Error:" (ps:@ content error)))
 
 		     (:state
-		      (,set-state value))
+		      (if onstate
+			  (funcall onstate value)
+			  (peldan.ps:log-warning "Got state message from server but no handler found" value)))
 		      
 		     (:pong
 		      (return))

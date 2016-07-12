@@ -92,7 +92,7 @@
 		 (peldan.ps:log-message "Using Server session" ,(format nil "~a" (type-of session)) ,uuid)
 	    
 		 (setf (ps:@ ,name ws)
-		       ,(peldan.websocket:connect-ps `(ps:@ ,name set-state) uuid))
+		       ,(peldan.websocket:connect-ps uuid))
 	      
 		 (defun send-message (obj)
 		   (peldan.ps:log-message "Sending" obj)
