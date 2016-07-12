@@ -33,6 +33,7 @@
   (cl-who:with-html-output-to-string (s)
     (:html
      (:head (:title (cl-who:str (view:view-name view))))
+     ;; TODO move all library and non-view PS into separate endpoint that we reference from a single SCRIPT-tag instead
      (:body (:script :type "text/javascript" (virtual-dom:library-js s))
 	    (:script :type "text/javascript" (peldan.ps:generate-user-js s))
 	    (:script :type "text/javascript" (let ((ps:*parenscript-stream* s))
