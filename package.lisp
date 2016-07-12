@@ -26,6 +26,7 @@
 	   :generate-uuid))
 
 (defpackage :peldan.ps
+  (:nicknames :ps-util)
   (:use :common-lisp :parenscript)
   (:export :log-message
 	   :log-warning
