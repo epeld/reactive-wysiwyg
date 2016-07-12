@@ -34,8 +34,11 @@
     (car assoc)))
 
 
+
 (defun view-renderer-ps (view &optional mappings)
   "Generates a renderer for the view in PS"
+  
+  ;; TODO introduce temporary state here as well
   `(lambda (current-state)
      (peldan.ps:log-message "Rendering")
      
@@ -63,7 +66,8 @@
   (let ((actions (view-actions view))
 	mappings)
     
-    ;; Some sanity checks
+    ;; TODO move this part into separate function, e.g
+    ;; (check-session-actions)
     (when actions
       
       ;; No backend?
@@ -79,21 +83,29 @@
     
     `(progn 
      
+       ;; TODO don't do defvar here.
+       ;; instead just return a module with a connection established (if requested)
        (defvar ,name
 	 (virtual-dom:make-module 
-	  ,(view-renderer-ps view (and session
-				       (session:session-actions session)))))
+	  ,(view-renderer-ps view mappings)))
      
      
+       ;; TODO remove the branch here
        ,(if session
 	    ;; With Session
 	    (let ((uuid (session:uuid session))) 
 	      `(progn
+		 ;; TODO move this log message into (session-connect-ps) below
 		 (peldan.ps:log-message "Using Server session" ,(format nil "~a" (type-of session)) ,uuid)
 	    
+		 ;; TODO always set (@ ,name ws)
+		 ;; but set it to a dummy when session is missing
+		 ;; e.g (session-connection-ps)
 		 (setf (ps:@ ,name ws)
 		       ,(peldan.websocket:connect-ps uuid))
 	      
+		 ;; TODO define this the same, regardless of using session or not,
+		 ;; just change the ws object instead
 		 (defun send-message (obj)
 		   (peldan.ps:log-message "Sending" obj)
 		   ((ps:@ ,name ws send) (peldan.ps:json-stringify obj)))))

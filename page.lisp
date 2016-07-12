@@ -36,6 +36,7 @@
      (:body (:script :type "text/javascript" (virtual-dom:library-js s))
 	    (:script :type "text/javascript" (peldan.ps:generate-user-js s))
 	    (:script :type "text/javascript" (let ((ps:*parenscript-stream* s))
+					       ;; TODO do (defvar) here instead of deferring it to into the view-ps call
 					       (ps:ps* (view:view-ps view 
 								     :session session
 								     :name 'component))))))))
