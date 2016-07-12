@@ -13,6 +13,21 @@ Random thoughts:
 
 - Higher level components
 
+- Consider supporting ajax or other means of running actions
+
+- Revisit the editor / JSON schema idea
+
+- Revive the html-parse module
+
+----------------------------
+long-term goal:
+
+figure out a good data manipulation language that can be compiled to e.g lisp, JS, erlang
+then look into automatically generating servers in erlang for running the backend sessions
+and producing JS code for the frontend
+
+can we interface SBCL and erlang using FFI?
+
 
 ---------------
 
@@ -22,3 +37,8 @@ Smaller tasks:
 - Decrease inline JS to a minimum per view/page
 - Make use of the new "component object structure" (see :virtual-dom)
 - Make websocket connectivity code take a virtual-dom module (or similar) as argument
+
+1. once this is done, make the final steps for introducing temporary state
+2. then move on to creating some higher level components (eg input fields etc) making use of them
+3. consider detecting all event handlers and generating automatic selenium tests for them
+4. keep churning out higher level components!
