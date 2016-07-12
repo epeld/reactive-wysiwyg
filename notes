@@ -12,3 +12,13 @@ Random thoughts:
 - Client-local state (temporary state!)
 
 - Higher level components
+
+
+---------------
+
+Smaller tasks:
+
+- Make a JS endpoint for downloading the library JS code
+- Decrease inline JS to a minimum per view/page
+- Make use of the new "component object structure" (see :virtual-dom)
+- Make websocket connectivity code take a virtual-dom module (or similar) as argument
