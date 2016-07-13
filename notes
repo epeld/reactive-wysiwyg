@@ -19,6 +19,15 @@ Random thoughts:
 
 - Revive the html-parse module
 
+- "deploy" functions as GET/POST endpoints, i.e
+stateless responses to queries
+
+- Figure out a working "page concept" i.e how to move between pages
+and how to treat each page individually
+
+
+- Make a graph out of "links between pages"
+
 ----------------------------
 long-term goal:
 
