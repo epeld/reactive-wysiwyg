@@ -59,63 +59,48 @@
 		   (:small "Generated using component package"))))))
 
 
+(defun verified-session-actions (session actions)
+  "Behaves like (session:session-actions) but also verifies that the returned map
+contains all the actions of the second argument"
 
-
-(defun view-ps (view &key (session *default-session*) (name 'component))
-  
-  (let ((actions (view-actions view))
-	mappings)
-    
-    ;; TODO move this part into separate function, e.g
-    ;; (check-session-actions)
-    (when actions
+  (when actions
       
-      ;; No backend?
-      (unless session
-	(error "View contains serverside actions ~a, but no session specified" actions))
+    ;; No backend?
+    (unless session
+      (error "View contains serverside actions ~a, but no session specified" actions))
       
-      (setq mappings (session:session-actions session))
+    (let* ((mappings (session:session-actions session))
+	   (diff (set-difference actions (mapcar #'cdr mappings)))) 
     
       ;; Make sure the session knows about all our actions
-      (let ((diff (set-difference actions (mapcar #'cdr mappings))))
-	(when diff
-	  (error "Cannot encode actions ~a because unknown to session" diff))))
-    
-    `(progn 
-     
-       ;; TODO don't do defvar here.
-       ;; instead just return a module with a connection established (if requested)
-       (defvar ,name
-	 (virtual-dom:make-module 
-	  ,(view-renderer-ps view mappings)))
-     
-     
-       ;; TODO remove the branch here
-       ,(if session
-	    ;; With Session
-	    (let ((uuid (session:uuid session))) 
-	      `(progn
-		 ;; TODO move this log message into (session-connect-ps) below
-		 (peldan.ps:log-message "Using Server session" ,(format nil "~a" (type-of session)) ,uuid)
-	    
-		 ;; TODO always set (@ ,name ws)
-		 ;; but set it to a dummy when session is missing
-		 ;; e.g (session-connection-ps)
-		 (setf (ps:@ ,name ws)
-		       ,(peldan.websocket:connect-ps uuid))
-	      
-		 ;; TODO define this the same, regardless of using session or not,
-		 ;; just change the ws object instead
-		 (defun send-message (obj)
-		   (peldan.ps:log-message "Sending" obj)
-		   ((ps:@ ,name ws send) (peldan.ps:json-stringify obj)))))
-	    
+      (when diff
+	  (error "Cannot encode actions ~a because unknown to session" diff))
+      
+      mappings)))
 
-	    ;; Without session
-	    `(progn
-	       (peldan.ps:log-message "Serverless.")
-	       
-	       (defun send-message (obj)
-		 (peldan.ps:log-warning "Cannot send message" obj))
-	       
-	       ((ps:@ ,name set-state) (peldan.ps:json-parse "{}")))))))
+
+(defun view-module-ps (view &optional (session *default-session*))
+  "PS: Return an object representing the view and with an (optional) connection to the server-side session"
+  (let ((actions (verified-session-actions session (view-actions view))))
+    
+    `(let ((module (virtual-dom:make-module 
+		    ,(view-renderer-ps view actions)))
+	   
+	   (ws ,(if session 
+		    (websocket:session-websocket-ps session)
+		    (websocket:dummy-websocket-ps))))
+       
+       (setf (@ module ws)
+	     ws)
+       
+       (setf (@ ws onstate)
+	     (@ module set-state))
+       
+       ;; Set initial state
+       ((@ module set-state) 
+	(ps-util:json-parse 
+	 ,(if session 
+	      (session:state-message session)
+	      "{}")))
+       
+       module)))

@@ -35,15 +35,17 @@
       (pushnew resource *resources*)))
 
 
-(defun generate-uri (uuid)
-  (concatenate 'string (format nil "ws://localhost:~s/" *port*) uuid))
+(defun generate-uri (session)
+  (concatenate 'string
+	       (format nil "ws://localhost:~s/" *port*) 
+	       (session:uuid session)))
 
 
-(defun connect-ps (uuid)
-  "Produce PS code for connecting to this websocket server"
-  `(let (interval 
-	 (ws (ps:new (-web-socket ,(generate-uri uuid)))))
-     (with-slots (onclose onopen onmessage) ws
+(defun session-websocket-ps (session)
+  "PS: Return a websocket connecting to the server-side session"
+  `(let ((ws (ps:new (-web-socket ,(generate-uri session)))) 
+	 interval)
+     (with-slots (onclose onopen onmessage send-message) ws
        
        ;; Setup a keep-alive timer
        (setf interval
@@ -81,6 +83,25 @@
 		      
 		     (t
 		      (peldan.ps:log-message "Got strange message" msg)))))))
+       
+       ;; Use this for sending JSON messages to the server
+       (setf send-message
+	     (lambda (obj)
+	       (ps-util:log-message "Sending" obj)
+	       ((@ ws send) (ps-util:json-stringify obj))))
+       
+       ws)))
+
+(defun dummy-websocket-ps ()
+  "PS: Return a dummy websocket faking a server-side session"
+  `(let ((ws (create)))
+     (with-slots (send-message) ws
+                    
+       ;; Use this for sending JSON messages to the server
+       (setf send-message
+	     (lambda (obj)
+	       (ps-util:log-message "Would have sent message:" obj)))
+       
        ws)))
 
 

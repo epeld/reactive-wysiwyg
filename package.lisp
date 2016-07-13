@@ -81,7 +81,8 @@
   (:import-from :yason :*parse-object-as* :parse :encode)
   (:import-from :peldan.virtual-dom)
   (:export :*port* 
-	   :connect-ps
+	   :session-websocket-ps
+	   :dummy-websocket-ps
 	   :install-resource
 	   :start-server
 	   :stop-server
