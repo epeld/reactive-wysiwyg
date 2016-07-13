@@ -8,6 +8,10 @@
   "A list of (url . view)")
 
 
+(defvar *library-js-url*
+  "/library.js")
+
+
 (defun index (request)
   (declare (ignore request))
   "You found the index page")
@@ -184,3 +188,11 @@ b { background: black; color: " (view:state 'style) "}")) ; this is a style elem
   
   (websocket:install-resource view:*default-session*))
 
+
+;; Deploy all library JS code
+(deploy-page *library-js-url*
+	     (lambda (req)
+	       (declare (ignore req))
+	       (with-output-to-string (s)
+		 (virtual-dom:library-js s)
+		 (peldan.ps:generate-user-js s))))
