@@ -38,26 +38,6 @@
   `((ps:@ virtual-dom patch) ,element ,patches))
 
 
-(defun render-ps (render-fn state temp-state)
-  "Defines a PS block that will render and attach a new element to BODY.
-You pass in the symbols for the rendering function, state and temporary state (resp)"
-  (with-ps-gensyms (render)
-    `(let ((,render ,render-fn))
-    
-       (let* ((tree (,render ,state))
-	      (element (reify tree)))
-	    
-	 ((ps:@ document body append-child) element)
-	
-	 (lambda (new-state new-temp)
-	   (peldan.ps:log-message "state:" new-state)
-	   (setf ,state new-state)
-	   (setf ,temp-state new-temp)
-	   (let* ((new-tree (,render new-state new-temp))
-		  (patches (diff-tree tree new-tree)))
-	     (setf tree new-tree)
-	     (apply-patch element patches)))))))
-
 
 (ps-util:defps make-module (render)
   "Returns a virtual DOM module with the given renderer.
@@ -78,10 +58,12 @@ The renderer must be able to render the state NIL successfully for the bootstrap
     ;; This function will describe how the component reacts to changes in data
     (setf (@ module refresh) 
 	  (lambda ()
+	    (ps-util:log-message "Refresh")
 	    (let* ((new-vtree (funcall render (@ module state) (@ module temp)))
 		   (patch (diff-tree vtree new-vtree)))
-	      (apply-patch element patch)
-	      (setf tree new-vtree))))
+	      (setf element (apply-patch element patch))
+	      (setf (@ module element) element)
+	      (setf vtree new-vtree))))
 
     ;; set the "global" session state for this component
     (setf (@ module set-state) 
@@ -99,7 +81,8 @@ The renderer must be able to render the state NIL successfully for the bootstrap
     ;; Call this when ready to 'activate' the component in the DOM
     (setf (@ module add-to-dom)
 	  (lambda ()
-	    ((@ document body append-child) element)))
+	    ((@ document body append-child) element)
+	    ((@ module refresh))))
     
        
     module))

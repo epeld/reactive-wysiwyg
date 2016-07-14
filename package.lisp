@@ -134,6 +134,7 @@
 (defpackage :peldan.view
   (:nicknames :view)
   (:use :cl)
+  (:import-from :parenscript :@ :getprop)
   (:export :encode-symbol
 	   :view
 	   :state
@@ -141,7 +142,7 @@
 	   :make-view
 	   :view-name
 	   :view-actions
-	   :view-ps
+	   :view-module-ps
 	   :*default-session*))
 
 (defpackage :peldan.url

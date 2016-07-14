@@ -34,9 +34,9 @@
 
 (defmacro defps (name args &body body)
   (let ((form `(defun ,name ,args ,@body)))
-    `(progn (push (cons ',name ',form) *user-ps-library*)
-	    (setf *user-ps-library*
-		  (remove-duplicates *user-ps-library* :key #'car)))))
+    `(progn (setf *user-ps-library*
+		  (remove ',name *user-ps-library* :key #'car))
+	    (push (cons ',name ',form) *user-ps-library*))))
 
 
 

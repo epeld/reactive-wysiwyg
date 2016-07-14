@@ -40,8 +40,6 @@
   
   ;; TODO introduce temporary state here as well
   `(lambda (current-state)
-     (peldan.ps:log-message "Rendering")
-     
      (macrolet ((state (&rest args)
 		  (if args
 		      `(ps:getprop current-state ,@args)
@@ -81,7 +79,10 @@ contains all the actions of the second argument"
 
 (defun view-module-ps (view &optional (session *default-session*))
   "PS: Return an object representing the view and with an (optional) connection to the server-side session"
-  (let ((actions (verified-session-actions session (view-actions view))))
+  (let ((actions (verified-session-actions session (view-actions view)))
+	(initial-state (if session 
+			   (session:state-message session)
+			   "{}")))
     
     `(let ((module (virtual-dom:make-module 
 		    ,(view-renderer-ps view actions)))
@@ -99,8 +100,6 @@ contains all the actions of the second argument"
        ;; Set initial state
        ((@ module set-state) 
 	(ps-util:json-parse 
-	 ,(if session 
-	      (session:state-message session)
-	      "{}")))
+	 ,initial-state))
        
        module)))

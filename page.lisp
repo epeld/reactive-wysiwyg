@@ -37,14 +37,17 @@
   (cl-who:with-html-output-to-string (s)
     (:html
      (:head (:title (cl-who:str (view:view-name view))))
-     ;; TODO move all library and non-view PS into separate endpoint that we reference from a single SCRIPT-tag instead
-     (:body (:script :type "text/javascript" (virtual-dom:library-js s))
-	    (:script :type "text/javascript" (peldan.ps:generate-user-js s))
-	    (:script :type "text/javascript" (let ((ps:*parenscript-stream* s))
-					       ;; TODO do (defvar) here instead of deferring it to into the view-ps call
-					       (ps:ps* (view:view-ps view 
-								     :session session
-								     :name 'component))))))))
+     (:body (:script :type "text/javascript" :src (cl-who:str *library-js-url*))
+	    (:script :type "text/javascript" 
+		     (let ((ps:*parenscript-stream* s))
+		       (ps:ps* `(defvar component 
+				  ,(view:view-module-ps view session))
+			       
+			       ;; This is required for the server-side actions to work
+			       `(defun send-message (msg)
+				  ((ps:@ component ws send-message) msg))
+			       
+			       `((ps:@ component add-to-dom)))))))))
 
 
 (defun deploy-page (url fn)

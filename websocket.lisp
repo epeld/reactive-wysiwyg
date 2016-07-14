@@ -45,7 +45,7 @@
   "PS: Return a websocket connecting to the server-side session"
   `(let ((ws (ps:new (-web-socket ,(generate-uri session)))) 
 	 interval)
-     (with-slots (onclose onopen onmessage send-message) ws
+     (with-slots (onstate onclose onopen onmessage send-message) ws
        
        ;; Setup a keep-alive timer
        (setf interval
@@ -73,7 +73,8 @@
 		     (:state
 		      (if onstate
 			  (funcall onstate value)
-			  (peldan.ps:log-warning "Got state message from server but no handler found" value)))
+			  (peldan.ps:log-warning "Got state message from server but no handler found" value))
+		      nil)
 		      
 		     (:pong
 		      (return))
@@ -88,7 +89,7 @@
        (setf send-message
 	     (lambda (obj)
 	       (ps-util:log-message "Sending" obj)
-	       ((@ ws send) (ps-util:json-stringify obj))))
+	       ((ps:@ ws send) (ps-util:json-stringify obj))))
        
        ws)))
 
