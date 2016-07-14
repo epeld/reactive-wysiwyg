@@ -42,10 +42,7 @@ can we interface SBCL and erlang using FFI?
 
 Smaller tasks:
 
-- Make a JS endpoint for downloading the library JS code
-- Decrease inline JS to a minimum per view/page
-- Make use of the new "component object structure" (see :virtual-dom)
-- Make websocket connectivity code take a virtual-dom module (or similar) as argument
+- Do we need to depend on a global send-message function for actions to work?
 
 1. once this is done, make the final steps for introducing temporary state
 2. then move on to creating some higher level components (eg input fields etc) making use of them
