@@ -13,6 +13,7 @@
   (and (consp item)
        (any-of (first item)
 	       :class :class-name
+	       :placeholder :type
 	       :width :height :size :href :style
 	       :onclick :onchange :onmouseover :onfocus :onblur :onmouseout)))
 
