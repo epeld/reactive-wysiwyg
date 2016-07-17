@@ -13,9 +13,11 @@
   (and (consp item)
        (any-of (first item)
 	       :class :class-name
-	       :placeholder :type
+	       :placeholder :type :value
 	       :width :height :size :href :style
-	       :onclick :onchange :onmouseover :onfocus :onblur :onmouseout)))
+	       :oninput :onclick
+	       :onchange :onmouseover
+	       :onfocus :onblur :onmouseout)))
 
 
 (defun convert-to-who (ml)

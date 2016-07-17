@@ -143,7 +143,10 @@
 	   :view-name
 	   :view-actions
 	   :view-module-ps
-	   :*default-session*))
+	   :*default-session*
+	   :store-to-temp
+	   :clear-temp
+	   :temp))
 
 (defpackage :peldan.url
   (:nicknames :url)
@@ -155,3 +158,4 @@
 
 (defpackage :peldan.page
   (:use :cl :hunchentoot))
+

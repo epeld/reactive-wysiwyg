@@ -35,20 +35,21 @@
 
 
 
-(defun view-renderer-ps (view &optional mappings)
+(defun view-renderer-ps (view)
   "Generates a renderer for the view in PS"
   
-  ;; TODO introduce temporary state here as well
-  `(lambda (current-state)
+  `(lambda (current-state temporary-state)
      (macrolet ((state (&rest args)
 		  (if args
 		      `(ps:getprop current-state ,@args)
 		      'current-state))
-
-		(action (name &rest args)
-		  `(send-message (ps:create :type :action
-					    :name ,(encode-symbol name (quote ,mappings))
-					    :args (list ,@args)))))
+		
+		(temp (name)
+		  `(let ((v (ps:getprop (or temporary-state (ps:create))
+			     ,name)))
+		     (if (ps:undefined v)
+			 nil
+			 v))))
        
        (ml:h (:div (when (state)
 		     (if (state 'debug)
@@ -84,12 +85,30 @@ contains all the actions of the second argument"
 			   (session:state-message session)
 			   "{}")))
     
-    `(let ((module (virtual-dom:make-module 
-		    ,(view-renderer-ps view actions)))
-	   
-	   (ws ,(if session 
-		    (websocket:session-websocket-ps session)
-		    (websocket:dummy-websocket-ps))))
+    `(let* (module
+	    (ws ,(if session 
+		     (websocket:session-websocket-ps session)
+		     (websocket:dummy-websocket-ps))))
+	 
+       (setf module 
+	     (virtual-dom:make-module 
+	      (macrolet (
+			 ;; Client side storage:
+			 (store-to-temp (name) 
+			   `(lambda (ev)
+			      ((@ module set-temp) (ps:create ,name (@ ev target value)))))
+			 
+			 (clear-temp (name) 
+			   `(lambda ()
+			      ((@ module set-temp) (ps:create))))
+			 
+			 ;; Server side actions:
+			 (action (name &rest args)
+			   `((@ ws send-message) 
+			     (ps:create :type :action
+					:name ,(encode-symbol name (quote ,actions))
+					:args (list ,@args)))))
+		,(view-renderer-ps view))))
        
        (setf (@ module ws)
 	     ws)

@@ -142,18 +142,18 @@ b { background: black; color: " (view:state 'style) "}")) ; this is a style elem
 		"Change background?")
 	       (:button (:onclick (lambda ()
 				    (view:action generate-rows)))
-		"Generate rows?")))
+		"Generate rows?")
+	       
+	       (:div "Home made form:"
+		(:input 
+		 (:type :text)
+		 (:placeholder "Write stuff here!")
+		 (:value (view:temp :erik-testar))
+		 (:oninput (view:store-to-temp :erik-testar)))
+		(:button (:onclick (view:clear-temp :erik-testar))
+		 "Clear"))))
 
 
-(ps:ps* `(ml:h (:tr (:onclick (lambda ()
-			       (view:action change-row ix)))
-     
-		   (:onhover (lambda ()
-			       (alert "ffw")))
-		   (:td (ps:getprop item 'name))
-		   (:td (ps:getprop item 'value))
-		   (:td (* 2 (ps:getprop item 'value)))
-		   (:td (* 33 (ps:getprop item 'value))))))
 
 ;(session:state-message view:*default-session*)
 
