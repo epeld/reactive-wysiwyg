@@ -38,18 +38,29 @@
 (defun view-renderer-ps (view)
   "Generates a renderer for the view in PS"
   
-  `(lambda (current-state temporary-state)
+  `(lambda (server-state local-state temp-state)
+     
+     ;; Ensure server state and local state are defined
+     (unless local-state
+       (setf local-state (ps:create)))
+     
+     (unless server-state
+       (setf server-state (ps:create)))
+     
+     (unless temp-state
+       (setf temp-state (ps:create)))
+     
      (macrolet ((state (&rest args)
 		  (if args
-		      `(ps:getprop current-state ,@args)
-		      'current-state))
+		      `(ps:getprop server-state ,@args)
+		      'server-state))
 		
-		(temp (name)
-		  `(let ((v (ps:getprop (or temporary-state (ps:create))
-			     ,name)))
-		     (if (ps:undefined v)
-			 nil
-			 v))))
+		(local-state (&rest args)
+		  `(ps:getprop local-state ,@args))
+		
+		(temp (&rest args)
+		  `(or (ps:getprop temp-state ,@args) 
+			      nil)))
        
        (ml:h (:div (when (state)
 		     (if (state 'debug)

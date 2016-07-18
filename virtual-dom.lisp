@@ -46,8 +46,9 @@ The renderer must be able to render the state NIL successfully for the bootstrap
 	(vtree (funcall render nil nil))
 	element)
 
-    ;; The two types of states
-    (setf (@ module state) nil)
+    ;; The three types of states
+    (setf (@ module state) nil) 	;server state
+    (setf (@ module local-state) nil)
     (setf (@ module temp) nil)
     
     ;; Construct the node
@@ -59,7 +60,10 @@ The renderer must be able to render the state NIL successfully for the bootstrap
     (setf (@ module refresh) 
 	  (lambda ()
 	    (ps-util:log-message "Refresh")
-	    (let* ((new-vtree (funcall render (@ module state) (@ module temp)))
+	    (let* ((new-vtree (funcall render
+				       (@ module state) 
+				       (@ module local-state)
+				       (@ module temp)))
 		   (patch (diff-tree vtree new-vtree)))
 	      (setf element (apply-patch element patch))
 	      (setf (@ module element) element)
@@ -71,7 +75,13 @@ The renderer must be able to render the state NIL successfully for the bootstrap
 	    (setf (@ module state) state)
 	    ((@ module refresh))))
     
-    ;; set the local temporary state for this component
+    ;; set the local state for this component
+    (setf (@ module set-local) 
+	  (lambda (local)
+	    (setf (@ module local-state) local-state)
+	    ((@ module refresh))))
+    
+    ;; set the temporary local state for this component
     (setf (@ module set-temp) 
 	  (lambda (temp)
 	    (setf (@ module temp) temp)
