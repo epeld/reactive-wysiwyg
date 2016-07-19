@@ -181,6 +181,13 @@ required string query = 1;"
 (defun file-name (file)
   (getf file :name))
 
+(defun file-imports-p (file importee)
+  "Imposes an order on a set of files such that f1 < f2 if f2 imports f1"
+  (find (file-name importee) (file-imports file) 
+	:test #'string=
+	:key #'import-name))
+
+
 
 (defun parse-file-group (path)
   "Parse a whole group of files by parsing the one indicated and following imports"
@@ -200,8 +207,10 @@ required string query = 1;"
        do (push (parse-file (first difference))
 		parsed)
 
-       ;; TODO: we can sort the files by imposing the relation f1 < f2 if f2 imports f1
-       finally (return parsed))))
+       finally (progn
+		 ;; Guard so that this doesn't slip by accidentally
+		 (assert (null difference))
+		 (return (sort parsed #'file-imports-p))))))
 
 
 (defun load-file (path)
