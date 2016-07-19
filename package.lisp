@@ -162,3 +162,7 @@
   (:export :deploy-view
 	   :deploy-page))
 
+
+(defpackage :peldan.protobuff
+  (:use :cl)
+  (:nicknames :protobuff))
