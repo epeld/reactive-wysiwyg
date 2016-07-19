@@ -12,12 +12,41 @@
   "Determine if a node should be serialized as an attr"
   (and (consp item)
        (any-of (first item)
-	       :class :class-name
-	       :placeholder :type :value
-	       :width :height :size :href :style
-	       :oninput :onclick
-	       :onchange :onmouseover
-	       :onfocus :onblur :onmouseout)))
+	       :rel
+	       :content
+	       :name
+	       :title
+	       :id
+	       :border
+	       :cellpadding
+	       :cellspacing
+	       :bgcolor
+	       :src
+	       :valign
+	       :align
+	       :colspan
+	       :autocorrect
+	       :spellcheck
+	       :autocapitalize
+	       :method
+	       :action
+	       :class 
+	       :class-name
+	       :placeholder 
+	       :type
+	       :value
+	       :width
+	       :height
+	       :size
+	       :href
+	       :style
+	       :oninput
+	       :onclick
+	       :onchange
+	       :onmouseover
+	       :onfocus
+	       :onblur
+	       :onmouseout)))
 
 
 (defun convert-to-who (ml)
