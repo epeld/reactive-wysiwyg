@@ -157,5 +157,8 @@
 
 
 (defpackage :peldan.page
-  (:use :cl :hunchentoot))
+  (:use :cl :hunchentoot)
+  (:nicknames :page)
+  (:export :deploy-view
+	   :deploy-page))
 
